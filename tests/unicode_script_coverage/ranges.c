@@ -184,7 +184,12 @@ TEST(ranges_vs_glyph_indices_every_codepoint_bmp)
         rng_get(u.face1, &o);
         for (i = 0; i < 0x10000; i++) cp[i] = i;
         CHECK_HR_OK(IDWriteFontFace_GetGlyphIndices(u.face, cp, 0x10000, g));
-        for (i = 0; i < 0x10000; i++) if (in_ranges(&o, i) != (g[i] != 0)) bad++;
+        for (i = 0; i < 0x10000; i++) {
+            if (in_ranges(&o, i) == (g[i] != 0)) continue;
+            /* U+FFFF is the format 4 sentinel segment; whether it is reported is implementation-dependent. */
+            if (i == 0xFFFF && v == UC_V_BMP) { t_note("variant %d: U+FFFF range membership %d, glyph %u", v, in_ranges(&o, i), g[i]); continue; }
+            bad++;
+        }
         CHECKF(bad == 0, "variant %d: %u code points where range membership != mapped", v, bad);
         free(o.r); uc_face_close(&u);
     }
