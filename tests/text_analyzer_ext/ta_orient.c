@@ -12,12 +12,14 @@
  * AnalyzeVerticalGlyphOrientation (OrientationAnalyzer::Analyze + GetOrientationInfo):
  *   E_INVALIDARG for NULL source / NULL sink / textPosition + textLength overflowing 32 bits; otherwise the source's
  *   GetParagraphReadingDirection is queried once, then GetVerticalGlyphOrientation per source run, and
- *   SetGlyphOrientation runs of identical (angle, bidi, sideways, rtl) are coalesced:
- *     DEFAULT orientation: "upright" Unicode classes -> angle 90, isSideways FALSE; others -> angle 0, isSideways TRUE;
- *                          adjusted bidi level = source level, isRightToLeft = level & 1;
- *     STACKED orientation: adjusted bidi level = (level + 1, saturating at 62) rounded down to even;
- *                          upright form -> angle 90 (even level) or 270 (odd level), isSideways FALSE,
- *                          isRightToLeft = level & 1;
+ *   SetGlyphOrientation runs of identical (angle, bidi, sideways, rtl) are coalesced (values observed on Windows 10 22H2):
+ *     DEFAULT orientation: "upright" Unicode classes (CJK ideographs, kana, hangul, supplementary ideographs, CJK punctuation)
+ *                          -> angle 0, isSideways TRUE; all others (Latin, digits, space, ASCII brackets) -> angle 90,
+ *                          isSideways FALSE; adjusted bidi level = source level, isRightToLeft = level & 1 for both;
+ *     STACKED orientation: adjusted bidi level = (level + 1, saturating at 62) rounded down to even; characters that are
+ *                          upright or letters/digits -> angle 0, isSideways TRUE, isRightToLeft FALSE; other characters
+ *                          (space, brackets) -> angle 90 (even source level) or 270 (odd source level), isSideways FALSE,
+ *                          isRightToLeft = source level & 1;
  *     any other orientation value -> angle 0, level 0, not sideways, not RTL.
  */
 #include "ta.h"
@@ -264,26 +266,26 @@ TEST(vo_covers_exact_range_with_offset) {
     for (i = 0; i < 8; i++) if (o.src->log[i].fn == 6) { CHECK(o.src->log[i].pos >= 2); break; }
     oa_free(&o); TA_END();
 }
-TEST(vo_latin_default_is_sideways_angle0) {
+TEST(vo_latin_default_is_not_sideways_angle90) {
     TA_BEGIN(); oa o; UINT32 i; oa_make(&o, L"Hello 123", 9, DWRITE_VERTICAL_GLYPH_ORIENTATION_DEFAULT, 0);
     CHECK_HR(oa_run(a1, &o, 0, 9), S_OK);
-    for (i = 0; i < 5; i++) { CHECK(o.sk->orient_set[i]); EXPECT_EQ(o.sk->angle[i], ANGLE_0); CHECK(o.sk->orient_sideways[i]); CHECK(!o.sk->orient_rtl[i]); EXPECT_EQ(o.sk->orient_bidi[i], 0); }
-    for (i = 6; i < 9; i++) { CHECK(o.sk->orient_set[i]); CHECK(o.sk->orient_sideways[i]); }   /* digits are rotated like Latin letters */
+    for (i = 0; i < 5; i++) { CHECK(o.sk->orient_set[i]); EXPECT_EQ(o.sk->angle[i], ANGLE_90); CHECK(!o.sk->orient_sideways[i]); CHECK(!o.sk->orient_rtl[i]); EXPECT_EQ(o.sk->orient_bidi[i], 0); }
+    for (i = 5; i < 9; i++) { CHECK(o.sk->orient_set[i]); EXPECT_EQ(o.sk->angle[i], ANGLE_90); CHECK(!o.sk->orient_sideways[i]); }   /* space and digits like Latin letters */
     oa_free(&o); TA_END();
 }
-TEST(vo_cjk_default_is_upright_angle90) {
+TEST(vo_cjk_default_is_angle0_sideways) {
     static const WCHAR t[] = { 0x4E00, 0x4E8C, 0x4E09, 0x56DB, 0x4E94 };
     TA_BEGIN(); oa o; UINT32 i; oa_make(&o, t, 5, DWRITE_VERTICAL_GLYPH_ORIENTATION_DEFAULT, 0);
     CHECK_HR(oa_run(a1, &o, 0, 5), S_OK);
-    for (i = 0; i < 5; i++) { CHECK(o.sk->orient_set[i]); EXPECT_EQ(o.sk->angle[i], ANGLE_90); CHECK(!o.sk->orient_sideways[i]); CHECK(!o.sk->orient_rtl[i]); }
+    for (i = 0; i < 5; i++) { CHECK(o.sk->orient_set[i]); EXPECT_EQ(o.sk->angle[i], ANGLE_0); CHECK(o.sk->orient_sideways[i]); CHECK(!o.sk->orient_rtl[i]); }
     EXPECT_EQ(o.sk->n_orient, 1);                       /* identical info coalesces into one callback */
     oa_free(&o); TA_END();
 }
-TEST(vo_kana_hangul_default_upright) {
+TEST(vo_kana_hangul_default_angle0_sideways) {
     static const WCHAR t[] = { 0x3042, 0x30A2, 0xAC00, 0xD55C };       /* hiragana, katakana, hangul syllables */
     TA_BEGIN(); oa o; UINT32 i; oa_make(&o, t, 4, DWRITE_VERTICAL_GLYPH_ORIENTATION_DEFAULT, 0);
     CHECK_HR(oa_run(a1, &o, 0, 4), S_OK);
-    for (i = 0; i < 4; i++) { EXPECT_EQ(o.sk->angle[i], ANGLE_90); CHECK(!o.sk->orient_sideways[i]); }
+    for (i = 0; i < 4; i++) { EXPECT_EQ(o.sk->angle[i], ANGLE_0); CHECK(o.sk->orient_sideways[i]); }
     oa_free(&o); TA_END();
 }
 TEST(vo_mixed_latin_cjk_splits_runs) {
@@ -291,17 +293,17 @@ TEST(vo_mixed_latin_cjk_splits_runs) {
     TA_BEGIN(); oa o; oa_make(&o, t, 5, DWRITE_VERTICAL_GLYPH_ORIENTATION_DEFAULT, 0);
     CHECK_HR(oa_run(a1, &o, 0, 5), S_OK);
     EXPECT_EQ(o.sk->n_orient, 3);
-    CHECK(o.sk->orient_sideways[0] && o.sk->orient_sideways[1] && !o.sk->orient_sideways[2] && !o.sk->orient_sideways[3] && o.sk->orient_sideways[4]);
+    CHECK(!o.sk->orient_sideways[0] && !o.sk->orient_sideways[1] && o.sk->orient_sideways[2] && o.sk->orient_sideways[3] && !o.sk->orient_sideways[4]);
     oa_free(&o); TA_END();
 }
 TEST(vo_surrogate_pair_is_one_unit) {
-    /* U+20000 (CJK extension B) is upright; both UTF-16 units get the same info and no run boundary splits the pair */
+    /* U+20000 (CJK extension B) takes the CJK treatment (angle 0, sideways); both UTF-16 units get the same info and no run boundary splits the pair */
     static const WCHAR t[] = { 'A', 0xD840, 0xDC00, 'B' };
     TA_BEGIN(); oa o; oa_make(&o, t, 4, DWRITE_VERTICAL_GLYPH_ORIENTATION_DEFAULT, 0);
     CHECK_HR(oa_run(a1, &o, 0, 4), S_OK);
     CHECK(o.sk->orient_set[1] && o.sk->orient_set[2]);
     CHECK(o.sk->orient_sideways[1] == o.sk->orient_sideways[2]); EXPECT_EQ(o.sk->angle[1], o.sk->angle[2]);
-    CHECK(!o.sk->orient_sideways[1]); EXPECT_EQ(o.sk->angle[1], ANGLE_90);
+    CHECK(o.sk->orient_sideways[1]); EXPECT_EQ(o.sk->angle[1], ANGLE_0);
     oa_free(&o); TA_END();
 }
 TEST(vo_emoji_default_upright_note) {
@@ -317,8 +319,8 @@ TEST(vo_punctuation_note) {
     TA_BEGIN(); oa o; UINT32 i; oa_make(&o, t, 12, DWRITE_VERTICAL_GLYPH_ORIENTATION_DEFAULT, 0);
     CHECK_HR(oa_run(a1, &o, 0, 12), S_OK);
     for (i = 0; i < 12; i++) { CHECK(o.sk->orient_set[i]); t_note("U+%04X DEFAULT: angle=%d sideways=%d", t[i], o.sk->angle[i], o.sk->orient_sideways[i]); }
-    /* ASCII brackets and punctuation are rotated with the Latin text around them */
-    CHECK(o.sk->orient_sideways[7] && o.sk->orient_sideways[8]);
+    /* ASCII brackets are treated like the Latin text around them: angle 90, not sideways */
+    CHECK(!o.sk->orient_sideways[7] && !o.sk->orient_sideways[8]);
     oa_free(&o); TA_END();
 }
 TEST(vo_default_bidi_level_passthrough) {
@@ -337,7 +339,7 @@ TEST(vo_default_bidi_level_cjk) {
     for (lv = 0; lv < 4; lv++) {
         oa o; oa_make(&o, t, 1, DWRITE_VERTICAL_GLYPH_ORIENTATION_DEFAULT, lv);
         CHECK_HR(oa_run(a1, &o, 0, 1), S_OK);
-        EXPECT_EQ(o.sk->orient_bidi[0], lv); EXPECT_EQ(o.sk->orient_rtl[0], (lv & 1)); EXPECT_EQ(o.sk->angle[0], ANGLE_90); CHECK(!o.sk->orient_sideways[0]);
+        EXPECT_EQ(o.sk->orient_bidi[0], lv); EXPECT_EQ(o.sk->orient_rtl[0], (lv & 1)); EXPECT_EQ(o.sk->angle[0], ANGLE_0); CHECK(o.sk->orient_sideways[0]);
         oa_free(&o);
     }
     TA_END();
@@ -347,19 +349,31 @@ TEST(vo_stacked_latin_even_levels) {
     for (i = 0; i < 4; i++) {
         oa o; oa_make(&o, L"A", 1, DWRITE_VERTICAL_GLYPH_ORIENTATION_STACKED, in[i]);
         CHECK_HR(oa_run(a1, &o, 0, 1), S_OK);
-        EXPECT_EQ(o.sk->orient_bidi[0], out[i]); CHECK(!o.sk->orient_rtl[0]); CHECK(!o.sk->orient_sideways[0]); EXPECT_EQ(o.sk->angle[0], ANGLE_90);
+        EXPECT_EQ(o.sk->orient_bidi[0], out[i]); CHECK(!o.sk->orient_rtl[0]); CHECK(o.sk->orient_sideways[0]); EXPECT_EQ(o.sk->angle[0], ANGLE_0);
         oa_free(&o);
     }
     TA_END();
 }
 TEST(vo_stacked_latin_odd_levels) {
-    /* odd level: rotated 270 degrees, right-to-left, level rounded to the next even value */
+    /* odd level: the letter keeps angle 0 / sideways / not RTL, the level is rounded to the next even value */
     TA_BEGIN(); static const UINT8 in[] = { 1, 3, 5, 61 }; static const UINT8 out[] = { 2, 4, 6, 62 }; int i;
     for (i = 0; i < 4; i++) {
         oa o; oa_make(&o, L"A", 1, DWRITE_VERTICAL_GLYPH_ORIENTATION_STACKED, in[i]);
         CHECK_HR(oa_run(a1, &o, 0, 1), S_OK);
-        EXPECT_EQ(o.sk->orient_bidi[0], out[i]); CHECK(o.sk->orient_rtl[0]); CHECK(!o.sk->orient_sideways[0]);
-        EXPECT_EQ(o.sk->angle[0], DWRITE_GLYPH_ORIENTATION_ANGLE_270_DEGREES);
+        EXPECT_EQ(o.sk->orient_bidi[0], out[i]); CHECK(!o.sk->orient_rtl[0]); CHECK(o.sk->orient_sideways[0]);
+        EXPECT_EQ(o.sk->angle[0], ANGLE_0);
+        oa_free(&o);
+    }
+    TA_END();
+}
+TEST(vo_stacked_space_follows_source_level) {
+    /* a space is not sideways in STACKED mode: angle 90 at even levels, 270 and right-to-left at odd levels */
+    TA_BEGIN(); static const UINT8 in[] = { 0, 1, 2, 3, 60, 61 }; static const UINT8 out[] = { 0, 2, 2, 4, 60, 62 }; int i;
+    for (i = 0; i < 6; i++) {
+        oa o; oa_make(&o, L" ", 1, DWRITE_VERTICAL_GLYPH_ORIENTATION_STACKED, in[i]);
+        CHECK_HR(oa_run(a1, &o, 0, 1), S_OK);
+        EXPECT_EQ(o.sk->orient_bidi[0], out[i]); EXPECT_EQ(o.sk->orient_rtl[0], (in[i] & 1)); CHECK(!o.sk->orient_sideways[0]);
+        EXPECT_EQ(o.sk->angle[0], (in[i] & 1) ? DWRITE_GLYPH_ORIENTATION_ANGLE_270_DEGREES : ANGLE_90);
         oa_free(&o);
     }
     TA_END();
@@ -379,7 +393,7 @@ TEST(vo_stacked_cjk_same_as_latin) {
     static const WCHAR t[] = { 0x4E00 };
     TA_BEGIN(); oa o; oa_make(&o, t, 1, DWRITE_VERTICAL_GLYPH_ORIENTATION_STACKED, 0);
     CHECK_HR(oa_run(a1, &o, 0, 1), S_OK);
-    CHECK(!o.sk->orient_sideways[0]); EXPECT_EQ(o.sk->angle[0], ANGLE_90); EXPECT_EQ(o.sk->orient_bidi[0], 0);
+    CHECK(o.sk->orient_sideways[0]); EXPECT_EQ(o.sk->angle[0], ANGLE_0); EXPECT_EQ(o.sk->orient_bidi[0], 0);
     oa_free(&o); TA_END();
 }
 TEST(vo_stacked_mixed_text_single_run) {
@@ -425,7 +439,7 @@ TEST(vo_chunked_text_source) {
     static const WCHAR t[] = { 'A', 'B', 0x4E00, 0x4E8C, 'C', 'D' };
     TA_BEGIN(); oa o; oa_make(&o, t, 6, 0, 0); o.src->chunk = 1;
     CHECK_HR(oa_run(a1, &o, 0, 6), S_OK);
-    CHECK(o.sk->orient_sideways[0] && o.sk->orient_sideways[1] && !o.sk->orient_sideways[2] && !o.sk->orient_sideways[3] && o.sk->orient_sideways[4] && o.sk->orient_sideways[5]);
+    CHECK(!o.sk->orient_sideways[0] && !o.sk->orient_sideways[1] && o.sk->orient_sideways[2] && o.sk->orient_sideways[3] && !o.sk->orient_sideways[4] && !o.sk->orient_sideways[5]);
     EXPECT_EQ(o.sk->n_orient, 3);
     oa_free(&o); TA_END();
 }

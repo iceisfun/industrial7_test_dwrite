@@ -2,7 +2,7 @@
  *
  * Windows 10 (DWriteTextAnalyzer::GetJustificationOpportunities -> TextAnalyzer::GetJustificationOpportunities):
  *   - fontEmSize < 0 or NaN -> E_INVALIDARG; then glyphCount == 0 -> S_OK (nothing is touched, arrays may be NULL);
- *     otherwise textLength == 0 or a NULL textString / clusterMap / glyphProperties / justificationOpportunities -> E_INVALIDARG.
+ *     otherwise textLength == 0 or a NULL textString / clusterMap / glyphProperties -> E_INVALIDARG (a NULL output array faults).
  *   - fontFace is optional (NULL is accepted: the face only refines the compression limit and Arabic kashida opportunities).
  *   - Every entry [0, glyphCount) of the output is written. The shaper's justification class lives in the low 4 bits of
  *     DWRITE_SHAPING_GLYPH_PROPERTIES (Uniscribe numbering: 0 none, 1 Arabic blank, 2 character, 4 blank, 7.. Arabic classes).
@@ -62,7 +62,7 @@ TEST(jo_null_arguments_invalid) {
     CHECK_HR(go(a1, NULL, EM, SA(0), 1, 1, NULL, cm, gp, o), TA_E_INVALIDARG);
     CHECK_HR(go(a1, NULL, EM, SA(0), 1, 1, t, NULL, gp, o), TA_E_INVALIDARG);
     CHECK_HR(go(a1, NULL, EM, SA(0), 1, 1, t, cm, NULL, o), TA_E_INVALIDARG);
-    CHECK_HR(go(a1, NULL, EM, SA(0), 1, 1, t, cm, gp, NULL), TA_E_INVALIDARG);
+    /* a NULL justificationOpportunities pointer is not validated: Windows 10 faults on it, so it is not exercised */
     TA_END();
 }
 TEST(jo_null_face_is_accepted) {
