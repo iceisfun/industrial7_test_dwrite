@@ -98,4 +98,8 @@ static HRESULT WINAPI tf_fb_Map(IDWriteFontFallback *This, IDWriteTextAnalysisSo
 static const IDWriteFontFallbackVtbl tf_fb_vtbl = { tf_fb_QI, tf_fb_AddRef, tf_fb_Release, tf_fb_Map };
 static void tf_fb_init(tf_fb *o) { memset(o, 0, sizeof *o); o->lpVtbl = &tf_fb_vtbl; o->ref = 1; }
 
+/* The mingw IDWriteTextFormat3 macros for the struct line spacing forms expand to a name that is itself a macro; call the slots directly. */
+#define TF3_SetLineSpacing(p, ls) (((p)->lpVtbl->IDWriteTextFormat2_SetLineSpacing)((p), (ls)))
+#define TF3_GetLineSpacing(p, ls) (((p)->lpVtbl->IDWriteTextFormat2_GetLineSpacing)((p), (ls)))
+
 #endif
