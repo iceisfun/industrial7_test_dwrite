@@ -22,6 +22,11 @@ IDWriteFontFace *clt_ctx_face(clt_ctx *c);      /* synthetic face, NULL on failu
 IDWriteFontFile *clt_ctx_file(clt_ctx *c);
 IDWriteFontCollection *clt_ctx_coll(clt_ctx *c);/* custom collection holding one synthetic font; owned by ctx */
 
+/* Isolated factory + file loader with n synthetic fonts (families CltFam0..) + collection loader enumerating them. */
+typedef struct { IDWriteFactory *f; dwx_mem_loader *fl; dwx_coll_loader *cl; } clt_cfix;
+int  clt_cfix_open(clt_cfix *x, int nfonts);     /* 0 on failure; always call clt_cfix_close */
+void clt_cfix_close(clt_cfix *x);
+
 /* ---- generic COM checks ------------------------------------------------------------------------------ */
 /* QueryInterface every public IID: successes raise the count by exactly one and keep the COM identity,
  * failures return E_NOINTERFACE with a NULL out pointer; the count is balanced afterwards. Returns #successes. */

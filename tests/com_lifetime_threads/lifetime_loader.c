@@ -304,30 +304,9 @@ TEST(ld_stream_fragment_balance_after_table_access) {
 }
 
 /* ---- collection loader / enumerator ownership ----------------------------------------------------------------------------- */
-typedef struct { IDWriteFactory *f; dwx_mem_loader *fl; dwx_coll_loader *cl; } cfix;
-static int cfix_open(cfix *x, int nfonts) {
-    int i; memset(x, 0, sizeof *x);
-    x->f = dw_new_factory(DWRITE_FACTORY_TYPE_ISOLATED);
-    if (!x->f) return 0;
-    x->fl = dwx_loader_new();
-    for (i = 0; i < nfonts; i++) {
-        char fam[32]; size_t n; uint8_t *b; UINT32 key;
-        sprintf(fam, "CltFam%d", i);
-        b = syn(fam, &n); key = dwx_loader_add(x->fl, b, n); free(b);
-        if (i == 0) {}
-        (void)key;
-    }
-    if (FAILED(dwx_loader_register(x->fl, x->f))) return 0;
-    x->cl = dwx_coll_new(x->fl);
-    for (i = 0; i < nfonts; i++) dwx_coll_add_key(x->cl, (UINT32)i);
-    if (FAILED(dwx_coll_register(x->cl, x->f))) return 0;
-    return 1;
-}
-static void cfix_close(cfix *x) {
-    if (x->cl) { dwx_coll_unregister(x->cl); dwx_release(x->cl); }
-    if (x->fl) { dwx_loader_unregister(x->fl); dwx_release(x->fl); }
-    DW_RELEASE(x->f);
-}
+#define cfix clt_cfix
+#define cfix_open clt_cfix_open
+#define cfix_close clt_cfix_close
 TEST(ld_enumerator_released_after_collection_build) {
     NEED_PROC();
     cfix x; IDWriteFontCollection *c = NULL;

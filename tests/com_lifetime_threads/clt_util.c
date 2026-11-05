@@ -468,3 +468,28 @@ uint64_t clt_op(clt_thr *t, IDWriteFactory *f, int op, int i, dwx_mem_loader *ld
     }
     return h;
 }
+
+/* ---- custom collection fixture ---- */
+int clt_cfix_open(clt_cfix *x, int nfonts) {
+    int i; memset(x, 0, sizeof *x);
+    x->f = dw_new_factory(DWRITE_FACTORY_TYPE_ISOLATED);
+    if (!x->f) return 0;
+    x->fl = dwx_loader_new();
+    for (i = 0; i < nfonts; i++) {
+        char fam[32]; size_t n; uint8_t *b; UINT32 key;
+        sprintf(fam, "CltFam%d", i);
+        b = ttf_build_styled(fam, 400, 5, 0, &n); key = dwx_loader_add(x->fl, b, n); free(b);
+        if (i == 0) {}
+        (void)key;
+    }
+    if (FAILED(dwx_loader_register(x->fl, x->f))) return 0;
+    x->cl = dwx_coll_new(x->fl);
+    for (i = 0; i < nfonts; i++) dwx_coll_add_key(x->cl, (UINT32)i);
+    if (FAILED(dwx_coll_register(x->cl, x->f))) return 0;
+    return 1;
+}
+void clt_cfix_close(clt_cfix *x) {
+    if (x->cl) { dwx_coll_unregister(x->cl); dwx_release(x->cl); }
+    if (x->fl) { dwx_loader_unregister(x->fl); dwx_release(x->fl); }
+    DW_RELEASE(x->f);
+}
