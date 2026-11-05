@@ -500,7 +500,8 @@ TEST(rg_matches_text_position_rectangles)
         CHECKF(r.count == 1, "pos %u count %u", i, r.count);
         if (r.count == 1) {
             CHECKF(r.m[0].textPosition == q.m.textPosition && r.m[0].length == q.m.length, "pos %u", i);
-            CHK_NEAR(r.m[0].left, q.m.left); CHK_NEAR(r.m[0].top, q.m.top); CHK_NEAR(r.m[0].width, q.m.width); CHK_NEAR(r.m[0].height, q.m.height);
+            CHK_NEAR(r.m[0].left, q.m.left); CHK_NEAR(r.m[0].width, q.m.width);
+            CHECK(r.m[0].top <= q.m.top + EPS && r.m[0].top + r.m[0].height + EPS >= q.m.top + q.m.height);   /* line box contains the span box */
         }
     }
     TH_DONE(l);

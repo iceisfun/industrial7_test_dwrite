@@ -167,3 +167,42 @@ float th_cw_sum(IDWriteTextLayout *l, UINT32 pos, UINT32 len)
     }
     return w;
 }
+
+/* Cross-checks HitTestTextPosition / HitTestPoint against GetClusterMetrics + GetLineMetrics for single-direction left-to-right text. */
+void th_check_consistency(IDWriteTextLayout *l, const char *file, int line)
+{
+    DWRITE_CLUSTER_METRICS c[256]; DWRITE_LINE_METRICS lm[64]; UINT32 nc = 0, nl = 0, ci, pos = 0, li = 0, lineStart = 0, k;
+    float top = 0, prevRight = 0; int havePrev = 0; DWRITE_TEXT_METRICS tm;
+    th_metrics(l, &tm); top = tm.top;
+    HRESULT hr = IDWriteTextLayout_GetLineMetrics(l, lm, 64, &nl);
+    t_check(hr == S_OK && nl > 0, file, line, "GetLineMetrics", "got %s", dw_hr_name(hr));
+    if (hr != S_OK || !nl) return;
+    nc = th_clusters(l, c, 256);
+    t_check(nc > 0, file, line, "GetClusterMetrics", "no clusters");
+    for (ci = 0; ci < nc; ci++) {
+        while (li + 1 < nl && pos >= lineStart + lm[li].length) { lineStart += lm[li].length; top += lm[li].height; li++; havePrev = 0; }
+        th_tp q = th_pos(l, pos, FALSE);
+        t_check(q.m.textPosition == pos && q.m.length == c[ci].length, file, line, "cluster hit rect", "pos %u: got (%u,%u) want (%u,%u)", pos, q.m.textPosition, q.m.length, pos, c[ci].length);
+        t_check(th_feq(q.m.width, c[ci].width), file, line, "cluster hit width", "pos %u got %g want %g", pos, (double)q.m.width, (double)c[ci].width);
+        t_check(th_feq(q.m.top, top), file, line, "cluster hit top", "pos %u got %g want %g", pos, (double)q.m.top, (double)top);
+        t_check(q.m.height > 0.0f && q.m.height <= lm[li].height + EPS, file, line, "cluster hit height", "pos %u got %g line %g", pos, (double)q.m.height, (double)lm[li].height);
+        t_check(th_feq(q.x, q.m.left) && th_feq(q.y, q.m.top), file, line, "leading caret", "pos %u", pos);
+        t_check(q.m.bidiLevel == 0 && q.m.isText == 1, file, line, "bidi/isText", "pos %u level %u text %d", pos, q.m.bidiLevel, (int)q.m.isText);
+        if (havePrev) t_check(th_feq(q.m.left, prevRight), file, line, "adjacent clusters", "pos %u left %g prev right %g", pos, (double)q.m.left, (double)prevRight);
+        for (k = 1; k < c[ci].length; k++) {
+            th_tp q2 = th_pos(l, pos + k, FALSE);
+            t_check(!memcmp(&q2.m, &q.m, sizeof q.m) && q2.x == q.x && q2.y == q.y, file, line, "positions inside a cluster", "pos %u+%u", pos, k);
+        }
+        th_tp t = th_pos(l, pos, TRUE);
+        t_check(th_feq(t.x, q.m.left + q.m.width) && th_feq(t.y, q.y), file, line, "trailing caret", "pos %u", pos);
+        /* hit the cluster with points: only clusters before the line's newline can be hit */
+        if (c[ci].width > 1.0f && pos + c[ci].length <= lineStart + lm[li].length - lm[li].newlineLength) {
+            float y = q.m.top + q.m.height * 0.5f;
+            th_pt a = th_point(l, q.m.left + 0.25f * q.m.width, y), b = th_point(l, q.m.left + 0.75f * q.m.width, y);
+            t_check(a.m.textPosition == pos && a.tr == 0 && a.in == 1, file, line, "point in leading quarter", "pos %u got pos %u tr %d in %d", pos, a.m.textPosition, (int)a.tr, (int)a.in);
+            t_check(b.m.textPosition == pos && b.tr == 1 && b.in == 1, file, line, "point in trailing quarter", "pos %u got pos %u tr %d in %d", pos, b.m.textPosition, (int)b.tr, (int)b.in);
+        }
+        prevRight = q.m.left + q.m.width; havePrev = 1;
+        pos += c[ci].length;
+    }
+}

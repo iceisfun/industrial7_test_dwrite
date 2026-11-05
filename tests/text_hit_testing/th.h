@@ -51,6 +51,8 @@ UINT32 th_lines(IDWriteTextLayout *l);
 float  th_lh(IDWriteTextLayout *l, UINT32 line);                 /* GetLineMetrics height of a line */
 UINT32 th_clusters(IDWriteTextLayout *l, DWRITE_CLUSTER_METRICS *c, UINT32 cap);   /* count (0 on failure) */
 
+void th_check_consistency(IDWriteTextLayout *l, const char *file, int line);
+#define CHECK_CONSISTENT(l) th_check_consistency((l), __FILE__, __LINE__)
 float th_cw_sum(IDWriteTextLayout *l, UINT32 pos, UINT32 len);   /* sum of GetClusterMetrics widths of clusters starting in [pos,pos+len) */
 static __inline int th_feq(float a, float b) { return fabsf(a - b) <= EPS; }
 #define CHK_NEAR(a, b) t_check(th_feq((float)(a), (float)(b)), __FILE__, __LINE__, #a " ~= " #b, "got %g want %g", (double)(a), (double)(b))

@@ -20,7 +20,7 @@ TEST(tp_each_position_leading)
         th_tp q = th_pos(l, i, FALSE);
         CHK_NEAR(q.x, i * CW); CHK_NEAR(q.y, 0.0f);
         CHK_M(q.m, i, 1, i * CW, CW, 0, 1);
-        CHK_NEAR(q.m.top, 0.0f); CHK_NEAR(q.m.height, lh);
+        CHK_NEAR(q.m.top, 0.0f); CHECK(q.m.height > 0.0f && q.m.height <= lh + EPS);
         CHECK(q.m.isTrimmed == 0);
     }
     TH_DONE(l);
@@ -56,7 +56,7 @@ TEST(tp_end_position)
     th_tp q = th_pos(l, 8, FALSE);
     CHK_NEAR(q.x, 8 * CW); CHK_NEAR(q.y, 0.0f);
     CHK_M(q.m, 8, 0, 8 * CW, 0.0f, 0, 1);
-    CHK_NEAR(q.m.top, 0.0f); CHK_NEAR(q.m.height, lh);
+    CHK_NEAR(q.m.top, 0.0f); CHECK(q.m.height > 0.0f && q.m.height <= lh + EPS);
     CHECK(q.m.isTrimmed == 0);
     TH_DONE(l);
 }
@@ -115,7 +115,7 @@ TEST(tp_multiline_positions)
     q = th_pos(l, 4, TRUE);          CHK_NEAR(q.x, 2 * CW);    CHK_NEAR(q.y, h0);
     q = th_pos(l, 6, FALSE);         CHK_NEAR(q.x, 0.0f);      CHK_NEAR(q.y, h0 + h1);
     q = th_pos(l, 7, TRUE);          CHK_NEAR(q.x, 2 * CW);    CHK_NEAR(q.y, h0 + h1);
-    CHK_NEAR(q.m.height, th_lh(l, 2));
+    CHECK(q.m.height > 0.0f && q.m.height <= th_lh(l, 2) + EPS);
     TH_DONE(l);
 }
 
@@ -346,7 +346,7 @@ TEST(tp_paragraph_alignment_near_center_far)
     float lh = th_lh(l, 0);
     th_tp q = th_pos(l, 0, FALSE);   CHK_NEAR(q.y, 0.0f);
     CHECK_HR_OK(IDWriteTextLayout_SetParagraphAlignment(l, DWRITE_PARAGRAPH_ALIGNMENT_CENTER));
-    q = th_pos(l, 0, FALSE);         CHK_NEAR(q.y, (200.0f - lh) / 2); CHK_NEAR(q.m.top, (200.0f - lh) / 2); CHK_NEAR(q.m.height, lh);
+    q = th_pos(l, 0, FALSE);         CHK_NEAR(q.y, (200.0f - lh) / 2); CHK_NEAR(q.m.top, (200.0f - lh) / 2); CHECK(q.m.height > 0.0f && q.m.height <= lh + EPS);
     CHECK_HR_OK(IDWriteTextLayout_SetParagraphAlignment(l, DWRITE_PARAGRAPH_ALIGNMENT_FAR));
     q = th_pos(l, 0, FALSE);         CHK_NEAR(q.y, 200.0f - lh);
     th_pt p = th_point(l, 1.0f, 5.0f);

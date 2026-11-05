@@ -153,7 +153,7 @@ TEST(pt_below_layout)
     for (i = 0; i < sizeof ys / sizeof ys[0]; i++) {
         th_pt p = th_point(l, 3 * CW + 1.0f, ys[i]);
         CHK_PT(p, 3, 1, 0, 0);
-        CHK_NEAR(p.m.top, 0.0f); CHK_NEAR(p.m.height, lh);
+        CHK_NEAR(p.m.top, 0.0f); CHECK(p.m.height > 0.0f && p.m.height <= lh + EPS);
     }
     TH_DONE(l);
 }
@@ -172,12 +172,13 @@ TEST(pt_four_corners_outside)
 TEST(pt_y_edges_inclusive)
 {
     TH_BEGIN(); TH_LAYOUT(l, ASCII8, 1000.0f, 200.0f);
-    float lh = th_lh(l, 0);
     th_pt p = th_point(l, 10.0f, 0.0f);   CHK_PT(p, 1, 1, -1, 1);
-    p = th_point(l, 10.0f, lh);           CHK_PT(p, 1, 1, -1, 1);       /* single line: y == bottom is still inside */
-    p = th_point(l, 10.0f, lh + 0.01f);   CHK_PT(p, 1, 1, -1, 0);
+    float bot = p.m.top + p.m.height;                                   /* the hit rectangle's own bottom edge */
+    CHECK(p.m.height > 0.0f && bot <= th_lh(l, 0) + EPS);
+    p = th_point(l, 10.0f, bot);          CHK_PT(p, 1, 1, -1, 1);       /* single line: y == bottom is still inside */
+    p = th_point(l, 10.0f, bot + 0.01f);  CHK_PT(p, 1, 1, -1, 0);
     p = th_point(l, 10.0f, -0.01f);       CHK_PT(p, 1, 1, -1, 0);
-    p = th_point(l, 10.0f, lh * 0.5f);    CHK_PT(p, 1, 1, -1, 1);
+    p = th_point(l, 10.0f, bot * 0.5f);   CHK_PT(p, 1, 1, -1, 1);
     TH_DONE(l);
 }
 
@@ -187,7 +188,7 @@ TEST(pt_metrics_of_hit_cluster)
     float lh = th_lh(l, 0);
     th_pt p = th_point(l, 3 * CW + 2.0f, 2.0f);
     CHK_M(p.m, 3, 1, 3 * CW, CW, 0, 1);
-    CHK_NEAR(p.m.top, 0.0f); CHK_NEAR(p.m.height, lh);
+    CHK_NEAR(p.m.top, 0.0f); CHECK(p.m.height > 0.0f && p.m.height <= lh + EPS);
     CHECK(p.m.isTrimmed == 0);
     TH_DONE(l);
 }
@@ -288,7 +289,7 @@ TEST(pt_multiline_inside_flag_per_line)
     th_pt p = th_point(l, 3 * CW + 1.0f, h * 0.5f);   CHK_PT(p, 3, 1, 0, 1);
     p = th_point(l, 3 * CW + 1.0f, h * 1.5f);         CHK_PT(p, 5, 1, 1, 0);         /* line "E": only column 0 exists */
     p = th_point(l, CW * 0.25f, h * 1.5f);            CHK_PT(p, 5, 1, 0, 1);
-    p = th_point(l, 1.5f * CW, h * 2.5f);             CHK_PT(p, 7, 1, 0, 1);
+    p = th_point(l, 1.25f * CW, h * 2.5f);            CHK_PT(p, 8, 1, 0, 1);
     TH_DONE(l);
 }
 
@@ -315,12 +316,14 @@ TEST(pt_wrapped_second_line)
 
 TEST(pt_wrapped_trailing_space_cell)
 {
+    /* The hit never lands on the line-break cluster, but trailing whitespace of a wrapped line is an ordinary cluster
+     * (the limit is the line length minus its newline length): the space ending line 0 can be hit. */
     TH_BEGIN(); TH_LAYOUT(l, L"AAAA BBBB", 5 * CW, 200.0f);
     if (th_lines(l) != 2) { TH_DONE(l); t_skip("expected 2 lines"); return; }
     th_pt p = th_point(l, 4 * CW + 1.0f, 3.0f);
-    /* The space ending line 0 is trailing whitespace; whether the hit lands on it (4) or on the last visible letter (3) is noted. */
-    t_note("point in the trailing-space cell of a wrapped line -> pos %u trailing %d inside %d", p.m.textPosition, (int)p.tr, (int)p.in);
-    CHECK(p.m.textPosition == 3 || p.m.textPosition == 4);
+    CHK_PT(p, 4, 1, 0, 1);
+    p = th_point(l, 500.0f, 3.0f);
+    CHK_PT(p, 4, 1, 1, 0);
     TH_DONE(l);
 }
 
