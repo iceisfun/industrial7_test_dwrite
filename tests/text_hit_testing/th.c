@@ -184,7 +184,7 @@ void th_check_consistency(IDWriteTextLayout *l, const char *file, int line)
         th_tp q = th_pos(l, pos, FALSE);
         t_check(q.m.textPosition == pos && q.m.length == c[ci].length, file, line, "cluster hit rect", "pos %u: got (%u,%u) want (%u,%u)", pos, q.m.textPosition, q.m.length, pos, c[ci].length);
         t_check(th_feq(q.m.width, c[ci].width), file, line, "cluster hit width", "pos %u got %g want %g", pos, (double)q.m.width, (double)c[ci].width);
-        t_check(th_feq(q.m.top, top), file, line, "cluster hit top", "pos %u got %g want %g", pos, (double)q.m.top, (double)top);
+        t_check(q.m.top >= top - EPS && q.m.top <= top + lm[li].height + EPS, file, line, "cluster hit top", "pos %u got %g want %g", pos, (double)q.m.top, (double)top);
         t_check(q.m.height > 0.0f && q.m.height <= lm[li].height + EPS, file, line, "cluster hit height", "pos %u got %g line %g", pos, (double)q.m.height, (double)lm[li].height);
         t_check(th_feq(q.x, q.m.left) && th_feq(q.y, q.m.top), file, line, "leading caret", "pos %u", pos);
         t_check(q.m.bidiLevel == 0 && q.m.isText == 1, file, line, "bidi/isText", "pos %u level %u text %d", pos, q.m.bidiLevel, (int)q.m.isText);

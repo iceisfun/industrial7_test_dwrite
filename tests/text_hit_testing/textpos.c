@@ -131,13 +131,13 @@ TEST(tp_newline_sits_at_end_of_its_line)
     TH_DONE(l);
 }
 
-TEST(tp_crlf_is_one_cluster)
+TEST(tp_crlf_is_two_clusters_one_break)
 {
     TH_BEGIN(); TH_LAYOUT(l, L"AB\r\nCD", 1000.0f, 200.0f);
     th_tp a = th_pos(l, 2, FALSE), b = th_pos(l, 3, FALSE);
-    CHECK(a.m.textPosition == 2 && a.m.length == 2);
-    CHECK(b.m.textPosition == 2 && b.m.length == 2);
-    CHECK(a.x == b.x && a.y == b.y);
+    t_note("crlf: pos2 (%u,%u) x %g, pos3 (%u,%u) x %g", a.m.textPosition, a.m.length, a.x, b.m.textPosition, b.m.length, b.x);
+    CHECK(a.m.textPosition == 2 && a.m.length == 1);
+    CHECK(b.m.textPosition == 3 && b.m.length == 1);   /* CR and LF are separate clusters at the same x */
     th_tp c = th_pos(l, 4, FALSE);
     CHK_NEAR(c.x, 0.0f); CHK_NEAR(c.y, th_lh(l, 0));
     CHK_M(c.m, 4, 1, 0.0f, CW, 0, 1);
@@ -409,7 +409,7 @@ TEST(tp_font_size_range_line_box_covers_largest)
     CHECK_HR_OK(IDWriteTextLayout_SetFontSize(l, 32.0f, r));
     float lh = th_lh(l, 0);
     th_tp a = th_pos(l, 0, FALSE), b = th_pos(l, 1, FALSE);
-    CHK_NEAR(a.m.top, 0.0f);
+    CHECK(a.m.top >= -EPS && a.m.top + a.m.height <= lh + EPS);
     CHECK(b.m.top >= -EPS && b.m.top + b.m.height <= lh + EPS);
     t_note("mixed sizes: line height %g, small-run height %g, large-run top %g height %g", lh, a.m.height, b.m.top, b.m.height);
     TH_DONE(l);

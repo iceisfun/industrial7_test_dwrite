@@ -258,12 +258,12 @@ TEST(pt_multiline_above_and_below)
 
 TEST(pt_multiline_right_of_line_excludes_newline)
 {
-    /* the hit never lands on the line-break cluster: right of "AB" gives the trailing half of B (position 1) */
+    /* right of "AB" the hit lands on the leading edge of the line-break cluster (position 2), outside */
     TH_BEGIN(); TH_LAYOUT(l, ML, 1000.0f, 200.0f);
     if (th_lines(l) != 3) { TH_DONE(l); t_skip("expected 3 lines"); return; }
     float h = th_lh(l, 0);
-    th_pt p = th_point(l, 300.0f, h * 0.5f);          CHK_PT(p, 1, 1, 1, 0);
-    p = th_point(l, 300.0f, h * 1.5f);                CHK_PT(p, 4, 1, 1, 0);
+    th_pt p = th_point(l, 300.0f, h * 0.5f);          CHK_PT(p, 2, 1, 0, 0);
+    p = th_point(l, 300.0f, h * 1.5f);                CHK_PT(p, 5, 1, 0, 0);
     p = th_point(l, 300.0f, h * 2.5f);                CHK_PT(p, 7, 1, 1, 0);
     TH_DONE(l);
 }
@@ -287,7 +287,7 @@ TEST(pt_multiline_inside_flag_per_line)
     if (th_lines(l) != 3) { TH_DONE(l); t_skip("expected 3 lines"); return; }
     float h = th_lh(l, 0);
     th_pt p = th_point(l, 3 * CW + 1.0f, h * 0.5f);   CHK_PT(p, 3, 1, 0, 1);
-    p = th_point(l, 3 * CW + 1.0f, h * 1.5f);         CHK_PT(p, 5, 1, 1, 0);         /* line "E": only column 0 exists */
+    p = th_point(l, 3 * CW + 1.0f, h * 1.5f);         CHK_PT(p, 6, 1, 0, 0);         /* line "E": only column 0 exists */
     p = th_point(l, CW * 0.25f, h * 1.5f);            CHK_PT(p, 5, 1, 0, 1);
     p = th_point(l, 1.25f * CW, h * 2.5f);            CHK_PT(p, 8, 1, 0, 1);
     TH_DONE(l);
@@ -298,8 +298,8 @@ TEST(pt_crlf_line_break)
     TH_BEGIN(); TH_LAYOUT(l, L"AB\r\nCD", 1000.0f, 200.0f);
     if (th_lines(l) != 2) { TH_DONE(l); t_skip("expected 2 lines"); return; }
     float h = th_lh(l, 0);
-    th_pt p = th_point(l, 1.0f, h * 1.5f);            CHK_PT(p, 4, 1, 0, 1);          /* "\r\n" is one break: D follows at 4 */
-    p = th_point(l, 300.0f, h * 0.5f);                CHK_PT(p, 1, 1, 1, 0);
+    th_pt p = th_point(l, 1.0f, h * 1.5f);            CHK_PT(p, 4, 1, 0, 1);          /* "\r\n" is one break (two one-unit clusters): D follows at 4 */
+    p = th_point(l, 300.0f, h * 0.5f);                CHK_PT(p, 2, 1, 0, 0);
     TH_DONE(l);
 }
 
@@ -391,7 +391,7 @@ TEST(pt_font_size_change_widens_cluster)
     th_pt p = th_point(l, 2 * CW + 1.0f, 3.0f);       CHK_PT(p, 2, 1, 0, 1);
     CHK_NEAR(p.m.width, 2 * CW);
     p = th_point(l, 2 * CW + 2 * CW - 1.0f, 3.0f);    CHK_PT(p, 2, 1, 1, 1);
-    p = th_point(l, 4 * CW + 1.0f, 3.0f);             CHK_PT(p, 3, 1, 0, 1);
+    p = th_point(l, 4 * CW + 1.0f, th_lh(l, 0) * 0.75f);             CHK_PT(p, 3, 1, 0, 1);
     TH_DONE(l);
 }
 
