@@ -179,7 +179,8 @@ RT(bidi_rtl_line_wrap_keeps_run_levels)
     /* a Hebrew word wrapped onto its own line is still level 1; with its right-edge origin it sits at x = its width on a left aligned line */
     R2_BEGIN(); R2_LAYOUT(l, L"AAAA " HEB3, 16.0f, 4 * 7.8125f + 4.0f, 80.0f); rh *r = rh_new(); r->snap_val = TRUE;
     RH_DRAW_OK(l, r, 0.0f, 0.0f);
-    { const rh_ev *a = glyph_at(r, 0), *b = glyph_at(r, 1);
+    { const rh_ev *a = glyph_at(r, 0), *b = NULL; int k;       /* the separating space may be a run of its own: take the Hebrew run */
+      for (k = 0; k < r->nev; k++) if (r->ev[k].type == RH_GLYPH && r->ev[k].bidi == 1) { b = &r->ev[k]; break; }
       CHECK(a && b);
       if (a && b) { EXPECT_EQ(b->bidi, 1); CHECK(b->y > a->y); CHECK_NEARF(b->x, 3 * 7.8125f); } }
     rh_free(r); IDWriteTextLayout_Release(l); R2_END();

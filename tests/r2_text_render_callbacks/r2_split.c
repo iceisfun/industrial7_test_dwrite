@@ -156,9 +156,11 @@ RT(split_line_wrap_splits_runs_at_line_end)
 {
     R2_BEGIN(); R2_LAYOUT(l, L"AAAA BBBB CCCC", 16.0f, 4 * 7.8125f + 2.0f, 200.0f); rh *r = rh_new(); r->snap_val = TRUE;
     RH_DRAW_OK(l, r, 0.0f, 0.0f);
-    EXPECT_EQ(r->count[RH_GLYPH], 3);
-    { const rh_ev *a = rh_nth(r, RH_GLYPH, 0), *b = rh_nth(r, RH_GLYPH, 1), *c = rh_nth(r, RH_GLYPH, 2);
-      if (a && b && c) { CHECK(a->y < b->y); CHECK(b->y < c->y); CHECK_NEARF(a->x, 0.0f); CHECK_NEARF(b->x, 0.0f); CHECK_NEARF(c->x, 0.0f); } else CHECK(0); }
+    /* trailing spaces may be runs of their own: look at the first run on each line */
+    { int i, lines = 0; float prevy = -1, ly[4] = { 0 }, lx[4] = { 0 };
+      for (i = 0; i < r->nev; i++) if (r->ev[i].type == RH_GLYPH && r->ev[i].y > prevy + 0.01f) { if (lines < 4) { ly[lines] = r->ev[i].y; lx[lines] = r->ev[i].x; } lines++; prevy = r->ev[i].y; }
+      EXPECT_EQ(lines, 3);
+      if (lines == 3) { CHECK(ly[0] < ly[1]); CHECK(ly[1] < ly[2]); CHECK_NEARF(lx[0], 0.0f); CHECK_NEARF(lx[1], 0.0f); CHECK_NEARF(lx[2], 0.0f); } }
     CHECK(rh_total_glyphs(r) >= 12 && rh_total_glyphs(r) <= 14);     /* the separating spaces may or may not be drawn as glyphs */
     rh_free(r); IDWriteTextLayout_Release(l); R2_END();
 }

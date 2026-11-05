@@ -216,9 +216,9 @@ RT(inline_top_left_y_is_baseline_minus_object_baseline_table)
 RT(inline_objects_do_not_change_glyph_run_baseline_between_lines)
 {
     /* two lines, an object only in the second: the first line's baseline comes from the text, the second line is taller */
-    R2_BEGIN(); R2_LAYOUT(l, L"AAAA BBB#B", 16.0f, 4 * 7.8125f + 2.0f, 200.0f); rh *r = rh_new(); r->snap_val = TRUE;
+    R2_BEGIN(); R2_LAYOUT(l, L"AAAA BB#B", 16.0f, 4 * 7.8125f + 2.0f, 200.0f); rh *r = rh_new(); r->snap_val = TRUE;
     dwx_inline *io = dwx_inline_new(8.0f, 40.0f, 30.0f, FALSE);
-    IDWriteTextLayout_SetInlineObject(l, (IDWriteInlineObject *)io, RNG(8, 1));
+    IDWriteTextLayout_SetInlineObject(l, (IDWriteInlineObject *)io, RNG(7, 1));
     RH_DRAW_OK(l, r, 0.0f, 0.0f);
     { DWRITE_LINE_METRICS lm[4]; UINT32 n = 0; IDWriteTextLayout_GetLineMetrics(l, lm, 4, &n);
       EXPECT_EQ(n, 2);
