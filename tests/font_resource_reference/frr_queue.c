@@ -440,7 +440,8 @@ TEST(begin_download_signals_listener_event) {
     dwx_listener *l = dwx_listener_new(); UINT32 tok = 0;
     IDWriteFontDownloadQueue_AddListener(x.q, (IDWriteFontDownloadListener *)l, &tok);
     CHECK_HR(IDWriteFontDownloadQueue_BeginDownload(x.q, NULL), S_OK);
-    EXPECT_EQ(WaitForSingleObject(l->event, 0), WAIT_OBJECT_0);        /* delivered before the call returned */
+    DWORD wr = WaitForSingleObject(l->event, 0);                        /* auto-reset event: wait only once */
+    EXPECT_EQ(wr, WAIT_OBJECT_0);        /* delivered before the call returned */
     EXPECT_EQ(l->n_completed, 1);
     EXPECT_EQ(l->last_queue, x.q);
     EXPECT_EQ(l->last_context, NULL);
