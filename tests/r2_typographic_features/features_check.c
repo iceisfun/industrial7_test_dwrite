@@ -201,9 +201,14 @@ static int run_pattern(const char *name, const unsigned short *g, int n, int fmt
     if (!r2_open(&c_)) { r2_close(&c_); return 0; }
     IDWriteFactory *f = c_.f;
     one_feature(&t, "liga", OTL_SINGLE, fmt, 1, 0, g, n);
-    { FONT_OR_SKIP(x, nglyphs, &t, NULL);
-      expect_set(&c_, x.h.face, LATIN(), NULL, "liga", nglyphs, g, n, name);
-      r2_font_close(&x); ok = 1; }
+    {
+        r2_font x;
+        if (SUCCEEDED(r2_font_open(&x, f, nglyphs, &t, NULL)) && x.h.face) {
+            expect_set(&c_, x.h.face, LATIN(), NULL, "liga", nglyphs, g, n, name);
+            ok = 1;
+        }
+        r2_font_close(&x);
+    }
     r2_close(&c_);
     return ok;
 }
