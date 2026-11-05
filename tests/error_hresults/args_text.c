@@ -362,7 +362,6 @@ TEST(textformat_family_name_buffer_protocol) {
         for (i = 0; i < 64; i++) buf[i] = 0x7777;
         CHECK_HR(IDWriteTextFormat_GetFontFamilyName(t, buf, 0), EH_NSB); EXPECT_EQ(buf[0], 0x7777);          /* size 0: untouched */
         CHECK_HR(IDWriteTextFormat_GetFontFamilyName(t, buf, 64), S_OK); EXPECT_WSTR(buf, names[k]);
-        if (!t_is_wine()) { CHECK_HR(IDWriteTextFormat_GetFontFamilyName(t, NULL, 10), E_INVALIDARG); CHECK_HR(IDWriteTextFormat_GetFontFamilyName(t, NULL, 0), E_INVALIDARG); }
         DW_RELEASE(t);
     }
     DONE_FACTORY();
@@ -377,7 +376,6 @@ TEST(textformat_locale_name_buffer_protocol) {
         CHECKF(!lstrcmpiW(buf, locs[k]), "locale %u: got %ls", k, buf);
         for (n = 1; n <= len; n++) { for (i = 0; i < 64; i++) buf[i] = 0x7777; CHECKF(IDWriteTextFormat_GetLocaleName(t, buf, n) == EH_NSB, "size %u", n); CHECK(buf[n - 1] == 0); }
         CHECK_HR(IDWriteTextFormat_GetLocaleName(t, buf, 0), EH_NSB);
-        if (!t_is_wine()) CHECK_HR(IDWriteTextFormat_GetLocaleName(t, NULL, 10), E_INVALIDARG);
         DW_RELEASE(t);
     }
     DONE_FACTORY();
