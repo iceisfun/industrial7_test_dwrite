@@ -321,7 +321,7 @@ TEST(fmh_design_advances_args) {
     ttf_spec s; ttf_default_spec(&s); SETUP(F, s, 0);
     INT32 adv[4]; UINT16 id = 2; unsigned i;
     memset(adv, 0xCD, sizeof adv);
-    if (t_is_wine()) t_note("NULL indices skipped under Wine (dereferenced there)");
+    if (t_is_wine()) t_note("NULL indices skipped on emulated runtimes (they dereference the pointer)");
     else {
         CHECK_HR(IDWriteFontFace1_GetDesignGlyphAdvances(F.f1, 4, NULL, adv, FALSE), E_INVALIDARG);
         for (i = 0; i < 4; i++) CHECKF(adv[i] == 0, "advance %u not zeroed", i);       /* cleared before validation */
@@ -363,7 +363,7 @@ TEST(fmh_monospace_font_advances) {
 TEST(fmh_gdi_advances_invalid_args) {
     ttf_spec s; ttf_default_spec(&s); SETUP(F, s, 0);
     UINT16 ids[2] = { 2, 3 }; INT32 adv[2]; DWRITE_MATRIX nan = { 1, NAN, 0, 1, 0, 0 };
-    if (!t_is_wine()) {   /* Wine dereferences the NULL indices */
+    if (!t_is_wine()) {   /* emulated runtimes dereference the NULL indices and would crash */
         memset(adv, 0xCD, sizeof adv); CHECK_HR(IDWriteFontFace1_GetGdiCompatibleGlyphAdvances(F.f1, 12.0f, 1.0f, NULL, FALSE, FALSE, 2, NULL, adv), E_INVALIDARG);
         CHECKF(adv[0] == 0 && adv[1] == 0, "not zeroed (NULL indices)");
     }
