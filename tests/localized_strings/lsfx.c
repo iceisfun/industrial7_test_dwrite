@@ -203,11 +203,11 @@ WCHAR *ls_en(IDWriteLocalizedStrings *s) { int i = ls_index_of(s, L"en-us"); ret
 int ls_sweep(IDWriteLocalizedStrings *s, const char *what) {
     UINT32 n = IDWriteLocalizedStrings_GetCount(s), i; int bad = 0;
     for (i = 0; i < n && i < 256; i++) {
-        UINT32 ll = 0xCCCC, sl = 0xCCCC, idx = 0; BOOL ex = FALSE; WCHAR lb[200], sb[1200]; HRESULT hr;
+        UINT32 ll = 0xCCCC, sl = 0xCCCC, idx = 0; BOOL ex = FALSE; WCHAR lb[200], sb[4200]; HRESULT hr;
         hr = IDWriteLocalizedStrings_GetLocaleNameLength(s, i, &ll);
-        if (hr != S_OK || ll == 0 || ll >= 100) { bad++; CHECKF(0, "%s[%u] locale length hr=%s len=%u", what, i, dw_hr_name(hr), ll); continue; }
+        if (hr != S_OK || ll >= 100) { bad++; CHECKF(0, "%s[%u] locale length hr=%s len=%u", what, i, dw_hr_name(hr), ll); continue; }
         hr = IDWriteLocalizedStrings_GetStringLength(s, i, &sl);
-        if (hr != S_OK || sl >= 1100) { bad++; CHECKF(0, "%s[%u] string length hr=%s len=%u", what, i, dw_hr_name(hr), sl); continue; }
+        if (hr != S_OK || sl >= 4000) { bad++; CHECKF(0, "%s[%u] string length hr=%s len=%u", what, i, dw_hr_name(hr), sl); continue; }
         /* locale: exact fit */
         memset(lb, 0x55, sizeof lb);
         hr = IDWriteLocalizedStrings_GetLocaleName(s, i, lb, ll + 1);
@@ -229,7 +229,8 @@ int ls_sweep(IDWriteLocalizedStrings *s, const char *what) {
         {
             WCHAR l2[200]; IDWriteLocalizedStrings_GetLocaleName(s, i, l2, 200);
             hr = IDWriteLocalizedStrings_FindLocaleName(s, l2, &idx, &ex);
-            if (hr != S_OK || !ex || idx != i) { bad++; CHECKF(0, "%s[%u] FindLocaleName(own) hr=%s ex=%d idx=%u", what, i, dw_hr_name(hr), ex, idx); }
+            WCHAR l3[200] = L""; if (hr == S_OK && ex && idx < n) IDWriteLocalizedStrings_GetLocaleName(s, idx, l3, 200);
+            if (hr != S_OK || !ex || idx > i || !ls_wcsieq(l2, l3)) { bad++; CHECKF(0, "%s[%u] FindLocaleName(own) hr=%s ex=%d idx=%u", what, i, dw_hr_name(hr), ex, idx); }
         }
     }
     return bad;

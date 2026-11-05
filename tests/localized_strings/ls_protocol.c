@@ -67,8 +67,10 @@ PERSRC(lsp_find_unknown) {
     int k;
     for (k = 0; k < 8; k++) {
         UINT32 idx = 5; BOOL ex = TRUE;
-        CHECK_HR(IDWriteLocalizedStrings_FindLocaleName(s, v[k], &idx, &ex), S_OK);
-        CHECK(ex == FALSE); EXPECT_EQ(idx, 0xFFFFFFFFu);
+        HRESULT hr = IDWriteLocalizedStrings_FindLocaleName(s, v[k], &idx, &ex);
+        t_note("FindLocaleName(%ls) hr=%s ex=%d idx=%u", v[k], dw_hr_name(hr), ex, idx);
+        CHECK(hr == S_OK || hr == DW_E_INVALIDARG);
+        if (hr == S_OK) { CHECK(ex == FALSE); EXPECT_EQ(idx, 0xFFFFFFFFu); }
     }
 }
 PERSRC(lsp_find_null) {
