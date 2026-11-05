@@ -603,3 +603,54 @@ TEST(ja_sweep_random_opportunities_match_model) {
     CHECK(bad == 0);
     TA_END();
 }
+
+/* ---- end to end: shape -> opportunities -> justify -> justified glyphs ---------------------------------------------------------------- */
+static void pipeline(ta_ctx *c, IDWriteFontFace *face, const WCHAR *text, int rtl, float extra, int expect_blank_opps) {
+    ta_shaped sh; UINT32 n = (UINT32)lstrlenW(text), i; const float em = 20.0f;
+    DWRITE_JUSTIFICATION_OPPORTUNITY *op; float *jadv, nat = 0; DWRITE_GLYPH_OFFSET *joff; UINT16 mcmap[TA_SHAPE_MAX], midx[TA_SHAPE_MAX * 4]; float madv[TA_SHAPE_MAX * 4]; DWRITE_GLYPH_OFFSET moff[TA_SHAPE_MAX * 4];
+    UINT32 actual = 0; HRESULT hr; float jsum = 0, msum = 0;
+    if (!ta_shape(&sh, c, face, text, n, rtl, em)) { t_skip("shaping failed"); return; }
+    op = (DWRITE_JUSTIFICATION_OPPORTUNITY *)calloc(sh.nglyphs, sizeof *op); jadv = (float *)calloc(sh.nglyphs, sizeof(float)); joff = (DWRITE_GLYPH_OFFSET *)calloc(sh.nglyphs, sizeof *joff);
+    CHECK_HR(IDWriteTextAnalyzer1_GetJustificationOpportunities(c->a1, face, em, sh.sa, n, sh.nglyphs, text, sh.cmap, sh.gprops, op), S_OK);
+    for (i = 0; i < sh.nglyphs; i++) nat += sh.adv[i];
+    CHECK_HR(IDWriteTextAnalyzer1_JustifyGlyphAdvances(c->a1, nat + extra, sh.nglyphs, op, sh.adv, sh.off, jadv, joff), S_OK);
+    for (i = 0; i < sh.nglyphs; i++) jsum += jadv[i];
+    if (expect_blank_opps) CHECKF(jsum > nat && jsum <= nat + extra + 0.01f, "justified width %g (natural %g, wanted %g)", jsum, nat, nat + extra);
+    else CHECKF(jsum >= (extra < 0 ? nat + extra : nat) - 0.01f && jsum <= (extra < 0 ? nat : nat + extra) + 0.01f, "justified width %g (natural %g, wanted %g)", jsum, nat, nat + extra);
+    t_note("pipeline natural %g justified %g wanted %g", nat, jsum, nat + extra);
+    hr = IDWriteTextAnalyzer1_GetJustifiedGlyphs(c->a1, face, em, sh.sa, n, sh.nglyphs, TA_SHAPE_MAX * 4, sh.cmap, sh.glyphs, sh.adv, jadv, joff, sh.gprops, &actual, mcmap, midx, madv, moff);
+    CHECK_HR(hr, S_OK);
+    CHECK(actual >= sh.nglyphs);
+    for (i = 0; i < actual && i < TA_SHAPE_MAX * 4; i++) msum += madv[i];
+    CHECKF(fabsf(msum - jsum) < 0.01f, "modified advances sum %g, justified %g (%u -> %u glyphs)", msum, jsum, sh.nglyphs, actual);
+    for (i = 0; i < n; i++) CHECK(mcmap[i] < actual);
+    if (actual > sh.nglyphs) {
+        t_note("%u extender glyphs inserted", actual - sh.nglyphs);
+        CHECK_HR(IDWriteTextAnalyzer1_GetJustifiedGlyphs(c->a1, face, em, sh.sa, n, sh.nglyphs, actual - 1, sh.cmap, sh.glyphs, sh.adv, jadv, joff, sh.gprops, &actual, mcmap, midx, madv, moff), TA_E_BUFFER);
+    }
+    free(op); free(jadv); free(joff);
+}
+TEST(ja_pipeline_latin_arial) {
+    TA_BEGIN(); IDWriteFontFace *arial = dw_sysface(f, L"Arial", DWRITE_FONT_WEIGHT_REGULAR, DWRITE_FONT_STRETCH_NORMAL, DWRITE_FONT_STYLE_NORMAL);
+    if (!arial) { TA_END(); t_skip("Arial not installed"); return; }
+    pipeline(&c_, arial, L"Justify these words please", 0, 60.0f, 1);
+    IDWriteFontFace_Release(arial); TA_END();
+}
+TEST(ja_pipeline_latin_compress_arial) {
+    TA_BEGIN(); IDWriteFontFace *arial = dw_sysface(f, L"Arial", DWRITE_FONT_WEIGHT_REGULAR, DWRITE_FONT_STRETCH_NORMAL, DWRITE_FONT_STYLE_NORMAL);
+    if (!arial) { TA_END(); t_skip("Arial not installed"); return; }
+    pipeline(&c_, arial, L"Justify these words please", 0, -4.0f, 0);
+    IDWriteFontFace_Release(arial); TA_END();
+}
+TEST(ja_pipeline_arabic_arial) {
+    TA_BEGIN(); IDWriteFontFace *arial = dw_sysface(f, L"Arial", DWRITE_FONT_WEIGHT_REGULAR, DWRITE_FONT_STRETCH_NORMAL, DWRITE_FONT_STYLE_NORMAL);
+    if (!arial) { TA_END(); t_skip("Arial not installed"); return; }
+    static const WCHAR t[] = { 0x0627, 0x0644, 0x0639, 0x0631, 0x0628, 0x064A, 0x0629, ' ', 0x0645, 0x062F, 0x064A, 0x0646, 0x0629, 0 };
+    pipeline(&c_, arial, t, 1, 80.0f, 0);
+    IDWriteFontFace_Release(arial); TA_END();
+}
+TEST(ja_pipeline_synthetic_font) {
+    TA_BEGIN(); dwx_font hf; if (FAILED(dwx_font_open_default(&hf, f)) || !hf.face) { dwx_font_close(&hf); TA_END(); t_skip("synthetic font unavailable"); return; }
+    pipeline(&c_, hf.face, L"AB CD EF", 0, 30.0f, 1);
+    dwx_font_close(&hf); TA_END();
+}
