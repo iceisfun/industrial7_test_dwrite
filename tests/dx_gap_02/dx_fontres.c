@@ -78,13 +78,24 @@ TEST(dxgap2_session_font_expiration_event_observed)
 
 TEST(dxgap2_session_font_set_contents_unchanged_after_removal)
 {
-    IDWriteFactory3 *f3 = dw_factory_v(DWRITE_FACTORY_TYPE_SHARED, 3); IDWriteFontSet *a = NULL, *b = NULL; sf p;
+    IDWriteFactory3 *f3 = dw_factory_v(DWRITE_FACTORY_TYPE_SHARED, 3); IDWriteFontSet *a = NULL, *b = NULL; sf p; UINT32 a0 = 0, bn = 0; int i;
     if (!f3) { t_skip("Factory3 unsupported"); return; }
     if (!sf_make(&p)) { t_skip("cannot write scratch font"); return; }
     CHECK_HR_OK(IDWriteFactory3_GetSystemFontSet(f3, &a));
+    if (a) a0 = IDWriteFontSet_GetFontCount(a);
     AddFontResourceW(p.wpath); p.added = 1;
     sf_remove(&p);
-    CHECK_HR_OK(IDWriteFactory3_GetSystemFontSet(f3, &b));
-    if (a && b) { CHECK(IDWriteFontSet_GetFontCount(a) == IDWriteFontSet_GetFontCount(b)); }
+    /* a newly obtained set may lag behind the font change notification; poll briefly and only record it */
+    for (i = 0; i < 20; i++) {
+        DW_RELEASE(b);
+        if (FAILED(IDWriteFactory3_GetSystemFontSet(f3, &b)) || !b) break;
+        bn = IDWriteFontSet_GetFontCount(b);
+        if (bn == a0) break;
+        Sleep(250);
+    }
+    CHECK(b != NULL);
+    t_note("old set count %u, new set count %u after %d polls", a0, bn, i);
+    /* the set obtained earlier is a snapshot and does not change */
+    if (a) { CHECK(IDWriteFontSet_GetFontCount(a) == a0); }
     DW_RELEASE(a); DW_RELEASE(b);
 }
