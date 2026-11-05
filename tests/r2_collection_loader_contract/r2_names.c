@@ -417,7 +417,7 @@ RT(order_of_fonts_within_a_family_does_not_depend_on_enumeration_order_note)
 /* ------------------------------------------------------------------------- TTC members */
 static uint8_t *make_ttc(const char *const *fam, const int *weight, const int *italic, int n, size_t *tn)
 {
-    uint8_t *blobs[8]; size_t sizes[8]; const uint8_t *cb[8]; int i; uint8_t *ttc;
+    uint8_t *blobs[8]; size_t sizes[8] = {0}; const uint8_t *cb[8]; int i; uint8_t *ttc;
     for (i = 0; i < n; i++) { blobs[i] = ttf_build_styled(fam[i], weight[i], 5, italic[i], &sizes[i]); cb[i] = blobs[i]; }
     ttc = ttf_build_ttc(cb, sizes, n, tn);
     for (i = 0; i < n; i++) free(blobs[i]);
