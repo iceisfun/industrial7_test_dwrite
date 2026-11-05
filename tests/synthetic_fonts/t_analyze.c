@@ -280,14 +280,14 @@ TEST(an_stream_call_sequence_for_a_truetype_file) {
     CHECK(s != NULL);
     if (s) {
         /* FileSize first, then the fragments IsPfm (0,0x75), IsPfb (0,7), IsOpenType (0,0x10). */
+        int base = (int)p.reads_before_analyze;       /* reads made before Analyze (file creation) are not part of the sequence */
         CHECK(s->n_getsize >= 1);
-        CHECK(s->nlogged >= 3);
-        if (s->nlogged >= 3) {
-            CHECK(s->reads[0].offset == 0 && s->reads[0].size == 0x75);
-            CHECK(s->reads[1].offset == 0 && s->reads[1].size == 7);
-            CHECK(s->reads[2].offset == 0 && s->reads[2].size == 0x10);
+        CHECKF(s->nlogged - base == 3, "reads during Analyze: %d", s->nlogged - base);
+        if (s->nlogged - base >= 3) {
+            CHECK(s->reads[base].offset == 0 && s->reads[base].size == 0x75);
+            CHECK(s->reads[base + 1].offset == 0 && s->reads[base + 1].size == 7);
+            CHECK(s->reads[base + 2].offset == 0 && s->reads[base + 2].size == 0x10);
         }
-        CHECK(s->nlogged == 3);
         CHECKF(s->outstanding == 0, "fragments still outstanding: %ld", (long)s->outstanding);
         CHECK(s->n_release == s->n_read);
         t_note("stream refcount after Analyze: %ld", (long)dwx_refs(s));
@@ -300,7 +300,7 @@ TEST(an_stream_reads_stop_early_for_pfm) {
     if (!sf_open(&p, b, 200)) { sf_close(&p); free(b); return; }
     s = sf_stream(&p);
     CHECK_HR(p.hr_analyze, S_OK);
-    if (s) { CHECK(s->nlogged == 1); CHECK(s->reads[0].size == 0x75); CHECK(s->outstanding == 0); }
+    if (s) { int base = (int)p.reads_before_analyze; CHECK(s->nlogged - base == 1); CHECK(s->reads[base].size == 0x75); CHECK(s->outstanding == 0); }
     sf_close(&p); free(b);
 }
 TEST(an_stream_reads_for_unknown_content) {
@@ -310,8 +310,9 @@ TEST(an_stream_reads_for_unknown_content) {
     CHECK_HR(p.hr_analyze, S_OK);
     if (s) {
         /* IsPfm, IsPfb, IsOpenType, then IsFon -> HasFntResource reads 0x40 bytes at 0. */
-        CHECK(s->nlogged == 4);
-        if (s->nlogged == 4) { CHECK(s->reads[3].offset == 0 && s->reads[3].size == 0x40); }
+        int base = (int)p.reads_before_analyze;
+        CHECK(s->nlogged - base == 4);
+        if (s->nlogged - base == 4) { CHECK(s->reads[base + 3].offset == 0 && s->reads[base + 3].size == 0x40); }
         CHECK(s->outstanding == 0);
     }
     sf_close(&p); free(b);

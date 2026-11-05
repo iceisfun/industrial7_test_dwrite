@@ -36,7 +36,7 @@ TEST(dir_numtables_zero_is_format_error) {
     sf_blob b = sf_default(); sf_set_numtables(&b, 0);
     SETUP(c, b, "numTables=0");
     CHECK_HR_OK(c.p.hr_analyze);          /* the sniffer never reads the directory */
-    CHECK_HR(c.p.hr_face, DWRITE_E_FILEFORMAT_);        /* no maxp -> FileFormatException from OpenTypeFace */
+    CHECK(FAILED(c.p.hr_face)); PRED("numTables=0", c.p.hr_face == DWRITE_E_FILEFORMAT_);        /* no maxp -> FileFormatException from OpenTypeFace */
     CHECK_OUT_NULL(c.p.face);
     end(&c);
 }
