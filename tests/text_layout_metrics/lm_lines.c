@@ -4,7 +4,7 @@
  * Facts used (Windows line breaker):
  *  - a line is broken when the running width of the content exceeds the layout width strictly (exact fit stays on the line);
  *    whitespace clusters never trigger a break, so trailing whitespace may overhang the layout width;
- *  - with no break opportunity inside a word WRAP keeps the word on one line (overflow), EMERGENCY_BREAK / CHARACTER split it;
+ *  - a word wider than the layout is split by character by WRAP, EMERGENCY_BREAK and CHARACTER; WHOLE_WORD and NO_WRAP keep it;
  *  - trailingWhitespaceLength counts whitespace clusters at the end of the line including the newline sequence; a trailing tab
  *    is the exception and is not counted;
  *  - newlineLength is the length of the mandatory-break sequence ending the line (CRLF = 2, every other newline char = 1);
@@ -56,7 +56,7 @@ TEST(ll_wrap_basic)
         { "three words w4", 0, L"AA BB CC", 4, -1, 3, { {3,1,0}, {3,1,0}, {2,0,0} } },
         { "three words w2", 0, L"AA BB CC", 2, -1, 3, { {3,1,0}, {3,1,0}, {2,0,0} } },
         { "single letters", 0, L"A B C D", 1, -1, 4, { {2,1,0}, {2,1,0}, {2,1,0}, {1,0,0} } },
-        { "zero width", 0, L"AAA BBB", 0, -1, 2, { {4,1,0}, {3,0,0} } },
+        { "zero width", 0, L"AAA BBB", 0, -1, 6, { {1,0,0}, {1,0,0}, {2,1,0}, {1,0,0}, {1,0,0}, {1,0,0} } },
         { "word exactly at limit then more", 0, L"AAA BBB CCC", 7, -1, 2, { {8,1,0}, {3,0,0} } },
         { "limit one more than word", 0, L"AAA BBB CCC", 3, -1, 3, { {4,1,0}, {4,1,0}, {3,0,0} } },
     };
@@ -67,8 +67,8 @@ TEST(ll_wrap_long_words)
 {
     TM_BEGIN();
     static const wcase cs[] = {
-        { "overflow keeps word", 0, L"AAAAAAAA", 3, WRAP, 1, { {8,0,0} } },
-        { "overflow then wrap", 0, L"AAAAAAAA BB", 3, WRAP, 2, { {9,1,0}, {2,0,0} } },
+        { "overflow splits word", 0, L"AAAAAAAA", 3, WRAP, 3, { {3,0,0}, {3,0,0}, {2,0,0} } },
+        { "overflow then wrap", 0, L"AAAAAAAA BB", 3, WRAP, 4, { {3,0,0}, {3,0,0}, {3,1,0}, {2,0,0} } },
         { "whole word", 0, L"AAAAAAAA", 3, WHOLE, 1, { {8,0,0} } },
         { "emergency", 0, L"AAAAAAAA", 3, EMERG, 3, { {3,0,0}, {3,0,0}, {2,0,0} } },
         { "character", 0, L"AAAAAAAA", 3, CHAR_, 3, { {3,0,0}, {3,0,0}, {2,0,0} } },
@@ -174,7 +174,7 @@ TEST(ll_break_opportunities_extended)
         { "cjk one per line", FAM_UNI, L"一丁丂", 2, -1, 3, { {1,0,0}, {1,0,0}, {1,0,0} } },
         { "cjk narrower than glyph", FAM_UNI, L"一丁", 1, -1, 2, { {1,0,0}, {1,0,0} } },
         { "kana between any", FAM_UNI, L"あいう", 4, -1, 2, { {2,0,0}, {1,0,0} } },
-        { "no break at nbsp", FAM_UNI, L"AAA " L"BBB", 4, -1, 1, { {7,0,0} } },
+        { "break at nbsp", FAM_UNI, L"AAA " L"BBB", 4, -1, 2, { {4,1,0}, {3,0,0} } },
         { "break after soft hyphen", FAM_UNI, L"AAA­" L"BBB", 4, -1, 2, { {4,0,0}, {3,0,0} } },
         { "no break in no wrap cjk", FAM_UNI, L"一丁丂", 2, NOWRAP, 1, { {3,0,0} } },
         { "cjk with emergency", FAM_UNI, L"一丁丂七", 4, EMERG, 2, { {2,0,0}, {2,0,0} } },
@@ -204,6 +204,7 @@ TEST(ll_not_trimmed_without_trimming)
 {
     TM_BEGIN(); TM_L(l, L"AAAAAAAA", 3 * CW, 1000);
     tm_lines ln;
+    CHECK_HR_OK(IDWriteTextLayout_SetWordWrapping(l, DWRITE_WORD_WRAPPING_NO_WRAP));
     if (tm_get_lines(l, &ln)) { EXPECT_EQ(ln.n, 1); CHECK(!ln.v[0].isTrimmed); }
     DW_RELEASE(l); TM_END();
 }
@@ -236,6 +237,7 @@ TEST(ll_trimming_none_granularity)
 {
     TM_BEGIN(); TM_L(l, L"AAAAAAAA", 3 * CW, 1000);
     tm_lines ln;
+    CHECK_HR_OK(IDWriteTextLayout_SetWordWrapping(l, DWRITE_WORD_WRAPPING_NO_WRAP));
     set_trim(l, DWRITE_TRIMMING_GRANULARITY_NONE);
     if (tm_get_lines(l, &ln)) { EXPECT_EQ(ln.n, 1); CHECK(!ln.v[0].isTrimmed); }
     DW_RELEASE(l); TM_END();
@@ -567,7 +569,7 @@ TEST(ll_trim_height_sweep)
     int k; UINT32 prev_vis = 0;
     for (k = 0; k <= 8; k++) {
         float h = k * 0.5f * LH; tm_lines ln; UINT32 i, vis = 0;
-        IDWriteTextLayout *l = tm_layout_(&X, FAM_TEST, L"A\nB\nC\nD", 4, SZ, 1000, h);
+        IDWriteTextLayout *l = tm_layout_(&X, FAM_TEST, L"A\nB\nC\nD", 7, SZ, 1000, h);
         if (!l) { CHECKF(0, "layout"); continue; }
         set_trim(l, DWRITE_TRIMMING_GRANULARITY_CHARACTER);
         if (tm_get_lines(l, &ln)) {
