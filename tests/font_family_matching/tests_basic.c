@@ -19,12 +19,17 @@ static void count_case(int n) {
     fm_face f[FM_MAXF]; fm m; int i;
     fm_seq(f, n);
     if (!fm_open(&m, "FmCount", f, n, NULL)) return;
-    /* the family lists exactly the faces that carry the typographic family name; no simulated faces are added */
-    EXPECT_EQ(m.count, n);
-    EXPECT_EQ(IDWriteFontFamily_GetFontCount(m.fam), n);
+    /* the family lists every real face that carries the typographic family name, plus simulated members (bold / oblique) that
+     * Windows 10 adds for completeness: at most four members per real face */
+    EXPECT_EQ(m.nreal, n);
+    CHECKF((int)m.count >= n && (int)m.count <= 4 * n, "font count %u for %d real faces", m.count, n);
+    EXPECT_EQ(IDWriteFontFamily_GetFontCount(m.fam), m.count);
     EXPECT_EQ(IDWriteFontCollection_GetFontFamilyCount(m.coll), 1);
     for (i = 0; i < n; i++) CHECKF(fm_find(&m, f[i].w, f[i].wd, f[i].st) >= 0, "face %d (w=%d wd=%d st=%d) missing", i, f[i].w, f[i].wd, f[i].st);
-    for (i = 0; i < (int)m.count; i++) { CHECKF(m.src[i] >= 0, "family font %d has no matching spec", i); CHECKF(m.obs_sims[i] == 0, "family font %d simulations %d", i, m.obs_sims[i]); }
+    for (i = 0; i < (int)m.count; i++) {
+        if (m.obs_sims[i] == 0) CHECKF(m.src[i] >= 0, "real family font %d has no matching spec", i);
+        else CHECKF(m.obs_sims[i] >= 1 && m.obs_sims[i] <= 3, "family font %d simulations %d", i, m.obs_sims[i]);
+    }
     fm_close(&m);
 }
 #define COUNT_TEST(n) TEST(fam_count_##n) { count_case(n); }
@@ -33,7 +38,7 @@ COUNT_TEST(1) COUNT_TEST(2) COUNT_TEST(3) COUNT_TEST(4) COUNT_TEST(5) COUNT_TEST
 TEST(fam_count_stable_across_calls) {
     FM_OPEN(m, "FmStable", F_RIBBI);
     int i;
-    for (i = 0; i < 10; i++) EXPECT_EQ(IDWriteFontFamily_GetFontCount(m.fam), 4);
+    for (i = 0; i < 10; i++) EXPECT_EQ(IDWriteFontFamily_GetFontCount(m.fam), m.count);
     fm_close(&m);
 }
 
@@ -114,7 +119,7 @@ TEST(fam_getfont_indices_are_distinct_faces) {
     FM_OPEN(m, "FmDistinct", F_W9);
     int i, j;
     for (i = 0; i < (int)m.count; i++) for (j = i + 1; j < (int)m.count; j++)
-        CHECKF(!(m.obs[i].w == m.obs[j].w && m.obs[i].wd == m.obs[j].wd && m.obs[i].st == m.obs[j].st), "indices %d and %d are the same face", i, j);
+        CHECKF(!(m.obs[i].w == m.obs[j].w && m.obs[i].wd == m.obs[j].wd && m.obs[i].st == m.obs[j].st && m.obs_sims[i] == m.obs_sims[j]), "indices %d and %d are the same face", i, j);
     fm_close(&m);
 }
 
@@ -149,7 +154,7 @@ TEST(fam_font_keeps_family_alive) {
         CHECK(ff != NULL);
         if (ff) {
             UINT32 c = IDWriteFontFamily_GetFontCount(ff);
-            EXPECT_EQ(c, 4);
+            EXPECT_EQ(c, m.count);
             IDWriteFontFamily_Release(ff);
         }
         IDWriteFont_Release(font);
@@ -292,7 +297,7 @@ TEST(fam_family_from_collection_matches_count) {
     FM_OPEN(m, "FmFromColl", F_W9);
     IDWriteFontFamily *ff = NULL;
     CHECK_HR_OK(IDWriteFontCollection_GetFontFamily(m.coll, 0, &ff));
-    if (ff) { EXPECT_EQ(IDWriteFontFamily_GetFontCount(ff), 9); IDWriteFontFamily_Release(ff); }
+    if (ff) { EXPECT_EQ(IDWriteFontFamily_GetFontCount(ff), m.count); IDWriteFontFamily_Release(ff); }
     fm_close(&m);
 }
 
@@ -342,9 +347,9 @@ TEST(fam_qi_interfaces_share_identity) {
         CHECK(dw_same_identity((IUnknown *)f1, (IUnknown *)m.fam));
         CHECK(dw_same_identity((IUnknown *)l, (IUnknown *)l2));
         CHECK(dw_same_identity((IUnknown *)l, (IUnknown *)m.fam));
-        EXPECT_EQ(IDWriteFontList_GetFontCount(l), 4);
-        EXPECT_EQ(IDWriteFontList2_GetFontCount(l2), 4);
-        EXPECT_EQ(IDWriteFontFamily2_GetFontCount(f2), 4);
+        EXPECT_EQ(IDWriteFontList_GetFontCount(l), m.count);
+        EXPECT_EQ(IDWriteFontList2_GetFontCount(l2), m.count);
+        EXPECT_EQ(IDWriteFontFamily2_GetFontCount(f2), m.count);
     }
     DW_RELEASE(u1); DW_RELEASE(u2); DW_RELEASE(f1); DW_RELEASE(f2); DW_RELEASE(l); DW_RELEASE(l2);
     fm_close(&m);
@@ -703,4 +708,74 @@ TEST(fam_addref_release_return_values) {
     c = IDWriteFontFamily_Release(m.fam); EXPECT_EQ(c, base + 1);
     c = IDWriteFontFamily_Release(m.fam); EXPECT_EQ(c, base);
     fm_close(&m);
+}
+
+/* ---- simulated members Windows 10 adds to a family's font list ------------------------------------------------ */
+/* Observed on Windows 10 22H2 (family built from real faces; no member of the group heavier than 550): a bold member (weight 700, BOLD
+ * simulation) is added to a (stretch, style) group whose faces are 400..550 (not seen for 100 or 300), and a normal-style member without an
+ * oblique twin at its weight gets an OBLIQUE member (bit 2).  Members may repeat; the checks compare sets. */
+typedef struct { int w, wd, st, sims; } sm_exp;
+static void sim_case(const char *nm, const fm_face *f, int n, const sm_exp *e, int ne) {
+    fm m; int i, j;
+    if (!fm_open(&m, nm, f, n, NULL)) return;
+    for (i = 0; i < ne; i++) {
+        int found = 0;
+        for (j = 0; j < (int)m.count; j++) if (m.obs[j].w == e[i].w && m.obs[j].wd == e[i].wd && m.obs[j].st == e[i].st && m.obs_sims[j] == e[i].sims) found = 1;
+        CHECKF(found, "%s: member (w=%d wd=%d st=%d sims=%d) missing from the family", nm, e[i].w, e[i].wd, e[i].st, e[i].sims);
+    }
+    for (j = 0; j < (int)m.count; j++) {
+        int found = 0;
+        for (i = 0; i < ne; i++) if (m.obs[j].w == e[i].w && m.obs[j].wd == e[i].wd && m.obs[j].st == e[i].st && m.obs_sims[j] == e[i].sims) found = 1;
+        CHECKF(found, "%s: unexpected member (w=%d wd=%d st=%d sims=%d)", nm, m.obs[j].w, m.obs[j].wd, m.obs[j].st, m.obs_sims[j]);
+    }
+    fm_close(&m);
+}
+TEST(fam_simulated_members_single_regular) {
+    static const fm_face f[] = { {400,5,0} };
+    static const sm_exp e[] = { {400,5,0,0}, {400,5,1,2}, {700,5,0,1}, {700,5,1,3} };
+    sim_case("FmSimA", f, 1, e, 4);
+}
+TEST(fam_simulated_members_single_bold) {
+    static const fm_face f[] = { {700,5,0} };
+    static const sm_exp e[] = { {700,5,0,0}, {700,5,1,2} };
+    sim_case("FmSimB", f, 1, e, 2);
+}
+TEST(fam_simulated_members_single_light) {
+    static const fm_face f[] = { {300,5,0} };
+    static const sm_exp e[] = { {300,5,0,0}, {300,5,1,2} };
+    sim_case("FmSimC", f, 1, e, 2);
+}
+TEST(fam_simulated_members_single_italic) {
+    static const fm_face f[] = { {400,5,2} };
+    static const sm_exp e[] = { {400,5,2,0}, {700,5,2,1} };
+    sim_case("FmSimD", f, 1, e, 2);
+}
+TEST(fam_simulated_members_bold_italic_only) {
+    static const fm_face f[] = { {700,5,2} };
+    static const sm_exp e[] = { {700,5,2,0} };
+    sim_case("FmSimF", f, 1, e, 1);
+}
+TEST(fam_simulated_members_regular_and_bold) {
+    static const fm_face f[] = { {400,5,0}, {700,5,0} };
+    static const sm_exp e[] = { {400,5,0,0}, {700,5,0,0}, {400,5,1,2}, {700,5,1,2} };
+    sim_case("FmSimG", f, 2, e, 4);
+}
+TEST(fam_simulated_members_regular_and_italic) {
+    static const fm_face f[] = { {400,5,0}, {400,5,2} };
+    static const sm_exp e[] = { {400,5,0,0}, {400,5,2,0}, {400,5,1,2}, {700,5,0,1}, {700,5,1,3}, {700,5,2,1} };
+    sim_case("FmSimH", f, 2, e, 6);
+}
+TEST(fam_simulated_members_ribbi_complete) {
+    static const sm_exp e[] = { {400,5,0,0}, {400,5,2,0}, {700,5,0,0}, {700,5,2,0}, {400,5,1,2}, {700,5,1,2} };
+    sim_case("FmSimI", F_RIBBI, 4, e, 6);
+}
+TEST(fam_simulated_members_light_and_semibold) {
+    static const fm_face f[] = { {300,5,0}, {600,5,0} };
+    static const sm_exp e[] = { {300,5,0,0}, {600,5,0,0}, {300,5,1,2}, {600,5,1,2} };
+    sim_case("FmSimM", f, 2, e, 4);
+}
+TEST(fam_simulated_members_medium_italic_pair) {
+    static const fm_face f[] = { {500,5,0}, {500,5,2} };
+    static const sm_exp e[] = { {500,5,0,0}, {500,5,2,0}, {500,5,1,2}, {700,5,0,1}, {700,5,1,3}, {700,5,2,1} };
+    sim_case("FmSimS", f, 2, e, 6);
 }

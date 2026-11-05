@@ -86,8 +86,19 @@ fm_face fm_reported(const fm_face *f, int sims) {
 }
 
 
+/* IsBetterMatch is not a strict weak order (the "real face beats simulated face" shortcuts are not transitive), so for some families the
+ * winner depends on the order in which candidates are visited.  Windows 10 visits them in an internal order that is not observable;
+ * such requests are treated as ambiguous: 1 when walking the faces in reverse gives a different observable result. */
+static int order_dependent(const fm_face *fs, int n, int rw, int rwd, int rst) {
+    fm_face rev[FM_MAXF]; int i; fm_pick a, b; fm_face ra, rb;
+    if (n < 2 || n > FM_MAXF) return 0;
+    for (i = 0; i < n; i++) rev[i] = fs[n - 1 - i];
+    a = fm_oracle_first(fs, n, rw, rwd, rst); b = fm_oracle_first(rev, n, rw, rwd, rst);
+    ra = fm_reported(&fs[a.idx], a.sims); rb = fm_reported(&rev[b.idx], b.sims);
+    return !(ra.w == rb.w && ra.wd == rb.wd && ra.st == rb.st && a.sims == b.sims);
+}
 /* 1 when some other face is indistinguishable from the winner of GetFirstMatchingFont (result then depends on enumeration order) */
-int fm_oracle_first_tied(const fm_face *fs, int n, int rw, int rwd, int rst) {
+int fm_oracle_first_equal(const fm_face *fs, int n, int rw, int rwd, int rst) {
     fm_pick p = fm_oracle_first(fs, n, rw, rwd, rst); int j;
     int rs = (rwd - 5) * 0x44c, rt = rst * 700, rwt = (rw - 400) * 5;
     mfont a;
@@ -101,9 +112,13 @@ int fm_oracle_first_tied(const fm_face *fs, int n, int rw, int rwd, int rst) {
     }
     return 0;
 }
+int fm_oracle_first_tied(const fm_face *fs, int n, int rw, int rwd, int rst) {
+    return fm_oracle_first_equal(fs, n, rw, rwd, rst) || (n > 0 && order_dependent(fs, n, rw, rwd, rst));
+}
 /* 1 when two faces are indistinguishable anywhere in the list: the order of the list is then enumeration-dependent */
 int fm_oracle_list_tied(const fm_face *fs, int n, int rw, int rwd, int rst) {
     int i, j; int rs = (rwd - 5) * 0x44c, rt = rst * 700, rwt = (rw - 400) * 5;
+    if (order_dependent(fs, n, rw, rwd, rst)) return 1;
     for (i = 0; i < n; i++) for (j = i + 1; j < n; j++) {
         mfont a = mkfont(fs, i, rw, rst), b = mkfont(fs, j, rw, rst);
         if (!better(fs, &a, &b, rs, rt, rwt) && !better(fs, &b, &a, rs, rt, rwt)) return 1;

@@ -149,7 +149,7 @@ TEST(f12_face_reference_basics) {
         CHECK(r != NULL);
         if (r) {
             EXPECT_EQ(IDWriteFontFaceReference_GetFontFaceIndex(r), 0);   /* single-face files */
-            EXPECT_EQ(IDWriteFontFaceReference_GetSimulations(r), DWRITE_FONT_SIMULATIONS_NONE);
+            EXPECT_EQ(IDWriteFontFaceReference_GetSimulations(r), m.obs_sims[i]);   /* simulated family members carry their simulations */
             IDWriteFontFaceReference_Release(r);
         }
     }
@@ -574,9 +574,9 @@ TEST(f12_family2_matching_list_holds_family) {
 TEST(f12_family2_same_methods_as_family1_and_family) {
     FM_OPEN(m, "FmF2m", F_RIBBI);
     NEED_F2(m, f2);
-    EXPECT_EQ(IDWriteFontFamily2_GetFontCount(f2), 4);
+    EXPECT_EQ(IDWriteFontFamily2_GetFontCount(f2), m.count);
     IDWriteFont3 *f3 = NULL; IDWriteFont *f = NULL;
-    CHECK_HR_OK(IDWriteFontFamily1_GetFont((IDWriteFontFamily1 *)f2, 3, &f3));
+    CHECK_HR_OK(IDWriteFontFamily1_GetFont((IDWriteFontFamily1 *)f2, fm_find(&m, 700, 5, 2), &f3));
     CHECK_HR_OK(IDWriteFontFamily2_GetFirstMatchingFont(f2, 700, 5, 2, &f));
     if (f3 && f) CHECK(IDWriteFont3_Equals(f3, f));
     CHECK(IDWriteFontFamily2_GetFontLocality(f2, 0) == DWRITE_LOCALITY_LOCAL);
@@ -593,7 +593,7 @@ TEST(f12_collection1_getfontfamily_family1) {
     IDWriteFontFamily2 *f2 = NULL; IDWriteFontFamily1 *f1 = NULL;
     CHECK_HR_OK(IDWriteFontCollection1_GetFontFamily(c1, 0, &f2));
     if (f2) {
-        EXPECT_EQ(IDWriteFontFamily2_GetFontCount(f2), 4);
+        EXPECT_EQ(IDWriteFontFamily2_GetFontCount(f2), m.count);
         CHECK(IDWriteFontFamily2_GetFontLocality(f2, 0) == DWRITE_LOCALITY_LOCAL);
         DW_RELEASE(f2);
     }

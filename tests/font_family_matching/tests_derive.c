@@ -18,10 +18,11 @@ static int one_font(const char *nm, fm_face *out, int *sims) {
     static const fm_face f = { 400, 5, 0 };
     fm m;
     if (!fm_open(&m, nm, &f, 1, tw_attrs)) return 0;
-    EXPECT_EQ(m.count, 1);
-    if (m.count >= 1) { *out = m.obs[0]; *sims = m.obs_sims[0]; }
+    /* the single real face plus the bold / oblique members Windows 10 simulates for it */
+    EXPECT_EQ(m.nreal, 1);
+    if (m.nreal == 1) { int k; for (k = 0; k < (int)m.count; k++) if (m.obs_sims[k] == 0) { *out = m.obs[k]; *sims = 0; } }
     fm_close(&m);
-    return m.count >= 1;
+    return m.nreal == 1;
 }
 static void defaults(void) { g_wc = 400; g_wd = 5; g_ver = 4; g_fs = 0x40; g_mac = 0; g_omit = 0; }
 
@@ -129,22 +130,22 @@ static void tw_two(ttf_spec *s, int i) {
 TEST(dv_derived_weights_are_used_for_matching) {
     fm_face f[2] = { {400,5,0}, {401,5,0} }; fm m;
     if (!fm_open(&m, "FmDerM", f, 2, tw_two)) return;
-    if (m.count == 2) {
+    if (m.nreal == 2) {
         fm_expect_first(&m, 1, 5, 0, fm_find(&m, 1, 5, 0), 0);
         fm_expect_first(&m, 500, 5, 0, fm_find(&m, 500, 5, 0), 0);
         fm_expect_first(&m, 400, 5, 0, fm_find(&m, 500, 5, 0), 0);    /* 500 is closer to 400 than 1 is */
         fm_expect_first(&m, 100, 5, 0, fm_find(&m, 1, 5, 0), 0);
-    } else CHECKF(0, "family has %u fonts", m.count);
+    } else CHECKF(0, "family has %d real fonts", m.nreal);
     fm_close(&m);
 }
 static void tw_wide(ttf_spec *s, int i) { s->width = i == 0 ? 0 : 10; }
 TEST(dv_derived_stretch_is_used_for_matching) {
     fm_face f[2] = { {400,5,0}, {401,5,0} }; fm m;
     if (!fm_open(&m, "FmDerS", f, 2, tw_wide)) return;
-    if (m.count == 2) {
+    if (m.nreal == 2) {
         /* width class 0 -> normal (5), 10 -> ultra-expanded (9) */
         fm_expect_first(&m, 400, 5, 0, fm_find(&m, 400, 5, 0), 0);
         fm_expect_first(&m, 400, 9, 0, fm_find(&m, 401, 9, 0), 0);
-    } else CHECKF(0, "family has %u fonts", m.count);
+    } else CHECKF(0, "family has %d real fonts", m.nreal);
     fm_close(&m);
 }

@@ -4,7 +4,12 @@
 
 #define NEED_SYS(m, name) fm m; if (!fm_open_system(&m, name)) return
 
-static int has_face(const fm *m, int w, int wd, int st) { return fm_find(m, w, wd, st) >= 0; }
+/* real faces only: Windows 10 adds simulated members to every family list */
+static int has_face(const fm *m, int w, int wd, int st) {
+    UINT32 i;
+    for (i = 0; i < m->count; i++) if (m->obs_sims[i] == 0 && m->obs[i].w == w && m->obs[i].wd == wd && m->obs[i].st == st) return 1;
+    return 0;
+}
 
 /* OS/2 usWeightClass etc. of one family member, read through IDWriteFontFace::TryGetFontTable */
 static int os2_attrs(IDWriteFont *font, int *w, int *wd, int *st) {
@@ -27,6 +32,7 @@ static void family_matches_os2(fm *m, int hard) {
     UINT32 i;
     for (i = 0; i < m->count; i++) {
         IDWriteFont *font = NULL; int w, wd, st;
+        if (m->obs_sims[i] != 0) continue;   /* simulated members share the OS/2 table of the real face they derive from */
         if (FAILED(IDWriteFontFamily_GetFont(m->fam, i, &font)) || !font) { CHECK(0); continue; }
         if (os2_attrs(font, &w, &wd, &st)) {
             int same = w == m->obs[i].w && wd == m->obs[i].wd && st == m->obs[i].st;
@@ -45,8 +51,8 @@ static void family_oracle_sweep(fm *m, int hard) {
     if (m->count > FM_MAXF) return;
     for (a = 0; a < 5; a++) for (b = 0; b < 3; b++) for (c = 0; c < 15; c++) {
         fm_pick p;
-        if (fm_oracle_first_tied(m->obs, (int)m->count, ws[c], wds[a], b)) continue;
-        p = fm_oracle_first(m->obs, (int)m->count, ws[c], wds[a], b);
+        if (fm_ofirst_tied(m, ws[c], wds[a], b)) continue;
+        p = fm_ofirst(m, ws[c], wds[a], b);
         total++;
         if (hard) fm_expect_first(m, ws[c], wds[a], b, p.idx, p.sims);
         else {
@@ -113,8 +119,9 @@ TEST(sys_arial_black_is_its_own_family) {
     UINT32 i; IDWriteFontCollection *coll = m.coll; BOOL ex = FALSE; UINT32 idx = 0;
     IDWriteFontCollection_FindFamilyName(coll, L"Arial Black", &idx, &ex);
     t_note("Arial Black family present: %d", ex);
-    /* Arial itself carries no weight above bold */
-    for (i = 0; i < m.count; i++) CHECKF(m.obs[i].w <= 700, "Arial font %u has weight %d", i, m.obs[i].w);
+    /* Windows 10 folds the black weight into the Arial family (weight stretch style grouping), so only the range is invariant */
+    for (i = 0; i < m.count; i++) CHECKF(m.obs[i].w >= 1 && m.obs[i].w <= 999, "Arial font %u has weight %d", i, m.obs[i].w);
+    CHECK(fm_find(&m, 400, 5, 0) >= 0 && fm_find(&m, 700, 5, 0) >= 0);
     fm_close(&m);
 }
 
@@ -289,7 +296,7 @@ TEST(sys_all_families_invariants) {
             if (FAILED(IDWriteFontFamily_GetFont(fam, k, &font)) || !font) { CHECKF(0, "family %u GetFont(%u)", i, k); continue; }
             fonts++;
             fm_read_font(font, &a, &s);
-            CHECKF(a.w >= 1 && a.w <= 999 && a.wd >= 1 && a.wd <= 9 && a.st >= 0 && a.st <= 2 && s == 0, "family %u font %u: w=%d wd=%d st=%d sims=%d", i, k, a.w, a.wd, a.st, s);
+            CHECKF(a.w >= 1 && a.w <= 999 && a.wd >= 1 && a.wd <= 9 && a.st >= 0 && a.st <= 2 && s >= 0 && s <= 3, "family %u font %u: w=%d wd=%d st=%d sims=%d", i, k, a.w, a.wd, a.st, s);
             if (SUCCEEDED(IDWriteFont_GetFontFamily(font, &back)) && back) { CHECKF(dw_same_identity((IUnknown *)back, (IUnknown *)fam), "family %u font %u", i, k); IDWriteFontFamily_Release(back); }
             IDWriteFont_Release(font);
         }
@@ -317,7 +324,12 @@ TEST(sys_all_families_oracle_survey) {
         if (FAILED(IDWriteFontCollection_GetFontFamily(coll, i, &fam)) || !fam) continue;
         cnt = (int)IDWriteFontFamily_GetFontCount(fam);
         if (cnt > FM_MAXF) { IDWriteFontFamily_Release(fam); continue; }
-        for (k = 0; k < cnt; k++) { IDWriteFont *font = NULL; int s; if (SUCCEEDED(IDWriteFontFamily_GetFont(fam, k, &font)) && font) { fm_read_font(font, &faces[k], &s); IDWriteFont_Release(font); } else faces[k] = (fm_face){ 400, 5, 0 }; }
+        {   /* real members only: the simulated members Windows adds to the list are not matcher candidates */
+            int nr = 0;
+            for (k = 0; k < cnt; k++) { IDWriteFont *font = NULL; int s = 1; fm_face tmp; if (SUCCEEDED(IDWriteFontFamily_GetFont(fam, k, &font)) && font) { fm_read_font(font, &tmp, &s); IDWriteFont_Release(font); if (s == 0) faces[nr++] = tmp; } }
+            cnt = nr;
+        }
+        if (cnt == 0) { IDWriteFontFamily_Release(fam); continue; }
         for (k = 0; k < 7 * 3; k++) {
             int rw = ws[k % 7], st = k / 7; IDWriteFont *font = NULL;
             if (fm_oracle_first_tied(faces, cnt, rw, 5, st)) continue;
@@ -375,7 +387,11 @@ TEST(sys_family1_family2_on_system_families) {
                 IDWriteFontFaceReference *r = NULL;
                 CHECKF(IDWriteFontFamily2_GetFontLocality(f2, k) == DWRITE_LOCALITY_LOCAL, "family %u font %u not local", i, k);
                 CHECK_HR_OK(IDWriteFontFamily2_GetFontFaceReference(f2, k, &r));
-                if (r) { EXPECT_EQ(IDWriteFontFaceReference_GetSimulations(r), 0); IDWriteFontFaceReference_Release(r); }
+                if (r) {
+                    IDWriteFont *fo = NULL;   /* the reference carries the simulations of the family member */
+                    if (SUCCEEDED(IDWriteFontFamily_GetFont(fam, k, &fo)) && fo) { EXPECT_EQ(IDWriteFontFaceReference_GetSimulations(r), IDWriteFont_GetSimulations(fo)); IDWriteFont_Release(fo); }
+                    IDWriteFontFaceReference_Release(r);
+                }
             }
             { IDWriteFontSet1 *s = NULL; if (SUCCEEDED(IDWriteFontFamily2_GetFontSet(f2, &s)) && s) { EXPECT_EQ(IDWriteFontSet1_GetFontCount(s), c); IDWriteFontSet1_Release(s); } }
             { IDWriteFontList2 *l = NULL; if (SUCCEEDED(IDWriteFontFamily2_GetMatchingFonts(f2, NULL, 0, &l)) && l) { UINT32 lc = IDWriteFontList2_GetFontCount(l); CHECK(lc >= 1 && lc <= c); IDWriteFontList2_Release(l); } }

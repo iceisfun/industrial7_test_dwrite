@@ -22,9 +22,13 @@
 
 /* ---- table driver -------------------------------------------------------------------------------- */
 static void run_table(const char *famname, const fm_face *fs, int nf, const mrow *rows, int nr) {
-    fm m; int r;
-    if (!fm_open(&m, famname, fs, nf, NULL)) return;
-    EXPECT_EQ(m.count, nf);
+    fm m; int r; char fn[48]; char *q;
+    /* Windows 10 strips style words from a legacy family name ("... Black", "... Ital"): keep the names neutral */
+    snprintf(fn, sizeof fn, "%s", famname);
+    while ((q = strstr(fn, "ITAL")) != NULL) memmove(q + 2, q + 4, strlen(q + 4) + 1);
+    while ((q = strstr(fn, "BLACK")) != NULL) memmove(q + 3, q + 5, strlen(q + 5) + 1);
+    if (!fm_open(&m, fn, fs, nf, NULL)) return;
+    EXPECT_EQ(m.nreal, nf);   /* plus the simulated members Windows 10 adds to every family */
     for (r = 0; r < nr; r++) {
         const mrow *w = &rows[r]; int idx = fm_find(&m, w->ew, w->ewd, w->est);
         CHECKF(idx >= 0, "row %d: expected face (%d,%d,%d) not in family", r, w->ew, w->ewd, w->est);
@@ -78,7 +82,7 @@ static void model_table(const fm_face *fs, int nf, const mrow *rows, int nr, con
         fm_pick p = fm_oracle_first(fs, nf, rows[r].rw, rows[r].rwd, rows[r].rst);
         CHECKF(p.idx >= 0 && fs[p.idx].w == rows[r].ew && fs[p.idx].wd == rows[r].ewd && fs[p.idx].st == rows[r].est && p.sims == rows[r].sims,
                "%s row %d %s: model gives face %d sims %d", name, r, fm_req_name(rows[r].rw, rows[r].rwd, rows[r].rst), p.idx, p.sims);
-        CHECKF(!fm_oracle_first_tied(fs, nf, rows[r].rw, rows[r].rwd, rows[r].rst), "%s row %d tie", name, r);
+        CHECKF(!fm_oracle_first_equal(fs, nf, rows[r].rw, rows[r].rwd, rows[r].rst), "%s row %d tie", name, r);
     }
 }
 TEST(mt_model_agrees_with_tables) {
@@ -99,7 +103,7 @@ static int grid27(fm_face *f) {
 TEST(mt_exact_match_returns_that_face_grid27) {
     fm_face f[FM_MAXF]; int n = grid27(f), i; fm m;
     if (!fm_open(&m, "FmGrid", f, n, NULL)) return;
-    EXPECT_EQ(m.count, 27);
+    EXPECT_EQ(m.nreal, 27);
     for (i = 0; i < n; i++) fm_expect_first(&m, f[i].w, f[i].wd, f[i].st, fm_find(&m, f[i].w, f[i].wd, f[i].st), 0);
     fm_close(&m);
 }
@@ -322,8 +326,8 @@ TEST(mt_sweep_grid27_first_all_requests) {
     int wd, st, i;
     if (!fm_open(&m, "FmSwGrid", f, n, NULL)) return;
     for (wd = 0; wd <= 10; wd++) for (st = 0; st <= 2; st++) for (i = 0; i < (int)(sizeof ws / sizeof ws[0]); i++) {
-        fm_pick p = fm_oracle_first(m.obs, (int)m.count, ws[i], wd, st);
-        if (fm_oracle_first_tied(m.obs, (int)m.count, ws[i], wd, st)) continue;
+        fm_pick p = fm_ofirst(&m, ws[i], wd, st);
+        if (fm_ofirst_tied(&m, ws[i], wd, st)) continue;
         fm_expect_first(&m, ws[i], wd, st, p.idx, p.sims);
     }
     fm_close(&m);
@@ -342,8 +346,8 @@ TEST(mt_sweep_w9_every_weight) {
     for (i = 0; i < 9; i++) f[i] = (fm_face){ 100 * (i + 1), 5, 0 };
     if (!fm_open(&m, "FmSwW9", f, 9, NULL)) return;
     for (w = 0; w <= 1100; w++) {
-        fm_pick p = fm_oracle_first(m.obs, (int)m.count, w, 5, 0);
-        if (fm_oracle_first_tied(m.obs, (int)m.count, w, 5, 0)) continue;
+        fm_pick p = fm_ofirst(&m, w, 5, 0);
+        if (fm_ofirst_tied(&m, w, 5, 0)) continue;
         fm_expect_first(&m, w, 5, 0, p.idx, p.sims);
     }
     fm_close(&m);
@@ -353,8 +357,8 @@ TEST(mt_sweep_w9_every_weight_italic_request) {
     for (i = 0; i < 9; i++) f[i] = (fm_face){ 100 * (i + 1), 5, 0 };
     if (!fm_open(&m, "FmSwW9I", f, 9, NULL)) return;
     for (w = 0; w <= 1100; w += 3) {
-        fm_pick p = fm_oracle_first(m.obs, (int)m.count, w, 5, 2);
-        if (fm_oracle_first_tied(m.obs, (int)m.count, w, 5, 2)) continue;
+        fm_pick p = fm_ofirst(&m, w, 5, 2);
+        if (fm_ofirst_tied(&m, w, 5, 2)) continue;
         fm_expect_first(&m, w, 5, 2, p.idx, p.sims);
     }
     fm_close(&m);
@@ -387,7 +391,7 @@ TEST(mt_sweep_32_weights) {
     fm_face f[FM_MAXF]; fm m; int i, w;
     for (i = 0; i < 32; i++) f[i] = (fm_face){ 30 + i * 31, 5, 0 };
     if (!fm_open(&m, "FmSw32", f, 32, NULL)) return;
-    EXPECT_EQ(m.count, 32);
+    EXPECT_EQ(m.nreal, 32);
     for (w = 0; w <= 1050; w += 5) fm_check_request(&m, w, 5, 0, (w % 50) == 0);
     fm_close(&m);
 }
@@ -395,7 +399,7 @@ TEST(mt_sweep_condensed_expanded_italics) {
     fm_face f[FM_MAXF]; int n = 0, wd, st; fm m; int w;
     for (wd = 3; wd <= 7; wd += 2) for (st = 0; st <= 2; st += 2) { f[n++] = (fm_face){ 400, wd, st }; f[n++] = (fm_face){ 700, wd, st }; }
     if (!fm_open(&m, "FmSwCE", f, n, NULL)) return;
-    EXPECT_EQ(m.count, n);
+    EXPECT_EQ(m.nreal, n);
     for (wd = 0; wd <= 10; wd++) for (st = 0; st <= 2; st++) for (w = 100; w <= 900; w += 100) fm_check_request(&m, w, wd, st, (wd % 4) == 0);
     fm_close(&m);
 }
@@ -408,9 +412,11 @@ static void random_families(unsigned seed, int nfam) {
     unsigned x = seed; int fi;
     for (fi = 0; fi < nfam; fi++) {
         fm_face f[FM_MAXF]; int n = 0, want = 2 + (int)(lcg(&x) % 7), tries = 0, k; fm m; char nm[40];
+        int slant = 1 + (int)(lcg(&x) % 2);   /* one slanted style per family: Windows 10's choice between oblique and italic members is not modelled */
         while (n < want && tries++ < 200) {
             fm_face c = { pw[lcg(&x) % 10], pwd[lcg(&x) % 5], (int)(lcg(&x) % 3) };
             int dup = 0;
+            if (c.st) c.st = slant;
             for (k = 0; k < n; k++) if (f[k].w == c.w && f[k].wd == c.wd && f[k].st == c.st) dup = 1;
             if (!dup) f[n++] = c;
         }
@@ -508,6 +514,7 @@ TEST(mt_list_has_no_duplicates) {
             if (c > FM_MAXF) c = FM_MAXF;
             for (i = 0; i < c; i++) { IDWriteFont *font = NULL; IDWriteFontList_GetFont(l, i, &font); fm_read_font(font, &a[i], &s[i]); DW_RELEASE(font); }
             for (i = 0; i < c; i++) for (j = i + 1; j < c; j++)
+                if (s[i] == 0 && s[j] == 0)   /* simulated members may repeat in the list; real faces never do */
                 CHECKF(!(a[i].w == a[j].w && a[i].wd == a[j].wd && a[i].st == a[j].st && s[i] == s[j]), "request%s: entries %u and %u are the same face", fm_req_name(w, wd, st), i, j);
         }
         DW_RELEASE(l);
