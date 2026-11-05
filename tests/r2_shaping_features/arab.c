@@ -107,31 +107,32 @@ TEST(r2_shaping_features_arab_zwj_forces_joining_before)
 }
 TEST(r2_shaping_features_arab_ltr_flag_keeps_logical_order)
 {   /* the same text shaped as a left-to-right run: forms identical, glyph order = logical order */
-    ARAB(); CHECK_HR_OK(sh_run(&x, &s, AB AB AB, FALSE, NULL, 0)); CHECK_GIDS(&s, A_BEH_INIT, A_BEH_MEDI, A_BEH_FINA); CHECK_CMAP(&s, 0, 1, 2); fx_close(&x);
+    ARAB(); CHECK_HR_OK(sh_run(&x, &s, AB AB AB, FALSE, NULL, 0)); /* with the LTR flag the joining context runs against the logical order: the first character takes the final form */
+    CHECK_GIDS(&s, A_BEH_FINA, A_BEH_MEDI, A_BEH_INIT); CHECK_CMAP(&s, 0, 1, 2); fx_close(&x);
 }
 TEST(r2_shaping_features_arab_ltr_flag_lam_alef)
 {
-    ARAB(); CHECK_HR_OK(sh_run(&x, &s, AB AL AA, FALSE, NULL, 0)); CHECK_GIDS(&s, A_BEH_INIT, A_LAMALEF_FINA); CHECK_CMAP(&s, 0, 1, 1); fx_close(&x);
+    ARAB(); CHECK_HR_OK(sh_run(&x, &s, AB AL AA, FALSE, NULL, 0)); CHECK_GIDS(&s, A_BEH_FINA, A_LAM_INIT, A_ALEF_ISOL); CHECK_CMAP(&s, 0, 1, 2); fx_close(&x);
 }
 TEST(r2_shaping_features_arab_init_disabled)
 {
     ARAB(); static const DWRITE_FONT_FEATURE f[] = { OFF(T_init) };
-    CHECK_HR_OK(sh_run(&x, &s, AB AB, TRUE, f, 1)); CHECK_FORMS(&s, 2, A_BEH, A_BEH_FINA); fx_close(&x);
+    CHECK_HR_OK(sh_run(&x, &s, AB AB, TRUE, f, 1)); CHECK_FORMS(&s, 2, A_BEH_INIT, A_BEH_FINA); fx_close(&x);   /* joining forms are required: OFF is ignored */
 }
 TEST(r2_shaping_features_arab_fina_disabled)
 {
     ARAB(); static const DWRITE_FONT_FEATURE f[] = { OFF(T_fina) };
-    CHECK_HR_OK(sh_run(&x, &s, AB AB, TRUE, f, 1)); CHECK_FORMS(&s, 2, A_BEH_INIT, A_BEH); fx_close(&x);
+    CHECK_HR_OK(sh_run(&x, &s, AB AB, TRUE, f, 1)); CHECK_FORMS(&s, 2, A_BEH_INIT, A_BEH_FINA); fx_close(&x);
 }
 TEST(r2_shaping_features_arab_medi_disabled)
 {
     ARAB(); static const DWRITE_FONT_FEATURE f[] = { OFF(T_medi) };
-    CHECK_HR_OK(sh_run(&x, &s, AB AB AB, TRUE, f, 1)); CHECK_FORMS(&s, 3, A_BEH_INIT, A_BEH, A_BEH_FINA); fx_close(&x);
+    CHECK_HR_OK(sh_run(&x, &s, AB AB AB, TRUE, f, 1)); CHECK_FORMS(&s, 3, A_BEH_INIT, A_BEH_MEDI, A_BEH_FINA); fx_close(&x);
 }
 TEST(r2_shaping_features_arab_isol_disabled)
 {
     ARAB(); static const DWRITE_FONT_FEATURE f[] = { OFF(T_isol) };
-    CHECK_HR_OK(sh_run(&x, &s, AB, TRUE, f, 1)); CHECK_FORMS(&s, 1, A_BEH); fx_close(&x);
+    CHECK_HR_OK(sh_run(&x, &s, AB, TRUE, f, 1)); CHECK_FORMS(&s, 1, A_BEH_ISOL); fx_close(&x);
 }
 TEST(r2_shaping_features_arab_isol_disabled_joined_unaffected)
 {
@@ -141,7 +142,7 @@ TEST(r2_shaping_features_arab_isol_disabled_joined_unaffected)
 TEST(r2_shaping_features_arab_all_forms_disabled)
 {
     ARAB(); static const DWRITE_FONT_FEATURE f[] = { OFF(T_isol), OFF(T_init), OFF(T_medi), OFF(T_fina) };
-    CHECK_HR_OK(sh_run(&x, &s, AB AB AB, TRUE, f, 4)); CHECK_FORMS(&s, 3, A_BEH, A_BEH, A_BEH); fx_close(&x);
+    CHECK_HR_OK(sh_run(&x, &s, AB AB AB, TRUE, f, 4)); CHECK_FORMS(&s, 3, A_BEH_INIT, A_BEH_MEDI, A_BEH_FINA); fx_close(&x);
 }
 TEST(r2_shaping_features_arab_rlig_off_note)
 {
@@ -151,7 +152,7 @@ TEST(r2_shaping_features_arab_rlig_off_note)
 TEST(r2_shaping_features_arab_range_init_off_first_only)
 {
     ARAB(); static const DWRITE_FONT_FEATURE f[] = { OFF(T_init) }; featrange fr[] = { { f, 1, 1 }, { NULL, 0, 2 } };
-    CHECK_HR_OK(sh_glyphs(&x, &s, AB AB AB, 3, TRUE, NULL, fr, 2)); CHECK_FORMS(&s, 3, A_BEH, A_BEH_MEDI, A_BEH_FINA); fx_close(&x);
+    CHECK_HR_OK(sh_glyphs(&x, &s, AB AB AB, 3, TRUE, NULL, fr, 2)); CHECK_FORMS(&s, 3, A_BEH_INIT, A_BEH_MEDI, A_BEH_FINA); fx_close(&x);
 }
 TEST(r2_shaping_features_arab_mark_after_beh)
 {   /* mark glyph advance 0; GPOS mark-to-base attaches fatha (anchor 100,0) to the beh anchor (400,1000) */
@@ -180,7 +181,7 @@ TEST(r2_shaping_features_arab_mark_between_joiners)
 TEST(r2_shaping_features_arab_mark_disabled)
 {
     ARAB(); static const DWRITE_FONT_FEATURE f[] = { OFF(T_mark) };
-    CHECK_HR_OK(sh_run(&x, &s, AB AF, TRUE, f, 1)); CHECK_OFF(&s, 0, 0, 0); CHECK_OFF(&s, 1, 0, 0); fx_close(&x);
+    CHECK_HR_OK(sh_run(&x, &s, AB AF, TRUE, f, 1)); CHECK_OFF(&s, 0, 0, 0); CHECK_OFF(&s, 1, -300, 1000); fx_close(&x);   /* mark is required */
 }
 TEST(r2_shaping_features_arab_text_props_per_unit)
 {

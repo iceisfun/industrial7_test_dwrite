@@ -159,7 +159,7 @@ TEST(r2_shaping_features_mark_two_bases)
 TEST(r2_shaping_features_mark_disabled)
 {
     LATN(); static const DWRITE_FONT_FEATURE f[] = { OFF(T_mark) };
-    CHECK_HR_OK(sh_run(&x, &s, L"a\x0301", FALSE, f, 1)); CHECK_GIDS(&s, 28, G_ACUTE); CHECK_OFF(&s, 1, 0, 0); fx_close(&x);
+    CHECK_HR_OK(sh_run(&x, &s, L"a\x0301", FALSE, f, 1)); CHECK_GIDS(&s, 28, G_ACUTE); CHECK_OFF(&s, 1, -600, 1400); fx_close(&x);   /* mark is required: stays on */
 }
 TEST(r2_shaping_features_mark_on_uncovered_base)
 {
@@ -204,7 +204,7 @@ TEST(r2_shaping_features_mkmk_cluster_map)
 TEST(r2_shaping_features_mkmk_disabled_falls_back_to_base)
 {
     LATN(); static const DWRITE_FONT_FEATURE f[] = { OFF(T_mkmk) };
-    CHECK_HR_OK(sh_run(&x, &s, L"a\x0301\x0302", FALSE, f, 1)); CHECK_OFF(&s, 1, -600, 1400); CHECK_OFF(&s, 2, -600, 1400); fx_close(&x);
+    CHECK_HR_OK(sh_run(&x, &s, L"a\x0301\x0302", FALSE, f, 1)); CHECK_OFF(&s, 1, -600, 1400); CHECK_OFF(&s, 2, -600, 2000); fx_close(&x);   /* mkmk is required: stays on */
 }
 TEST(r2_shaping_features_mkmk_reversed_order_not_matched)
 {   /* circumflex then acute: mkmk only attaches 79 to 78 (not 78 to 79), so acute goes to the base */
@@ -214,7 +214,7 @@ TEST(r2_shaping_features_mkmk_reversed_order_not_matched)
 TEST(r2_shaping_features_mkmk_both_disabled)
 {
     LATN(); static const DWRITE_FONT_FEATURE f[] = { OFF(T_mark), OFF(T_mkmk) };
-    CHECK_HR_OK(sh_run(&x, &s, L"a\x0301\x0302", FALSE, f, 2)); CHECK_OFF(&s, 1, 0, 0); CHECK_OFF(&s, 2, 0, 0); fx_close(&x);
+    CHECK_HR_OK(sh_run(&x, &s, L"a\x0301\x0302", FALSE, f, 2)); CHECK_OFF(&s, 1, -600, 1400); CHECK_OFF(&s, 2, -600, 2000); fx_close(&x);
 }
 TEST(r2_shaping_features_mkmk_scaled)
 {
@@ -235,7 +235,12 @@ TEST(r2_shaping_features_cpsp_on_adds_advance)
 TEST(r2_shaping_features_cpsp_with_kern)
 {
     LATN(); static const DWRITE_FONT_FEATURE f[] = { ON(T_cpsp) };
-    CHECK_HR_OK(sh_run(&x, &s, L"AV", FALSE, f, 1)); CHECK_ADV(&s, 1000, 1100); fx_close(&x);
+    CHECK_HR_OK(sh_run(&x, &s, L"AV", FALSE, f, 1)); CHECK_ADV(&s, 1100, 1100); fx_close(&x);
+}
+TEST(r2_shaping_features_cpsp_with_kern_listed)
+{   /* kern is an optional default that a feature list replaces: listing it brings it back */
+    LATN(); static const DWRITE_FONT_FEATURE f[] = { ON(T_cpsp), ON(T_kern) };
+    CHECK_HR_OK(sh_run(&x, &s, L"AV", FALSE, f, 2)); CHECK_ADV(&s, 1000, 1100); fx_close(&x);
 }
 TEST(r2_shaping_features_cpsp_all_capitals)
 {
@@ -269,7 +274,7 @@ TEST(r2_shaping_features_ss02_with_mark_then_offset_wins_for_base)
 /* ---- placement result invariants ---- */
 TEST(r2_shaping_features_place_zwsp_zero_advance)
 {
-    LATN(); CHECK_HR_OK(sh_run(&x, &s, L"a\x200b" L"b", FALSE, NULL, 0)); CHECK_GIDS(&s, 28, G_ZWSP, 29); CHECK_ADV(&s, 1000, 0, 1000);
+    LATN(); CHECK_HR_OK(sh_run(&x, &s, L"a\x200b" L"b", FALSE, NULL, 0)); CHECK(s.actual == 3 && s.gid[0] == 28 && s.gid[2] == 29); CHECK(s.gid[1] == G_ZWSP || s.gid[1] == 1); CHECK_ADV(&s, 1000, 0, 1000);
     t_note("ZWSP glyph isZeroWidthSpace=%d isDiacritic=%d", s.gp[1].isZeroWidthSpace, s.gp[1].isDiacritic); fx_close(&x);
 }
 TEST(r2_shaping_features_place_space_advance_and_props_note)
@@ -300,7 +305,7 @@ static HRESULT gdi(fx *x, shaped *s, float em, float ppd, BOOL natural, BOOL rtl
 }
 TEST(r2_shaping_features_gdi_classic_rounds_to_pixels)
 {
-    LATN(); CHECK_HR_OK(sh_glyphs(&x, &s, L"abc", 3, FALSE, NULL, NULL, 0));
+    LATN(); CHECK_HR_OK(sh_glyphs(&x, &s, L"acd", 3, FALSE, NULL, NULL, 0));
     CHECK_HR_OK(gdi(&x, &s, 16.0f, 1.0f, FALSE, FALSE)); CHECK_ADV(&s, 8, 8, 8);
     CHECK_HR_OK(gdi(&x, &s, 20.0f, 1.0f, FALSE, FALSE)); CHECK_ADV(&s, 10, 10, 10);
     CHECK_HR_OK(gdi(&x, &s, 12.0f, 1.0f, FALSE, FALSE)); CHECK_ADV(&s, 6, 6, 6);

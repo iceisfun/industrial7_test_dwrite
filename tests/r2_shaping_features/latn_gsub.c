@@ -53,9 +53,9 @@ TEST(r2_shaping_features_liga_explicit_on_same_as_default)
     CHECK_HR_OK(sh_run(&x, &s, L"ffi", FALSE, f, 1)); CHECK_GIDS(&s, G_FFI); fx_close(&x);
 }
 TEST(r2_shaping_features_liga_disabled_leaves_other_features)
-{   /* switching liga off does not disable calt/clig */
+{   /* A supplied feature list replaces the default optional features (liga/clig/calt/kern): unlisted ones are not applied. */
     LATN(); static const DWRITE_FONT_FEATURE f[] = { OFF(T_liga) };
-    CHECK_HR_OK(sh_run(&x, &s, L"ckfi", FALSE, f, 1)); CHECK_GIDS(&s, G_CK, 33, 36); fx_close(&x);
+    CHECK_HR_OK(sh_run(&x, &s, L"ckfi", FALSE, f, 1)); CHECK_GIDS(&s, 30, 38, 33, 36); fx_close(&x);
 }
 TEST(r2_shaping_features_liga_glyph_props)
 {
@@ -85,7 +85,10 @@ TEST(r2_shaping_features_clig_and_liga_independent)
 {
     LATN(); static const DWRITE_FONT_FEATURE f[] = { OFF(T_clig) };
     CHECK_HR_OK(sh_run(&x, &s, L"cki", FALSE, f, 1)); CHECK_GIDS(&s, 30, 38, 36);
-    CHECK_HR_OK(sh_run(&x, &s, L"fick", FALSE, f, 1)); CHECK_GIDS(&s, G_FI, 30, 38);
+    /* liga is not listed, so it is not applied either (a feature list replaces the optional defaults) */
+    CHECK_HR_OK(sh_run(&x, &s, L"fick", FALSE, f, 1)); CHECK_GIDS(&s, 33, 36, 30, 38);
+    { static const DWRITE_FONT_FEATURE g2[] = { ON(T_liga), OFF(T_clig) };
+      CHECK_HR_OK(sh_run(&x, &s, L"fick", FALSE, g2, 2)); CHECK_GIDS(&s, G_FI, 30, 38); }
     fx_close(&x);
 }
 TEST(r2_shaping_features_rlig_default_on)
@@ -115,7 +118,8 @@ TEST(r2_shaping_features_ccmp_decomposes_advances)
 TEST(r2_shaping_features_ccmp_disabled)
 {
     LATN(); static const DWRITE_FONT_FEATURE f[] = { OFF(T_ccmp) };
-    CHECK_HR_OK(sh_run(&x, &s, L"\x00e9", FALSE, f, 1)); CHECK_GIDS(&s, G_EACUTE); CHECK_ADV(&s, 1000); fx_close(&x);
+    /* ccmp is a required feature of the shaping engine: switching it off has no effect */
+    CHECK_HR_OK(sh_run(&x, &s, L"\x00e9", FALSE, f, 1)); CHECK_GIDS(&s, 32, G_ACUTE); fx_close(&x);
 }
 TEST(r2_shaping_features_ccmp_in_text)
 {   /* clusterMap of the characters around a one-to-many substitution */
@@ -184,7 +188,8 @@ TEST(r2_shaping_features_smcp_uncovered_letters_unchanged)
 TEST(r2_shaping_features_smcp_value_zero_is_off)
 {
     LATN(); static const DWRITE_FONT_FEATURE f[] = { OFF(T_smcp) };
-    CHECK_HR_OK(sh_run(&x, &s, L"ab", FALSE, f, 1)); CHECK_GIDS(&s, 28, G_CALTB); fx_close(&x);
+    /* calt is a default feature that a supplied feature list replaces, so it is not applied here */
+    CHECK_HR_OK(sh_run(&x, &s, L"ab", FALSE, f, 1)); CHECK_GIDS(&s, 28, 29); fx_close(&x);
 }
 TEST(r2_shaping_features_c2sc_on)
 {
@@ -284,7 +289,7 @@ TEST(r2_shaping_features_locl_turkish_language_system)
 TEST(r2_shaping_features_locl_explicit_off_for_turkish)
 {
     LATN(); static const DWRITE_FONT_FEATURE f[] = { OFF(T_locl) }; featrange fr = { f, 1, 1 };
-    CHECK_HR_OK(sh_glyphs(&x, &s, L"i", 1, FALSE, L"tr-tr", &fr, 1)); CHECK_GIDS(&s, 36); fx_close(&x);
+    CHECK_HR_OK(sh_glyphs(&x, &s, L"i", 1, FALSE, L"tr-tr", &fr, 1)); CHECK_GIDS(&s, G_DOTLESSI); fx_close(&x);   /* locl is required for the language: stays on */
 }
 TEST(r2_shaping_features_locl_unknown_locale_is_default_language)
 {
@@ -337,7 +342,7 @@ TEST(r2_shaping_features_range_liga_off_whole_first_word)
 TEST(r2_shaping_features_range_exact_cover)
 {
     LATN(); static const DWRITE_FONT_FEATURE f[] = { OFF(T_liga) }; featrange fr[] = { { f, 1, 2 }, { NULL, 0, 3 } };
-    CHECK_HR_OK(sh_glyphs(&x, &s, L"fi fi", 5, FALSE, NULL, fr, 2)); CHECK_GIDS(&s, 33, 36, 1, G_FI); CHECK_CMAP(&s, 0, 1, 2, 3, 3); fx_close(&x);
+    CHECK_HR_OK(sh_glyphs(&x, &s, L"fi fi", 5, FALSE, NULL, fr, 2)); CHECK_GIDS(&s, 33, 36, 1, 33, 36); CHECK_CMAP(&s, 0, 1, 2, 3, 4);   /* the empty second list also replaces the defaults */ fx_close(&x);
 }
 TEST(r2_shaping_features_range_single_range_equals_whole)
 {
@@ -348,7 +353,8 @@ TEST(r2_shaping_features_range_single_range_equals_whole)
 TEST(r2_shaping_features_range_empty_feature_list)
 {
     LATN(); featrange fr = { NULL, 0, 2 };
-    CHECK_HR_OK(sh_glyphs(&x, &s, L"fi", 2, FALSE, NULL, &fr, 1)); CHECK_GIDS(&s, G_FI); fx_close(&x);
+    CHECK_HR_OK(sh_glyphs(&x, &s, L"fi", 2, FALSE, NULL, &fr, 1)); CHECK_GIDS(&s, 33, 36);   /* a present (even empty) list replaces the defaults */
+    fx_close(&x);
 }
 TEST(r2_shaping_features_range_many_features_one_range)
 {
@@ -364,7 +370,7 @@ TEST(r2_shaping_features_duplicate_feature_last_wins_note)
 TEST(r2_shaping_features_unknown_feature_tag_ignored)
 {
     LATN(); static const DWRITE_FONT_FEATURE f[] = { FEAT(TG('z','z','z','z'), 1) };
-    CHECK_HR_OK(sh_run(&x, &s, L"fi", FALSE, f, 1)); CHECK_GIDS(&s, G_FI); fx_close(&x);
+    CHECK_HR_OK(sh_run(&x, &s, L"fi", FALSE, f, 1)); CHECK_GIDS(&s, 33, 36); fx_close(&x);   /* list present, liga unlisted */
 }
 TEST(r2_shaping_features_feature_with_large_value)
 {
