@@ -276,11 +276,13 @@ TEST(ul_splits_on_bidi_parity)
     IDWriteTextLayout_SetUnderline(l, TRUE, RNG(0, 7));
     DRAW_OK(l, r, 0.0f, 0.0f);
     int n = td_count(r, DWX_DRAW_UNDERLINE);
-    t_note("underline over latin/hebrew/latin: %d call(s)", n);
-    CHECK(n >= 3);
-    int i; float tot = 0; for (i = 0; i < n; i++) tot += UL(r, i)->ul.width;
-    CHECK_NEAR(tot, 7 * 7.8125f, 0.01);
-    for (i = 0; i < n; i++) { const dwx_draw *u = UL(r, i); CHECK(u->ul.readingDirection == DWRITE_READING_DIRECTION_LEFT_TO_RIGHT || u->ul.readingDirection == DWRITE_READING_DIRECTION_RIGHT_TO_LEFT); }
+    EXPECT_EQ(n, 3);
+    if (n == 3) {
+        CHECK_NEAR(UL(r, 0)->ul.width, 2 * 7.8125f, 0.01); CHECK_NEAR(UL(r, 1)->ul.width, 3 * 7.8125f, 0.01); CHECK_NEAR(UL(r, 2)->ul.width, 2 * 7.8125f, 0.01);
+        EXPECT_EQ(UL(r, 0)->ul.readingDirection, DWRITE_READING_DIRECTION_LEFT_TO_RIGHT);
+        EXPECT_EQ(UL(r, 1)->ul.readingDirection, DWRITE_READING_DIRECTION_RIGHT_TO_LEFT);
+        EXPECT_EQ(UL(r, 2)->ul.readingDirection, DWRITE_READING_DIRECTION_LEFT_TO_RIGHT);
+    }
     DONE(l, r);
 }
 TEST(ul_hebrew_reading_direction)

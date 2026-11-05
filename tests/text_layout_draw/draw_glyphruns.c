@@ -318,7 +318,7 @@ TEST(split_drawing_effect_change)
     if (a && b && c) { EXPECT_EQ(a->effect, e1); EXPECT_EQ(b->effect, e2); EXPECT_EQ(c->effect, NULL); }
     IDWriteTextLayout_Release(l); dwx_release(r); dwx_release(e1); dwx_release(e2); TD_END();
 }
-TEST(split_same_effect_object_adjacent_ranges_still_split_or_merge)
+TEST(split_same_effect_object_adjacent_ranges_merge)
 {
     /* two adjacent ranges carrying the identical effect pointer: record the observed run count */
     SPLIT_BEGIN(L"ABCDEF");
@@ -326,8 +326,7 @@ TEST(split_same_effect_object_adjacent_ranges_still_split_or_merge)
     IDWriteTextLayout_SetDrawingEffect(l, (IUnknown *)e, RNG(0, 3)); IDWriteTextLayout_SetDrawingEffect(l, (IUnknown *)e, RNG(3, 3));
     DRAW_OK(l, r, 0.0f, 0.0f);
     int n = td_count(r, DWX_DRAW_GLYPHRUN);
-    t_note("adjacent ranges with one effect object: %d glyph run(s)", n);
-    CHECK(n == 1 || n == 2);
+    EXPECT_EQ(n, 1);
     EXPECT_EQ(td_total_glyphs(r), 6);
     IDWriteTextLayout_Release(l); dwx_release(r); dwx_release(e); TD_END();
 }
@@ -354,12 +353,15 @@ TEST(split_script_latin_greek)
     DRAW_OK(l, r, 0.0f, 0.0f);
     /* observed: the script change does not split the run when one font covers both scripts */
     EXPECT_EQ(td_count(r, DWX_DRAW_GLYPHRUN), 1);
-    const dwx_draw *a = td_nth(r, DWX_DRAW_GLYPHRUN, 0), *b = NULL, *c = NULL;
-    if (a && b && c) {
-        EXPECT_EQ(a->text_pos, 0); EXPECT_EQ(a->text_len, 2);
-        EXPECT_EQ(b->text_pos, 2); EXPECT_EQ(b->text_len, 2); EXPECT_EQ(b->indices[0], 28);
-        EXPECT_EQ(c->text_pos, 4); EXPECT_EQ(c->text_len, 2);
-        EXPECT_EQ(a->bidi, 0); EXPECT_EQ(b->bidi, 0); EXPECT_EQ(c->bidi, 0);
+    const dwx_draw *a = td_nth(r, DWX_DRAW_GLYPHRUN, 0);
+    CHECK(a != NULL);
+    if (a) {
+        static const UINT32 want[6] = { 2, 3, 28, 28, 4, 5 };
+        UINT32 i;
+        EXPECT_EQ(a->text_pos, 0); EXPECT_EQ(a->text_len, 6);
+        EXPECT_EQ(a->nglyphs, 6);
+        EXPECT_EQ(a->bidi, 0);
+        for (i = 0; i < a->nglyphs && i < 6; i++) { EXPECT_EQ(a->indices[i], want[i]); CHECK_NEARF(a->advances[i], 7.8125); }
     }
     DONE(l, r);
 }
@@ -841,14 +843,14 @@ TEST(bidi_latin_hebrew_latin_runs)
     DRAW_OK(l, r, 0.0f, 0.0f);
     int i, rtl = 0, ltr = 0;
     for (i = 0; i < r->ncalls; i++) { const dwx_draw *c = &r->calls[i]; if (c->kind != DWX_DRAW_GLYPHRUN) continue; if (c->bidi & 1) rtl++; else ltr++; }
-    CHECK(rtl >= 1); CHECK(ltr >= 2);
+    EXPECT_EQ(rtl, 1); EXPECT_EQ(ltr, 3);
     const dwx_draw *h = NULL;
     for (i = 0; i < r->ncalls; i++) if (r->calls[i].kind == DWX_DRAW_GLYPHRUN && (r->calls[i].bidi & 1) && r->calls[i].nglyphs >= 3) h = &r->calls[i];
+    CHECK(h != NULL);
     if (h) {
         /* baseline origin of the Hebrew run lies within the span the run occupies (left edge or right edge) */
         float left = 3 * 7.8125f, right = left + 3 * 7.8125f;
-        CHECK(fabsf(h->x - left) < 0.01f || fabsf(h->x - right) < 0.01f);
-        t_note("RTL run baseline origin x=%g (run spans %g .. %g)", h->x, left, right);
+        CHECK_NEARF(h->x, right);
     }
     DONE(l, r);
 }
@@ -901,8 +903,7 @@ TEST(bidi_hebrew_in_rtl_paragraph_origin)
     if (c) {
         float left = 200.0f - 3 * 7.8125f;
         CHECK_NEARF(m.left, left);
-        CHECK(fabsf(c->x - left) < 0.01f || fabsf(c->x - 200.0f) < 0.01f);
-        t_note("RTL run in RTL paragraph: origin x=%g (left edge %g, right edge 200)", c->x, left);
+        CHECK_NEARF(c->x, 200.0f);
         EXPECT_EQ(c->bidi, 1);
     }
     DONE(l, r);
