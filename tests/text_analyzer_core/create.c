@@ -44,10 +44,11 @@ TEST(create_refcount_protocol)
 {
     TA_BEGIN();
     EXPECT_REFS(an, 1);
-    EXPECT_EQ(IDWriteTextAnalyzer_AddRef(an), 2);
-    EXPECT_EQ(IDWriteTextAnalyzer_AddRef(an), 3);
-    EXPECT_EQ(IDWriteTextAnalyzer_Release(an), 2);
-    EXPECT_EQ(IDWriteTextAnalyzer_Release(an), 1);
+    { ULONG r;
+    r = IDWriteTextAnalyzer_AddRef(an); EXPECT_EQ(r, 2);
+    r = IDWriteTextAnalyzer_AddRef(an); EXPECT_EQ(r, 3);
+    r = IDWriteTextAnalyzer_Release(an); EXPECT_EQ(r, 2);
+    r = IDWriteTextAnalyzer_Release(an); EXPECT_EQ(r, 1); }
     TA_END();
 }
 

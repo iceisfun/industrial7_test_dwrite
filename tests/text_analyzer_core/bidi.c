@@ -450,9 +450,9 @@ NS_TEST(national_at_end,        NATIONAL, L"ar-sa", L"abc7",             { 3, 1 
 NS_TEST(national_at_start,      NATIONAL, L"ar-sa", L"7abc",             { 0, 1 })
 NS_TEST(national_fullwidth_digits_not_matched, NATIONAL, L"ar-sa", L"\xff11\xff12")
 NS_TEST(national_arabic_indic_not_matched, NATIONAL, L"ar-sa", L"\x0661\x0662")
-/* A locale whose digits are the nominal ones turns the object into METHOD_NONE: nothing is substituted. */
+/* An en-us locale (nominal digits) is treated as METHOD_NONE: nothing is substituted; other Latin-digit locales still substitute. */
 NS_TEST(national_en_locale_is_nominal, NATIONAL, L"en-us", L"4 5")
-NS_TEST(national_de_locale_is_nominal, NATIONAL, L"de-de", L"4 5")
+NS_TEST(national_de_locale_substitutes, NATIONAL, L"de-de", L"4 5", { 0, 1 }, { 2, 1 })
 NS_TEST(national_fa_locale,     NATIONAL, L"fa-ir", L"2024",             { 0, 4 })
 NS_TEST(none_digits,            NSNONE, L"ar-sa", L"abc 123")
 NS_TEST(none_en,                NSNONE, L"en-us", L"123")
