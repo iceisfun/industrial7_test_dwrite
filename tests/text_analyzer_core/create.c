@@ -285,3 +285,57 @@ TEST(source_sink_qi_not_required)
     }
     TA_END();
 }
+
+/* ---- IDWriteFactory::CreateNumberSubstitution (the objects the number substitution analysis consumes) ----------------------------- */
+TEST(numsub_create_null_locale)
+{
+    IDWriteFactory *f = dw_shared(); IDWriteNumberSubstitution *ns = (IDWriteNumberSubstitution *)(ULONG_PTR)1;
+    if (!f) { t_skip("no factory"); return; }
+    /* a locale name is required unless the method is NONE */
+    CHECK_HR(IDWriteFactory_CreateNumberSubstitution(f, DWRITE_NUMBER_SUBSTITUTION_METHOD_NATIONAL, NULL, FALSE, &ns), E_INVALIDARG);
+    CHECK_OUT_NULL(ns);
+    ns = (IDWriteNumberSubstitution *)(ULONG_PTR)1;
+    CHECK_HR(IDWriteFactory_CreateNumberSubstitution(f, DWRITE_NUMBER_SUBSTITUTION_METHOD_FROM_CULTURE, NULL, FALSE, &ns), E_INVALIDARG);
+    CHECK_OUT_NULL(ns);
+    ns = (IDWriteNumberSubstitution *)(ULONG_PTR)1;
+    CHECK_HR(IDWriteFactory_CreateNumberSubstitution(f, DWRITE_NUMBER_SUBSTITUTION_METHOD_CONTEXTUAL, NULL, FALSE, &ns), E_INVALIDARG);
+    CHECK_OUT_NULL(ns);
+    ns = NULL;
+    CHECK_HR_OK(IDWriteFactory_CreateNumberSubstitution(f, DWRITE_NUMBER_SUBSTITUTION_METHOD_NONE, NULL, FALSE, &ns));
+    CHECK(ns != NULL);
+    if (ns) EXPECT_REFS(ns, 1);
+    DW_RELEASE(ns);
+}
+TEST(numsub_create_invalid_method)
+{
+    IDWriteFactory *f = dw_shared(); IDWriteNumberSubstitution *ns = (IDWriteNumberSubstitution *)(ULONG_PTR)1;
+    if (!f) { t_skip("no factory"); return; }
+    CHECK_HR(IDWriteFactory_CreateNumberSubstitution(f, (DWRITE_NUMBER_SUBSTITUTION_METHOD)5, L"en-us", FALSE, &ns), E_INVALIDARG);
+    CHECK_OUT_NULL(ns);
+    ns = (IDWriteNumberSubstitution *)(ULONG_PTR)1;
+    CHECK_HR(IDWriteFactory_CreateNumberSubstitution(f, (DWRITE_NUMBER_SUBSTITUTION_METHOD)0x7fffffff, L"en-us", FALSE, &ns), E_INVALIDARG);
+    CHECK_OUT_NULL(ns);
+}
+TEST(numsub_create_ok_methods)
+{
+    IDWriteFactory *f = dw_shared(); int m;
+    if (!f) { t_skip("no factory"); return; }
+    for (m = 0; m <= 4; m++) {
+        IDWriteNumberSubstitution *ns = NULL;
+        CHECK_HR_OK(IDWriteFactory_CreateNumberSubstitution(f, (DWRITE_NUMBER_SUBSTITUTION_METHOD)m, L"ar-sa", TRUE, &ns));
+        if (ns) { EXPECT_REFS(ns, 1); DW_RELEASE(ns); }
+    }
+}
+TEST(numsub_create_qi)
+{
+    IDWriteFactory *f = dw_shared(); IDWriteNumberSubstitution *ns = NULL; void *p = (void *)(ULONG_PTR)1;
+    if (!f) { t_skip("no factory"); return; }
+    CHECK_HR_OK(IDWriteFactory_CreateNumberSubstitution(f, DWRITE_NUMBER_SUBSTITUTION_METHOD_NATIONAL, L"ar-sa", FALSE, &ns));
+    if (!ns) return;
+    CHECK_HR(IDWriteNumberSubstitution_QueryInterface(ns, &IID_IDWriteTextAnalyzer, &p), E_NOINTERFACE);
+    CHECK_OUT_NULL(p);
+    CHECK_HR_OK(IDWriteNumberSubstitution_QueryInterface(ns, &IID_IDWriteNumberSubstitution, &p));
+    CHECK(p == ns);
+    IDWriteNumberSubstitution_Release(ns);
+    DW_RELEASE(ns);
+}

@@ -31,7 +31,7 @@ enum { TA_SCRIPT = 1, TA_BIDI, TA_NUMSUB, TA_BREAK };
 
 /* Run one analysis kind (TA_*) over [pos, pos+len) of the source into the sink. */
 HRESULT ta_do(IDWriteTextAnalyzer *an, int kind, dwx_ana_src *s, UINT32 pos, UINT32 len, dwx_ana_sink *k);
-/* Convenience: text of wcslen units analysed from 0, fresh source/sink created, result returned; caller releases *ps/*pk (dwx_release). */
+/* Convenience: text of wcslen units analysed from 0, fresh source/sink created, result returned; caller releases both (dwx_release). */
 HRESULT ta_run(IDWriteTextAnalyzer *an, int kind, const WCHAR *text, dwx_ana_src **ps, dwx_ana_sink **pk);
 HRESULT ta_run_n(IDWriteTextAnalyzer *an, int kind, const WCHAR *text, UINT32 n, UINT32 chunk, dwx_ana_src **ps, dwx_ana_sink **pk);
 void ta_free(dwx_ana_src *s, dwx_ana_sink *k);
@@ -46,7 +46,7 @@ int ta_runs_exact(const dwx_ana_sink *k, char fam, UINT32 pos, UINT32 len);
 
 /* Synthetic font fixtures (see common/ttfgen.h default font): 'A'..'Z' gid 2..27, 'a'..'z' 28..53, '0'..'9' 54..63, space 1,
  * every advance 1000 of UPM 2048, notdef 1200.  The "shaping" variant adds
- *   GSUB liga:  f i -> gid 65 (the "round" glyph)         GSUB liga also  f f i? no: only the single pair f+i
+ *   GSUB liga:  f i -> gid 65 (the "round" glyph), the single pair f+i
  *   GPOS kern:  A V -100, V A -100, T o -150, A Y -80 (design units; applied to the advance of the first glyph)
  * 'f' = 33, 'i' = 36, 'V' = 23, 'A' = 2, 'T' = 21, 'o' = 42, 'Y' = 26. */
 typedef struct ta_font { dwx_font h; IDWriteFontFace *face; int ok; } ta_font;
