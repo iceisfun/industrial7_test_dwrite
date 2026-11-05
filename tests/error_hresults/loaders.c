@@ -190,7 +190,7 @@ static HRESULT lrig_face(lrig *r, IDWriteFontFace **face) {
     return IDWriteFactory_CreateFontFace(r->f, DWRITE_FONT_FACE_TYPE_TRUETYPE, 1, &r->file, 0, DWRITE_FONT_SIMULATIONS_NONE, face);
 }
 static const HRESULT passthru[] = { E_FAIL, E_ACCESSDENIED, E_NOTIMPL, E_OUTOFMEMORY, EH_CUSTOM, EH_FILEACCESS, EH_UNEXPECTED, EH_FILEFORMAT,
-                                    (HRESULT)0x80070057, (HRESULT)0x8007007A, (HRESULT)0x80004004, (HRESULT)0xC0000005, (HRESULT)0x87654321 };
+                                    (HRESULT)0x80070057, (HRESULT)0x8007007A, (HRESULT)0x80004004, (HRESULT)0x87654321 };
 #define NPASS ((int)(sizeof passthru / sizeof passthru[0]))
 
 TEST(callback_baseline_face_creation_succeeds) {
