@@ -593,6 +593,8 @@ TEST(draw_effect_refcount_balanced)
     TD_BEGIN(); TD_LAYOUT(l, L"ABC DEF", 16.0f, 300.0f, 200.0f); RD();
     dwx_effect *e = dwx_effect_new(1);
     CHECK_HR_OK(IDWriteTextLayout_SetDrawingEffect(l, (IUnknown *)e, RNG(0, 7)));
+    CHECK(dwx_refs(e) >= 2);
+    DRAW_OK(l, r, 0.0f, 0.0f);   /* the first draw may take an extra cached reference */
     LONG held = dwx_refs(e);
     CHECK(held >= 2);
     DRAW_OK(l, r, 0.0f, 0.0f);

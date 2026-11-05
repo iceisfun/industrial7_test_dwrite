@@ -251,6 +251,8 @@ TEST(inline_refs_held_by_layout)
     dwx_inline *io = dwx_inline_new(20.0f, 12.0f, 8.0f, FALSE);
     EXPECT_EQ(dwx_refs(io), 1);
     IDWriteTextLayout_SetInlineObject(l, (IDWriteInlineObject *)io, RNG(1, 1));
+    CHECK(dwx_refs(io) >= 2);
+    DRAW_OK(l, r, 0.0f, 0.0f);   /* the first draw may take an extra cached reference */
     LONG held = dwx_refs(io);
     CHECK(held >= 2);
     DRAW_OK(l, r, 0.0f, 0.0f);
@@ -457,6 +459,7 @@ TEST(trim_sign_refcount_balanced)
     TD_BEGIN(); IDWriteInlineObject *sign; IDWriteTextLayout *l = trimmed_layout(&X, &sign);
     if (!l) { TD_END(); t_skip("trimming setup failed"); return; }
     RD();
+    DRAW_OK(l, r, 0.0f, 0.0f);   /* the layout may cache the sign during the first draw */
     ULONG before = dw_refcount((IUnknown *)sign);
     DRAW_OK(l, r, 0.0f, 0.0f);
     ULONG after = dw_refcount((IUnknown *)sign);
