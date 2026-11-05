@@ -36,7 +36,9 @@ TEST(par_default_builtin_numbers_without_avalon_keys) {
 TEST(par_default_have_all_param_interfaces_note) {
     NEED_DEFAULT(v);
     t_note("rendering params interfaces: 1=%d 2=%d 3=%d", v.have1, v.have2, v.have3);
-    CHECK(v.have1 == v.have2 || v.have2 == v.have3 || 1);
+    /* the system parameter object implements IDWriteRenderingParams1 (Win8 platform update) and 2 (Win8.1); 3 arrived later */
+    CHECK(v.have1);
+    CHECK(v.have2);
 }
 TEST(par_default_repeat_is_stable) {
     cts_pv a, b;
