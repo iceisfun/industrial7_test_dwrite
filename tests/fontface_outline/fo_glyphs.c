@@ -272,11 +272,11 @@ TEST(glyph_composite_negative_scale) {
 }
 TEST(glyph_composite_nested) {
     FO_LAB(h, 0);
-    dwx_geom *s = one(h.face, 2048.0f, FO_G_COMP_NESTED);   /* composite(box, triangle@1400) + box@(1000,0) */
-    static const ex_ev e[] = { BEG_(100, 0), L_(100, -1400), L_(900, -1400), L_(900, 0), END_,
-                               BEG_(100, -1400), L_(500, -2800), L_(900, -1400), END_,
-                               BEG_(1100, 0), L_(1100, -1400), L_(1900, -1400), L_(1900, 0), END_ };
-    EX_CHECK(s, e, 0.0, "nested composite");
+    /* composite(box, triangle@1400) + box@(1000,0): a component that is itself a composite is not resolved; the OS
+     * yields an empty glyph (no figures, nothing for the plain sibling component either) */
+    dwx_geom *s = one(h.face, 2048.0f, FO_G_COMP_NESTED);
+    CHECK(s->nfigures_begun == 0);
+    CHECK(s->nev == 1 && s->ev[0].kind == DWX_G_FILL);
     dwx_release(s); dwx_font_close(&h);
 }
 TEST(glyph_composite_unscaled_offset_default) {

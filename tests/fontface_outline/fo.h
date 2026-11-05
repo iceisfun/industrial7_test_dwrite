@@ -85,7 +85,7 @@ static void fo_contour(fo_exp *e, const fo_pt *p, int n, const fo_xf *t) {
 
 /* Flatten glyph gid of the glyph table into design-space contours (composites resolved).
  * scaled_off: composite offsets are scaled by the component scale (SCALED_COMPONENT_OFFSET). */
-typedef struct { fo_pt pts[256]; int n; int ends[32]; int nc; } fo_flat;
+typedef struct { fo_pt pts[256]; int n; int ends[32]; int nc; int bad; } fo_flat;
 static void fo_flatten_rec(fo_flat *f, const ttf_glyph *tab, int ntab, int gid, double S, double tx, double ty, int depth) {
     const ttf_glyph *g;
     int i, c, start;
@@ -94,6 +94,7 @@ static void fo_flatten_rec(fo_flat *f, const ttf_glyph *tab, int ntab, int gid, 
     if (g->ncomp > 0) {
         for (i = 0; i < g->ncomp; i++) {
             const ttf_comp *cp = &g->comps[i];
+            if (cp->gid < ntab && tab[cp->gid].ncomp > 0) f->bad = 1;   /* Win10: a component that is itself a composite empties the whole glyph */
             double s = cp->scale ? (double)cp->scale / 16384.0 : 1.0;
             double dx = cp->dx, dy = cp->dy;
             if (cp->flags & TTF_COMP_SCALED_OFFSET) { dx *= s; dy *= s; }
@@ -116,6 +117,7 @@ static void fo_glyph_events(fo_exp *e, const ttf_glyph *tab, int ntab, int gid, 
     fo_flat *f = (fo_flat *)calloc(1, sizeof *f);
     int c, s = 0;
     fo_flatten_rec(f, tab, ntab, gid, 1.0, 0, 0, 0);
+    if (f->bad) f->nc = 0;
     for (c = 0; c < f->nc; c++) { fo_contour(e, f->pts + s, f->ends[c] - s + 1, t); s = f->ends[c] + 1; }
     free(f);
 }
