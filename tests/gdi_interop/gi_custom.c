@@ -337,7 +337,11 @@ TEST(gic_weight_ladder_each_is_own_win32_family)
         CHECK_HR_OK(gi_cf_conv(&x, font, &lf, &sys));
         gi_name_u8(&lf, name, sizeof name);
         CHECKF(!strcmp(name, want), "rung %d: \"%s\" want \"%s\"", w, name, want);
-        if (w != 400 && w != 700) EXPECT_EQ(lf.lfWeight, w);
+        if (w != 400 && w != 700) {
+            /* requesting 400 against a thin rung (>= 151 away) is realized with the bold simulation, which adds the delta */
+            int sim = (int)IDWriteFont_GetSimulations(font) & DWRITE_FONT_SIMULATIONS_BOLD;
+            EXPECT_EQ(lf.lfWeight, w + (sim ? GI_BOLD_SIM_DELTA : 0));
+        }
         DW_RELEASE(font);
     }
     gi_fix_close(&x);

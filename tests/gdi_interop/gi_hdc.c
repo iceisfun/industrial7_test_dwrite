@@ -197,8 +197,13 @@ TEST(gih_bold_gdi_font_without_bold_face)
             gi_lf(&plain, faces[i], 400, 0, 1);
             if (SUCCEEDED(IDWriteGdiInterop_CreateFontFromLOGFONT(g, &plain, &font)) && font) {
                 LOGFONTW base;
-                if (SUCCEEDED(IDWriteGdiInterop_ConvertFontToLOGFONT(g, font, &base, &sys)))
-                    EXPECT_EQ(lf.lfWeight, base.lfWeight + ((sim & DWRITE_FONT_SIMULATIONS_BOLD) ? GI_BOLD_SIM_DELTA : 0));
+                if (SUCCEEDED(IDWriteGdiInterop_ConvertFontToLOGFONT(g, font, &base, &sys))) {
+                    if (sim & DWRITE_FONT_SIMULATIONS_BOLD) EXPECT_EQ(lf.lfWeight, base.lfWeight + GI_BOLD_SIM_DELTA);
+                    else { /* a real bold design exists (e.g. Comic Sans MS): lfWeight is that design's own weight */
+                        CHECKF(lf.lfWeight >= base.lfWeight && lf.lfWeight <= 1000, "lfWeight %ld base %ld", lf.lfWeight, base.lfWeight);
+                        t_note("%s: real bold design, lfWeight %ld (regular %ld)", faces[i], lf.lfWeight, base.lfWeight);
+                    }
+                }
                 IDWriteFont_Release(font);
             }
             IDWriteFontFace_Release(face);
