@@ -109,6 +109,7 @@ TEST(imf_ref_unregistered_loader_fails_with_null_out) {
     imf_close(&x);
 }
 TEST(imf_ref_null_data_is_invalidarg) {
+    NO_WINE();
     OPEN(x, 1);
     IDWriteFontFile *ff = (IDWriteFontFile *)RFP_SENTINEL;
     CHECK_HR(IDWriteInMemoryFontFileLoader_CreateInMemoryFontFileReference(x.l, x.f, NULL, (UINT32)x.n, NULL, &ff), E_INVALIDARG);
@@ -125,6 +126,7 @@ TEST(imf_ref_zero_size_is_invalidarg) {
     imf_close(&x);
 }
 TEST(imf_ref_null_data_and_zero_size_is_invalidarg) {
+    NO_WINE();
     OPEN(x, 1);
     IDWriteFontFile *ff = (IDWriteFontFile *)RFP_SENTINEL;
     CHECK_HR(IDWriteInMemoryFontFileLoader_CreateInMemoryFontFileReference(x.l, x.f, NULL, 0, NULL, &ff), E_INVALIDARG);
@@ -132,6 +134,7 @@ TEST(imf_ref_null_data_and_zero_size_is_invalidarg) {
     imf_close(&x);
 }
 TEST(imf_ref_invalid_args_do_not_consume_an_index) {
+    NO_WINE();
     OPEN(x, 1);
     IDWriteFontFile *ff = NULL; UINT32 *key = NULL, ks = 0;
     IDWriteInMemoryFontFileLoader_CreateInMemoryFontFileReference(x.l, x.f, NULL, 0, NULL, &ff);

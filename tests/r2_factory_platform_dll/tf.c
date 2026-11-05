@@ -65,18 +65,22 @@ TEST(tfv_size_positive_infinity_note) {
     DW_RELEASE(tf);
 }
 TEST(tfv_null_family_invalid) {
+    NO_WINE();
     IDWriteTextFormat *tf = (IDWriteTextFormat *)RFP_SENTINEL; IDWriteFactory *f = dw_shared(); REQUIRE(f);
     CHECK_HR(mk(f, NULL, 400, 0, 5, 12.0f, L"en-us", &tf), E_INVALIDARG); CHECK(tf == NULL);
 }
 TEST(tfv_null_locale_invalid) {
+    NO_WINE();
     IDWriteTextFormat *tf = (IDWriteTextFormat *)RFP_SENTINEL; IDWriteFactory *f = dw_shared(); REQUIRE(f);
     CHECK_HR(mk(f, L"Arial", 400, 0, 5, 12.0f, NULL, &tf), E_INVALIDARG); CHECK(tf == NULL);
 }
 TEST(tfv_null_family_and_locale_invalid) {
+    NO_WINE();
     IDWriteTextFormat *tf = (IDWriteTextFormat *)RFP_SENTINEL; IDWriteFactory *f = dw_shared(); REQUIRE(f);
     CHECK_HR(mk(f, NULL, 400, 0, 5, 12.0f, NULL, &tf), E_INVALIDARG); CHECK(tf == NULL);
 }
 TEST(tfv_failure_does_not_touch_factory_refcount) {
+    NO_WINE();
     IDWriteFactory *f = dw_new_factory(FT_ISOLATED); IDWriteTextFormat *tf; int i; REQUIRE(f);
     for (i = 0; i < 10; i++) { tf = NULL; mk(f, NULL, 400, 0, 5, 12.0f, L"en-us", &tf); mk(f, L"Arial", 0, 0, 5, 12.0f, L"en-us", &tf); }
     EXPECT_REFS(f, 1);

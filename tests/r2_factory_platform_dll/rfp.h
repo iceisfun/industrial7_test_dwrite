@@ -26,4 +26,6 @@ static inline IDWriteTextFormat *rfp_fmt(IDWriteFactory *f, float size, const WC
                                                DWRITE_FONT_STRETCH_NORMAL, size, loc, &tf))) return NULL;
     return tf;
 }
+/* Skip where the emulated implementation dereferences a NULL argument (Windows validates it). */
+#define NO_WINE() do { if (t_is_wine()) { t_skip("emulated implementation faults on NULL argument"); return; } } while (0)
 #endif
