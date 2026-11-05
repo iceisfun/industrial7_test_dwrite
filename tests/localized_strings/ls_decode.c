@@ -238,7 +238,9 @@ TEST(lsd_lcid_unknown_values) {
         r[1].lang = l[k];
         s = open_desc(&x, f, r, 2, &ex);
         if (s) {
-XX, l[k], IDWriteLocalizedStrings_GetCount(s));
+            en = ls_en(s);   /* an LCID the OS maps to en-US (e.g. 0x400 user default) may legitimately replace the entry */
+            CHECK(en && (!lstrcmpW(en, L"english") || !lstrcmpW(en, L"odd")));
+            t_note("lcid %#x: %u entries", l[k], IDWriteLocalizedStrings_GetCount(s));
             CHECK(IDWriteLocalizedStrings_GetCount(s) >= 1);
             CHECK(ls_sweep(s, "odd lcid") == 0);
             free(en); IDWriteLocalizedStrings_Release(s);
