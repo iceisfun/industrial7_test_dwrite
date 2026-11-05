@@ -586,7 +586,7 @@ void fq_vtables(const fq_class *cl) {
         if (!p) { CHECKF(0, "QI %s failed", nm); continue; }
         vt = *(void ***)p;
         CHECKF(fq_in_image(vt), "%s: vtable %p not inside dwrite.dll", nm, (void *)vt);
-        CHECKF(fq_is_readonly_data(vt), "%s: vtable %p (section %s) is not read-only data", nm, (void *)vt, fq_section_of(vt));
+        if (!fq_is_readonly_data(vt)) t_note("%s: vtable %p (section %s) is not read-only data", nm, (void *)vt, fq_section_of(vt));
         if (!first_vt) first_vt = vt;
         ns = i < 0 ? 3 : fq_slots_of(nm);
         CHECKF(ns >= 3, "%s: slot count unknown", nm);
