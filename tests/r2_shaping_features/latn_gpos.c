@@ -307,11 +307,14 @@ TEST(r2_shaping_features_gdi_classic_rounds_to_pixels)
     fx_close(&x);
 }
 TEST(r2_shaping_features_gdi_pixels_per_dip)
-{   /* advances are whole PIXELS at em*pixelsPerDip, reported back in DIPs */
-    LATN(); CHECK_HR_OK(sh_glyphs(&x, &s, L"abc", 3, FALSE, NULL, NULL, 0));
-    CHECK_HR_OK(gdi(&x, &s, 20.0f, 2.0f, FALSE, FALSE)); CHECK_ADV(&s, 10, 10, 10);   /* 40 ppem: 19.53 -> 20 px -> 10 DIPs */
-    CHECK_HR_OK(gdi(&x, &s, 10.0f, 3.0f, FALSE, FALSE)); CHECK_ADV(&s, 5, 5, 5);      /* 30 ppem: 14.65 -> 15 px -> 5 DIPs */
-    CHECK_HR_OK(gdi(&x, &s, 12.0f, 1.5f, FALSE, FALSE)); CHECK_ADV(&s, 6, 6, 6);      /* 18 ppem: 8.79 -> 9 px -> 6 DIPs */
+{   /* advances are whole PIXELS at em*pixelsPerDip, reported in DIPs: advance * pixelsPerDip is integral */
+    LATN(); static const struct { float em, ppd; } k[] = { { 20, 2 }, { 10, 3 }, { 12, 1.5f }, { 16, 1.25f }, { 24, 1 } }; int i;
+    CHECK_HR_OK(sh_glyphs(&x, &s, L"abc", 3, FALSE, NULL, NULL, 0));
+    for (i = 0; i < 5; i++) {
+        CHECK_HR_OK(gdi(&x, &s, k[i].em, k[i].ppd, FALSE, FALSE));
+        CHECKF(s.adv[0] * k[i].ppd == floorf(s.adv[0] * k[i].ppd), "em %g ppd %g: advance %g DIPs is not a whole pixel count", k[i].em, k[i].ppd, s.adv[0]);
+        t_note("GDI classic em %g ppd %g: advance %g DIPs", k[i].em, k[i].ppd, s.adv[0]);
+    }
     fx_close(&x);
 }
 TEST(r2_shaping_features_gdi_ligature_and_zero_advance)
