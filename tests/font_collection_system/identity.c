@@ -2,7 +2,8 @@
  * Windows 10 behaviour (dwrite.dll decompilation): every GetSystemFontCollection overload funnels into
  * DWriteFactory::GetSystemFontCollection(model, includeDownloadable) which caches one collection object per
  * (model != typographic, includeDownloadable) pair inside the factory and always returns S_OK;
- * checkForUpdates is not used by the IDWriteFactory3 entry point. */
+ * checkForUpdates is not used by the IDWriteFactory3 entry point. The factory only holds a weak slot (ChildComObject):
+ * object identity is guaranteed while a client reference is held. */
 #include "fcs.h"
 
 /* ---- plain acquisition through IDWriteFactory --------------------------------------------------------------- */
