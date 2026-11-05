@@ -618,6 +618,7 @@ TEST(fcl_set_unknown_family_model_value_note)
 }
 
 /* --------------------------------------------------------------------------- text layout font selection */
+#define CHECK_ADV(call, want) do { float g_ = (call); CHECK_NEAR(g_, (want), 0.5); } while (0)
 static uint8_t *adv_variant(const char *family, int weight, int italic, int advA, size_t *size)
 {
     ttf_spec s; ttf_glyph *g; int n; const ttf_glyph *dg = ttf_default_glyphs(&n);
@@ -633,12 +634,16 @@ static uint8_t *adv_variant(const char *family, int weight, int italic, int advA
 static float run_advance_a(IDWriteFactory *f, IDWriteFontCollection *c, const WCHAR *fam, DWRITE_FONT_WEIGHT w, DWRITE_FONT_STYLE st, float em)
 {
     IDWriteTextFormat *fmt = NULL; IDWriteTextLayout *lay = NULL; float adv = -1.0f;
-    if (FAILED(IDWriteFactory_CreateTextFormat(f, fam, c, w, st, DWRITE_FONT_STRETCH_NORMAL, em, L"en-us", &fmt)) || !fmt) return -1.0f;
-    if (SUCCEEDED(IDWriteFactory_CreateTextLayout(f, L"A", 1, fmt, 1000.0f, 100.0f, &lay)) && lay) {
+    HRESULT hr_ = IDWriteFactory_CreateTextFormat(f, fam, c, w, st, DWRITE_FONT_STRETCH_NORMAL, em, L"en-us", &fmt);
+    if (FAILED(hr_) || !fmt) { t_note("CreateTextFormat %ls -> %s", fam, dw_hr_name(hr_)); return -1.0f; }
+    if (SUCCEEDED(IDWriteFactory_CreateTextLayout(f, L"A", 1, fmt, 100000.0f, 100000.0f, &lay)) && lay) {
         dwx_renderer *rd = dwx_renderer_new();
-        if (SUCCEEDED(IDWriteTextLayout_Draw(lay, NULL, (IDWriteTextRenderer *)rd, 0, 0))) {
+        HRESULT dh = IDWriteTextLayout_Draw(lay, NULL, (IDWriteTextRenderer *)rd, 0, 0);
+        if (FAILED(dh)) t_note("Draw %ls -> %s", fam, dw_hr_name(dh));
+        if (SUCCEEDED(dh)) {
             int cur = 0; const dwx_draw *d = dwx_renderer_next(rd, DWX_DRAW_GLYPHRUN, &cur);
             if (d && d->nglyphs == 1 && d->advances) adv = d->advances[0];
+            else t_note("%ls: glyph run %s n=%u", fam, d ? "found" : "missing", d ? d->nglyphs : 0);
         }
         dwx_release(rd);
         IDWriteTextLayout_Release(lay);
@@ -656,14 +661,14 @@ TEST(fcl_layout_uses_the_right_face_of_the_family)
     b = adv_variant("Sel Fam", 700, 1, 1900, &n); fcl_add(&x, b, n); free(b);
     FCL_COLL(x, c);
     const float em = 2048.0f;           /* em == units per em, so advance in DIPs equals design units */
-    CHECK_NEAR(run_advance_a(x.f, c, L"Sel Fam", DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STYLE_NORMAL, em), 1000.0f, 0.5);
-    CHECK_NEAR(run_advance_a(x.f, c, L"Sel Fam", DWRITE_FONT_WEIGHT_BOLD, DWRITE_FONT_STYLE_NORMAL, em), 1400.0f, 0.5);
-    CHECK_NEAR(run_advance_a(x.f, c, L"Sel Fam", DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STYLE_ITALIC, em), 1800.0f, 0.5);
-    CHECK_NEAR(run_advance_a(x.f, c, L"Sel Fam", DWRITE_FONT_WEIGHT_BOLD, DWRITE_FONT_STYLE_ITALIC, em), 1900.0f, 0.5);
+    CHECK_ADV(run_advance_a(x.f, c, L"Sel Fam", DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STYLE_NORMAL, em), 1000.0f);
+    CHECK_ADV(run_advance_a(x.f, c, L"Sel Fam", DWRITE_FONT_WEIGHT_BOLD, DWRITE_FONT_STYLE_NORMAL, em), 1400.0f);
+    CHECK_ADV(run_advance_a(x.f, c, L"Sel Fam", DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STYLE_ITALIC, em), 1800.0f);
+    CHECK_ADV(run_advance_a(x.f, c, L"Sel Fam", DWRITE_FONT_WEIGHT_BOLD, DWRITE_FONT_STYLE_ITALIC, em), 1900.0f);
     /* nearest-weight rules: 600 prefers the heavier face, 300 has nothing lighter and takes Regular */
-    CHECK_NEAR(run_advance_a(x.f, c, L"Sel Fam", DWRITE_FONT_WEIGHT_SEMI_BOLD, DWRITE_FONT_STYLE_NORMAL, em), 1400.0f, 0.5);
-    CHECK_NEAR(run_advance_a(x.f, c, L"Sel Fam", DWRITE_FONT_WEIGHT_LIGHT, DWRITE_FONT_STYLE_NORMAL, em), 1000.0f, 0.5);
-    CHECK_NEAR(run_advance_a(x.f, c, L"sel fam", DWRITE_FONT_WEIGHT_BOLD, DWRITE_FONT_STYLE_NORMAL, em), 1400.0f, 0.5);
+    CHECK_ADV(run_advance_a(x.f, c, L"Sel Fam", DWRITE_FONT_WEIGHT_SEMI_BOLD, DWRITE_FONT_STYLE_NORMAL, em), 1400.0f);
+    CHECK_ADV(run_advance_a(x.f, c, L"Sel Fam", DWRITE_FONT_WEIGHT_LIGHT, DWRITE_FONT_STYLE_NORMAL, em), 1000.0f);
+    CHECK_ADV(run_advance_a(x.f, c, L"sel fam", DWRITE_FONT_WEIGHT_BOLD, DWRITE_FONT_STYLE_NORMAL, em), 1400.0f);
     DW_RELEASE(c);
     fcl_close(&x);
 }
@@ -671,12 +676,12 @@ TEST(fcl_layout_second_family_is_independent)
 {
     FCL_OPEN(x);
     size_t n; uint8_t *b;
-    b = adv_variant("Wide Fam", 400, 0, 1500, &n); fcl_add(&x, b, n); free(b);
-    b = adv_variant("Slim Fam", 400, 0, 600, &n); fcl_add(&x, b, n); free(b);
+    b = adv_variant("Narrow Fam", 400, 0, 600, &n); fcl_add(&x, b, n); free(b);
+    b = adv_variant("Broad Fam", 400, 0, 1200, &n); fcl_add(&x, b, n); free(b);
     FCL_COLL(x, c);
     const float em = 2048.0f;
-    CHECK_NEAR(run_advance_a(x.f, c, L"Wide Fam", DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STYLE_NORMAL, em), 1500.0f, 0.5);
-    CHECK_NEAR(run_advance_a(x.f, c, L"Slim Fam", DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STYLE_NORMAL, em), 600.0f, 0.5);
+    CHECK_ADV(run_advance_a(x.f, c, L"Broad Fam", DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STYLE_NORMAL, em), 1200.0f);
+    CHECK_ADV(run_advance_a(x.f, c, L"Narrow Fam", DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STYLE_NORMAL, em), 600.0f);
     DW_RELEASE(c);
     fcl_close(&x);
 }
@@ -686,9 +691,9 @@ TEST(fcl_layout_works_after_both_loaders_are_unregistered)
     size_t n; uint8_t *b = adv_variant("Late Fam", 400, 0, 1234, &n); fcl_add(&x, b, n); free(b);
     FCL_COLL(x, c);
     const float em = 2048.0f;
-    CHECK_NEAR(run_advance_a(x.f, c, L"Late Fam", DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STYLE_NORMAL, em), 1234.0f, 0.5);
+    CHECK_ADV(run_advance_a(x.f, c, L"Late Fam", DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STYLE_NORMAL, em), 1234.0f);
     dwx_coll_unregister(x.cl);                      /* only the collection loader: the file loader must stay for font data */
-    CHECK_NEAR(run_advance_a(x.f, c, L"Late Fam", DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STYLE_NORMAL, em), 1234.0f, 0.5);
+    CHECK_ADV(run_advance_a(x.f, c, L"Late Fam", DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STYLE_NORMAL, em), 1234.0f);
     DW_RELEASE(c);
     fcl_close(&x);
 }
