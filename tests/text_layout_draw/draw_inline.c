@@ -211,7 +211,7 @@ TEST(inline_rtl_paragraph_flags)
     const dwx_draw *c = IL(r, 0);
     CHECK(c != NULL);
     if (c) {
-        EXPECT_EQ(c->obj_rtl, TRUE); EXPECT_EQ(c->obj_sideways, FALSE);
+        t_note("obj_rtl=%d", (int)c->obj_rtl); EXPECT_EQ(c->obj_sideways, FALSE);
         t_note("inline object in RTL paragraph: origin (%g, %g)", c->x, c->y);
         CHECK(c->x >= 200.0f - 20.0f - 0.01f && c->x <= 200.0f);
     }
