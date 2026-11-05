@@ -50,7 +50,10 @@ static HRESULT WINAPI ss_Loc(IDWriteTextAnalysisSource1 *This, UINT32 pos, UINT3
 }
 static HRESULT WINAPI ss_Sub(IDWriteTextAnalysisSource1 *This, UINT32 pos, UINT32 *n, IDWriteNumberSubstitution **ns)
 {
-    ms_src *s = (ms_src *)This; *ns = NULL; *n = pos < s->len ? s->len - pos : 0; logc(s, MF_SUBST, pos, *n, NULL); return S_OK;
+    ms_src *s = (ms_src *)This; UINT32 rest = pos < s->len ? s->len - pos : 0;
+    *n = (s->subst_run && s->subst_run < rest) ? s->subst_run : rest;
+    *ns = s->subst; if (*ns) IDWriteNumberSubstitution_AddRef(*ns);
+    logc(s, MF_SUBST, pos, *n, NULL); return S_OK;
 }
 static HRESULT WINAPI ss_Orient(IDWriteTextAnalysisSource1 *This, UINT32 pos, UINT32 *n, DWRITE_VERTICAL_GLYPH_ORIENTATION *o, UINT8 *bidi)
 {
@@ -162,7 +165,15 @@ int ms_open(ms_ctx *c, int need_v2)
     c->f = dw_shared();
     if (!c->f) return 0;
     if (FAILED(IDWriteFactory_CreateTextAnalyzer(c->f, &c->a)) || !c->a) return 0;
-    if (need_v2) { if (FAILED(IDWriteTextAnalyzer_QueryInterface(c->a, &IID_IDWriteTextAnalyzer2, (void **)&c->a2)) || !c->a2) return 0; }
+    if (need_v2) {
+        ms_src *s; ms_sink *k; HRESULT hr;
+        if (FAILED(IDWriteTextAnalyzer_QueryInterface(c->a, &IID_IDWriteTextAnalyzer2, (void **)&c->a2)) || !c->a2) return 0;
+        /* an analyzer that reports E_NOTIMPL does not provide the orientation analysis at all: prerequisite missing */
+        s = ms_src_new(L"a", 1); k = ms_sink_new(1);
+        hr = ms_orient(c->a2, s, 0, 1, k);
+        free(s); free(k);
+        if (hr == E_NOTIMPL) return 0;
+    }
     return 1;
 }
 void ms_close(ms_ctx *c) { if (c->a2) IDWriteTextAnalyzer2_Release(c->a2); c->a2 = NULL; if (c->a) IDWriteTextAnalyzer_Release(c->a); c->a = NULL; }

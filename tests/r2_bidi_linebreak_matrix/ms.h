@@ -34,6 +34,7 @@ typedef struct ms_src {
     int null_before, null_after;             /* GetTextBeforePosition / GetTextAtPosition(pos >= nafter_from) return NULL, 0 */
     UINT32 or_len[16]; DWRITE_VERTICAL_GLYPH_ORIENTATION or_o[16]; UINT8 or_bidi[16]; int nor; /* orientation runs from 0; last repeats */
     HRESULT fail_orient;
+    IDWriteNumberSubstitution *subst; UINT32 subst_run;   /* returned (AddRef'ed) by GetNumberSubstitution; run length, 0 = rest of the text */
     ms_call log[MS_EVMAX]; int nlog;
     int n[8];                                /* per MF_* count */
 } ms_src;
