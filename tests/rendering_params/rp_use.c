@@ -219,6 +219,20 @@ TEST(rpu_face3_symmetric_upgrade_for_old_overloads_at_high_dpi) {
     }
     DW_RELEASE(f3); FACE_END();
 }
+TEST(rpu_face3_natural_not_upgraded_with_equal_dpi_and_no_transform) {
+    FACE_BEGIN(); IDWriteFontFace3 *f3 = face_v(face, &IID_IDWriteFontFace3);
+    if (!f3) { FACE_END(); t_skip("IDWriteFontFace3 unsupported"); return; }
+    int ver; DWRITE_RENDERING_MODE1 m; DWRITE_GRID_FIT_MODE g;
+    for (ver = 0; ver <= 2; ver++) {
+        void *p; if (!dw_factory_v(DWRITE_FACTORY_TYPE_SHARED, ver)) continue;
+        /* explicit NATURAL with dpiX == dpiY and no transform: the axis-alignment bit is set, so the 4 -> 5 promotion is skipped at any density */
+        p = mk(ver, 4, 0); if (!p) continue;
+        CHECK_HR_OK(face3_call(f3, 96.0f, p, &m, &g));  EXPECT_EQ(m, DWRITE_RENDERING_MODE1_NATURAL);
+        CHECK_HR_OK(face3_call(f3, 192.0f, p, &m, &g)); EXPECT_EQ(m, DWRITE_RENDERING_MODE1_NATURAL);
+        DW_RELEASE(p);
+    }
+    DW_RELEASE(f3); FACE_END();
+}
 TEST(rpu_face3_symmetric_not_upgraded_for_mode1_overload) {
     FACE_BEGIN(); RP_NEED(3); IDWriteFontFace3 *f3 = face_v(face, &IID_IDWriteFontFace3);
     if (!f3) { FACE_END(); t_skip("IDWriteFontFace3 unsupported"); return; }
