@@ -97,4 +97,28 @@ void tlr_model_run(const tlr_model *m, UINT32 pos, tlr_cell *value, DWRITE_TEXT_
 int  tlr_cell_eq(const tlr_cell *a, const tlr_cell *b);
 /* Deterministic PRNG. */
 UINT32 tlr_rand(UINT32 *s);
+
+/* ---- property table: the same range semantics are exercised for every per-range property ------------------------------------------
+ * Each property has value index 0 = the layout default (taken from the format), 1 and 2 = distinct non-default values
+ * (2 may equal 1 for boolean properties: nvals == 2). */
+typedef struct tlr_env {
+    tlr_fx x;
+    IDWriteTextLayout *l; IDWriteTextLayout1 *l1;
+    dwx_effect *eff[3]; dwx_inline *inl[3]; IDWriteTypography *typo[3]; IDWriteFontCollection *coll[3];
+} tlr_env;
+typedef struct tlr_prop {
+    const char *name; int nvals;
+    HRESULT (*set)(tlr_env *e, int v, DWRITE_TEXT_RANGE r);
+    int (*get)(tlr_env *e, UINT32 pos, DWRITE_TEXT_RANGE *r);       /* value index (-1 unknown); poisons the range and requires S_OK */
+} tlr_prop;
+extern const tlr_prop tlr_props[];
+extern const int tlr_nprops;
+int  tlr_env_open(tlr_env *e);               /* fixture + helper objects; 0 on failure */
+int  tlr_env_layout(tlr_env *e, const WCHAR *text);   /* (re)creates e->l over `text`; 0 on failure */
+void tlr_env_close(tlr_env *e);
+extern const WCHAR *tlr_cur_text;
+#define TLR_ENV_BEGIN(text) tlr_env E; tlr_cur_text = (text); memset(&E, 0, sizeof E); if (!tlr_env_open(&E) || !tlr_env_layout(&E, text)) { tlr_env_close(&E); t_skip("fixture unavailable"); return; }
+#define TLR_ENV_END() tlr_env_close(&E)
+#define A(n) (TLR_ALL - (UINT32)(n))        /* length of the unmodified tail starting at n */
+#define FOR_PROPS(p) for (p = tlr_props; p < tlr_props + tlr_nprops; p++)
 #endif
