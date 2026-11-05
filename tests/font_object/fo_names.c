@@ -324,7 +324,7 @@ TEST(font_face_names_locale_string_apis) {
     IDWriteFont_GetFaceNames(x.font[0], &n);
     if (n) {
         CHECK_HR_OK(IDWriteLocalizedStrings_FindLocaleName(n, L"en-us", &idx, &ex)); CHECK(ex);
-        CHECK_HR_OK(IDWriteLocalizedStrings_FindLocaleName(n, L"xx-nonexistent", &idx, &ex)); EXPECT_EQ(ex, FALSE); EXPECT_EQ(idx, (UINT32)-1);
+        CHECK_HR_OK(IDWriteLocalizedStrings_FindLocaleName(n, L"xx-xx", &idx, &ex)); EXPECT_EQ(ex, FALSE); EXPECT_EQ(idx, (UINT32)-1);
         { UINT32 len = 0; WCHAR w[16]; CHECK_HR_OK(IDWriteLocalizedStrings_GetStringLength(n, 0, &len)); EXPECT_EQ(len, 7);
           CHECK_HR_FAILED(IDWriteLocalizedStrings_GetString(n, 0, w, len));        /* no room for the terminating NUL */
           CHECK_HR_OK(IDWriteLocalizedStrings_GetString(n, 0, w, len + 1)); CHECK(!lstrcmpW(w, L"Regular"));

@@ -76,10 +76,17 @@ TEST(font_createface_face3_variant) {
 }
 TEST(font_createface_face_interface_set) {
     fo_fx x; ttf_spec s; IDWriteFontFace *face = NULL; static const dw_qi_row rows[] = { DW_QI_ROW(IDWriteFontFace, 1), DW_QI_ROW(IDWriteFontFace1, 1), DW_QI_ROW(IDWriteFontFace2, 1),
-        DW_QI_ROW(IDWriteFontFace3, 1), DW_QI_ROW(IDWriteFont, 0), DW_QI_ROW(IDWriteFontFamily, 0), DW_QI_ROW(IDWriteFontCollection, 0) };
+        DW_QI_ROW(IDWriteFontFace3, 1) };
+    static const IID *const neg[] = { &IID_IDWriteFont, &IID_IDWriteFontFamily, &IID_IDWriteFontCollection };
     fo_spec(&s, "FoCf7"); FO_OPEN1(x, s);
     IDWriteFont_CreateFontFace(x.font[0], &face);
-    if (face) DW_CHECK_QI(face, rows);
+    if (face) {
+        int i; DW_CHECK_QI(face, rows);
+        for (i = 0; i < 3; i++) {   /* Win10 answers E_NOTIMPL here, other implementations E_NOINTERFACE: accept both, require failure and NULL out */
+            void *pv = (void *)(ULONG_PTR)1; HRESULT hr = IDWriteFontFace_QueryInterface(face, neg[i], &pv);
+            CHECK(hr == E_NOINTERFACE || hr == E_NOTIMPL); CHECK(pv == NULL);
+        }
+    }
     DW_RELEASE(face); fo_close(&x);
 }
 TEST(font_createface_attributes_match_font) {
