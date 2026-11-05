@@ -573,7 +573,7 @@ TEST(cmapi_null_codepoints_with_count) {
     if (!sf_open_face(&p, b.p, b.n)) { sf_close(&p); sf_free(&b); return; }
     if (p.face) {
         CHECK_HR(IDWriteFontFace_GetGlyphIndices(p.face, NULL, 3, g), E_INVALIDARG);
-        t_note("outputs after the failed call: %04x %04x %04x (decomp: zeroed before the argument check)", g[0], g[1], g[2]);
+        t_note("outputs after the failed call: %04x %04x %04x (observed: zeroed before the argument check)", g[0], g[1], g[2]);
         PRED("outputs zeroed", g[0] == 0 && g[1] == 0 && g[2] == 0);
     }
     sf_close(&p); sf_free(&b);
