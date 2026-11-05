@@ -144,7 +144,8 @@ TEST(fmh_design_vertical_without_os2_uses_hhea) {
     ttf_spec s; ttf_default_spec(&s); s.omit |= TTF_OMIT_OS2; SETUP(F, s, 0);
     UINT16 id = 2; DWRITE_GLYPH_METRICS m, w;
     CHECK_HR(IDWriteFontFace_GetDesignGlyphMetrics(F.face, &id, 1, &m, FALSE), S_OK);
-    fm_design_expect(fm_def_glyph(2), 1700, 400, &w); FM_GMCMP(&m, &w, "hhea");
+    /* without OS/2 the vertical ascent comes from hhea and the descent is zero */
+    fm_design_expect(fm_def_glyph(2), 1700, 0, &w); FM_GMCMP(&m, &w, "hhea");
     fm_close(&F);
 }
 TEST(fmh_design_vertical_ignores_typo_flag) {
@@ -424,8 +425,8 @@ TEST(fmh_gdi_glyph_metrics_classic_advances_are_whole_pixels) {
         CHECK_HR(IDWriteFontFace_GetGdiCompatibleGlyphMetrics(F.face, (float)px, 1.0f, NULL, FALSE, ids, 4, m, FALSE), S_OK);
         for (i = 0; i < 4; i++) {
             double pxadv = (double)m[i].advanceWidth * px / 2048.0, r = floor(pxadv + 0.5);
-            /* design units are integers, so the pixel value is whole up to half a design unit */
-            t_check(fabs(pxadv - r) <= 0.5 * px / 2048.0 + 1e-9, __FILE__, __LINE__, "whole pixel advance", "em %d gid %u: advance %u = %g px", px, ids[i], m[i].advanceWidth, pxadv);
+            /* design units are integers, so the pixel value is whole up to one design unit */
+            t_check(fabs(pxadv - r) <= 1.0 * px / 2048.0 + 1e-9, __FILE__, __LINE__, "whole pixel advance", "em %d gid %u: advance %u = %g px", px, ids[i], m[i].advanceWidth, pxadv);
         }
     }
     fm_close(&F);

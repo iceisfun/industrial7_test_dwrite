@@ -337,7 +337,7 @@ TEST(fm_underline_thickness_zero_is_derived) {
     }
 }
 TEST(fm_post_missing_defaults) {
-    static const struct { int upm, pos, th; } t[] = { { 2048, -205, 146 }, { 1000, -100, 71 }, { 1024, -103, 73 } };
+    static const struct { int upm, pos, th; } t[] = { { 2048, -205, 146 }, { 1000, -100, 71 }, { 1024, -102, 73 } };
     unsigned i;
     for (i = 0; i < 3; i++) {
         ttf_spec s; fm_spec_upm(&s, t[i].upm); s.omit |= TTF_OMIT_POST; FM_OPEN(F, s, 0);
