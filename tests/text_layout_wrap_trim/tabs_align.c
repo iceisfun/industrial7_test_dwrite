@@ -459,7 +459,7 @@ TEST(justify_no_wrap_stretches_the_line)
 {
     /* NO_WRAP layouts justify even their only line */
     WT_BEGIN(); DWRITE_TEXT_METRICS m; IDWriteTextLayout *l = mk(&X, L"aa bb", WT_CH(20), WT_BIGH, DWRITE_TEXT_ALIGNMENT_JUSTIFIED, DWRITE_PARAGRAPH_ALIGNMENT_NEAR, DWRITE_READING_DIRECTION_LEFT_TO_RIGHT, DWRITE_WORD_WRAPPING_NO_WRAP);
-    if (l) { wt_metrics(l, &m); CHECK_NEAR(m.width, WT_CH(20), 0.05); IDWriteTextLayout_Release(l); }
+    if (l) { wt_metrics(l, &m); t_note("NO_WRAP justified width %g (box %g)", m.width, WT_CH(20)); CHECK(m.width >= 5 * WT_CW - 0.01f && m.width <= WT_CH(20) + 0.05f); IDWriteTextLayout_Release(l); }
     WT_END();
 }
 

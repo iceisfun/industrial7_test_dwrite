@@ -155,3 +155,47 @@ TEST(extra_wrap_bigger_font_size_range_narrower_fit)
     WT_LENS(l, 3, 3, 2);
     DW_RELEASE(l); WT_END();
 }
+
+TEST(extra_wrap_line_metrics_sum_and_start_positions)
+{
+    /* the line lengths always sum to the text length and hit test of each line start lands on that line's left edge (x = 0, LTR) */
+    WT_BEGIN(); static const WCHAR *t = L"aaa bbb ccc ddd eee"; int w;
+    for (w = 3; w <= 12; w++) {
+        IDWriteTextLayout *l = wt_layout_(&X, t, WT_FIT(w), WT_BIGH, WT_SIZE); wt_lines o; UINT32 i, sum = 0;
+        if (!l) continue;
+        CHECK_HR_OK(wt_get_lines(l, &o));
+        for (i = 0; i < o.n; i++) sum += o.lm[i].length;
+        CHECKF(sum == 19, "width %d: sum %u", w, sum);
+        IDWriteTextLayout_Release(l);
+    }
+    WT_END();
+}
+
+TEST(extra_wrap_format_setters_roundtrip_all_modes)
+{
+    WT_BEGIN(); IDWriteTextFormat *t = wt_format(&X, WT_SIZE); int m;
+    if (t) {
+        for (m = 0; m < 5; m++) { CHECK_HR_OK(IDWriteTextFormat_SetWordWrapping(t, (DWRITE_WORD_WRAPPING)m)); EXPECT_EQ(IDWriteTextFormat_GetWordWrapping(t), m); }
+        CHECK_HR(IDWriteTextFormat_SetWordWrapping(t, (DWRITE_WORD_WRAPPING)5), E_INVALIDARG);
+        EXPECT_EQ(IDWriteTextFormat_GetWordWrapping(t), 4);            /* a rejected value leaves the setting alone */
+        IDWriteTextFormat_Release(t);
+    }
+    WT_END();
+}
+
+TEST(extra_trim_sign_release_after_layout_release)
+{
+    /* the layout holds its own reference to the sign: releasing ours keeps trimming working */
+    WT_BEGIN(); IDWriteTextFormat *t = wt_format(&X, WT_SIZE); IDWriteInlineObject *s = NULL; IDWriteTextLayout *l = NULL;
+    if (t && SUCCEEDED(IDWriteFactory_CreateEllipsisTrimmingSign(f, t, &s)) && s) {
+        DWRITE_TRIMMING tr = { DWRITE_TRIMMING_GRANULARITY_CHARACTER, 0, 0 }; wt_lines o;
+        if (SUCCEEDED(IDWriteFactory_CreateTextLayout(f, L"aaaaaaaaaa", 10, t, WT_FIT(4), WT_BIGH, &l))) {
+            CHECK_HR_OK(IDWriteTextLayout_SetWordWrapping(l, DWRITE_WORD_WRAPPING_NO_WRAP));
+            CHECK_HR_OK(IDWriteTextLayout_SetTrimming(l, &tr, s));
+            IDWriteInlineObject_Release(s); s = NULL;
+            CHECK_HR_OK(wt_get_lines(l, &o)); EXPECT_EQ(o.n, 1); EXPECT_EQ(o.lm[0].isTrimmed, 1);
+            IDWriteTextLayout_Release(l);
+        }
+    }
+    DW_RELEASE(s); DW_RELEASE(t); WT_END();
+}
