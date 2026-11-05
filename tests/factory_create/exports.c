@@ -126,8 +126,12 @@ TEST(exp_getprocaddress_other_ordinals_fail) {
         SET_ERR(0);
         p = GetProcAddress(dwmod(), (LPCSTR)ords[i]);
         CHECKF(p == NULL, "ordinal %lu resolved", (unsigned long)ords[i]);
-        if (!p) EXPECT_ERR(ERROR_PROC_NOT_FOUND);
+        if (!p && ords[i] != 0) EXPECT_ERR(ERROR_PROC_NOT_FOUND);   /* ordinal 0 is a NULL name pointer: error code unspecified */
     }
+}
+TEST(exp_getprocaddress_hash_ordinal_spelling_note) {
+    /* "#1" is an import-resolver spelling; whether GetProcAddress honours it is not asserted. */
+    t_note("GetProcAddress(\"#1\") -> %p", (void *)GetProcAddress(dwmod(), "#1"));
 }
 TEST(exp_getprocaddress_wrong_names_fail) {
     static const char *const names[] = {
@@ -136,7 +140,7 @@ TEST(exp_getprocaddress_wrong_names_fail) {
         "DWriteCreateFactory2", "DWriteCreateFactoryEx", "DWriteCreateFactoryInternal", "DllGetClassObject", "DllCanUnloadNow",
         "DllMain", "DllRegisterServer", "DllUnregisterServer", "DWriteGetFactoryIid", "DWriteCreateTextFormat", "CreateFactory",
         "GetSharedFactory", "DWriteFactory", "?DWriteCreateFactory@@YAJW4DWRITE_FACTORY_TYPE@@AEBU_GUID@@PEAPEAUIUnknown@@@Z",
-        "DWriteCreateFactory\\", "dwrite.DWriteCreateFactory", "dwrite.dll.DWriteCreateFactory", "#1", "#2",
+        "DWriteCreateFactory\\", "dwrite.DWriteCreateFactory", "dwrite.dll.DWriteCreateFactory",
     };
     size_t i;
     for (i = 0; i < sizeof names / sizeof names[0]; i++) {
