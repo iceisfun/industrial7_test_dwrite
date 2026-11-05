@@ -12,6 +12,7 @@ static inline HRESULT fc_create(int type, REFIID riid, void **out) {
     if (!fn) { *out = NULL; return HRESULT_FROM_WIN32(ERROR_PROC_NOT_FOUND); }
     return fn((DWRITE_FACTORY_TYPE)type, riid, (IUnknown **)out);
 }
+static const GUID fc_null_guid = { 0, 0, 0, { 0, 0, 0, 0, 0, 0, 0, 0 } };
 #define FC_SENTINEL ((void *)(ULONG_PTR)0x1)
 
 /* Skip the test when the export cannot be resolved. */
