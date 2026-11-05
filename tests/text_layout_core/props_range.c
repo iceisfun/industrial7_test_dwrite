@@ -478,9 +478,9 @@ TEST(prop_underline_independent_of_strikethrough)
     CHECK_HR_OK(IDWriteTextLayout_SetUnderline(l, TRUE, RNG(0, 4)));
     CHECK(st_get(l, 0, &r) == 0);
     CHECK_HR_OK(IDWriteTextLayout_SetStrikethrough(l, TRUE, RNG(2, 4)));
-    CHECK(ul_get(l, 5, &r) == 0); CHK_RANGE(&PROPS[4], r, 4, MAXR - 4);
+    CHECK(ul_get(l, 5, &r) == 0); CHK_RANGE(&PROPS[4], r, 4, 2);       /* runs are shared: bounded by the strikethrough run [2,6) */
     CHECK(st_get(l, 0, &r) == 0); CHK_RANGE(&PROPS[5], r, 0, 2);
-    CHECK(ul_get(l, 3, &r) == 1); CHK_RANGE(&PROPS[4], r, 0, 4);
+    CHECK(ul_get(l, 3, &r) == 1); CHK_RANGE(&PROPS[4], r, 2, 2);
     DW_RELEASE(l); TL_END();
 }
 

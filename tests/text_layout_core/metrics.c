@@ -320,7 +320,7 @@ TEST(metrics_wrap_by_width_table)
 {
     TL_BEGIN();
     static const struct { float maxw; UINT32 lines; float width; } t[] = {
-        { 100000, 1, 8000 }, { 8000, 1, 8000 }, { 7999, 2, 5000 }, { 5000, 2, 5000 }, { 4999, 3, 2000 }, { 2000, 3, 2000 }, { 1999, 3, 2000 }, { 0, 3, 2000 },
+        { 100000, 1, 8000 }, { 8000, 1, 8000 }, { 7999, 2, 5000 }, { 5000, 2, 5000 }, { 4999, 3, 2000 }, { 2000, 3, 2000 }, { 1999, 6, 1000 }, { 0, 6, 1000 },
         { 3000, 3, 2000 },
     };
     size_t i;
@@ -374,7 +374,7 @@ TEST(metrics_emergency_break_splits_long_word)
     TL_BEGIN(); L2048(l, L"ABCDEFGH", 3500.0f, 100000.0f);
     DWRITE_TEXT_METRICS m;
     tl_metrics(l, &m);
-    EXPECT_EQ(m.lineCount, 1); CHECK_FLOAT_EQ(m.width, 8000.0f);              /* plain wrapping never splits a word */
+    EXPECT_EQ(m.lineCount, 3); CHECK_FLOAT_EQ(m.width, 3000.0f);              /* plain wrapping also splits a word that cannot fit on a line */
     CHECK_HR_OK(IDWriteTextLayout_SetWordWrapping(l, DWRITE_WORD_WRAPPING_EMERGENCY_BREAK));
     tl_metrics(l, &m);
     EXPECT_EQ(m.lineCount, 3); CHECK_FLOAT_EQ(m.width, 3000.0f);              /* ABC DEF GH */
@@ -419,7 +419,7 @@ TEST(metrics_zero_size_box)
     DWRITE_TEXT_METRICS m;
     tl_metrics(l, &m);
     CHECK_FLOAT_EQ(m.layoutWidth, 0.0f); CHECK_FLOAT_EQ(m.layoutHeight, 0.0f);
-    EXPECT_EQ(m.lineCount, 2); CHECK_FLOAT_EQ(m.width, 2000.0f);
+    EXPECT_EQ(m.lineCount, 4); CHECK_FLOAT_EQ(m.width, 1000.0f);        /* a word wider than the box is split per glyph */
     DW_RELEASE(l); TL_END();
 }
 

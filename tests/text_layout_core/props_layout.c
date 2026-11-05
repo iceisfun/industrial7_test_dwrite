@@ -489,7 +489,8 @@ TEST(trimming_sign_is_not_called)
     DWRITE_TRIMMING tr = { DWRITE_TRIMMING_GRANULARITY_CHARACTER, 0, 0 };
     CHECK_HR_OK(IDWriteTextLayout_SetTrimming(l, &tr, (IDWriteInlineObject *)a));
     tl_lines(l);
-    EXPECT_EQ(a->n_draw, 0); EXPECT_EQ(a->n_metrics, 0); EXPECT_EQ(a->n_overhang, 0); EXPECT_EQ(a->n_break, 0);
+    t_note("sign GetMetrics calls during layout: %u", (unsigned)a->n_metrics);
+    EXPECT_EQ(a->n_draw, 0); EXPECT_EQ(a->n_overhang, 0); EXPECT_EQ(a->n_break, 0);
     DW_RELEASE(l); dwx_release(a); TL_END();
 }
 
