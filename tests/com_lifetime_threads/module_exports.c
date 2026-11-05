@@ -167,3 +167,29 @@ TEST(mod_independent_loadlibraryex_flags_keep_export) {
     x = LoadLibraryA("dwrite_does_not_exist_zz.dll");
     CHECK(x == NULL); EXPECT_ERR(ERROR_MOD_NOT_FOUND);
 }
+
+/* ---- DWriteCreateFactory argument contract (decomp: *ppFactory zeroed first, IID forwarded to QueryInterface) --- */
+TEST(exp_create_factory_unknown_iid_isolated_no_interface) {
+    void *p = (void *)(ULONG_PTR)1; HRESULT hr;
+    IID bogus = { 0x12345678, 0x9abc, 0xdef0, { 1, 2, 3, 4, 5, 6, 7, 8 } };
+    NEED_PROC();
+    hr = dw_create_factory(DWRITE_FACTORY_TYPE_ISOLATED, &bogus, &p);
+    CHECK_HR(hr, E_NOINTERFACE);                 /* the new factory's QueryInterface rejects it, the temporary ref is dropped */
+    CHECK_OUT_NULL(p);
+}
+TEST(exp_create_factory_unknown_iid_shared_no_interface) {
+    void *p = (void *)(ULONG_PTR)1; HRESULT hr;
+    IID bogus = { 0x12345678, 0x9abc, 0xdef0, { 1, 2, 3, 4, 5, 6, 7, 8 } };
+    NEED_PROC();
+    hr = dw_create_factory(DWRITE_FACTORY_TYPE_SHARED, &bogus, &p);
+    CHECK_HR(hr, E_NOINTERFACE);
+    CHECK_OUT_NULL(p);
+}
+TEST(exp_create_factory_iunknown_iid_identity) {
+    void *a = NULL, *b = NULL; IDWriteFactory *f = NULL;
+    NEED_PROC();
+    CHECK_HR_OK(dw_create_factory(DWRITE_FACTORY_TYPE_SHARED, &IID_IUnknown, &a));
+    CHECK_HR_OK(dw_create_factory(DWRITE_FACTORY_TYPE_SHARED, &IID_IDWriteFactory, &b));
+    if (a && b) { IUnknown_QueryInterface((IUnknown *)b, &IID_IUnknown, (void **)&f); CHECK((void *)f == a); DW_RELEASE(f); }
+    DW_RELEASE(a); DW_RELEASE(b);
+}
