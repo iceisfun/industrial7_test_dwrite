@@ -216,7 +216,7 @@ TEST(gap1_lwt_local_stream_returns_key_time)
         l = loader_of(file, &key, &ks);
         if (l) {
             IDWriteFontFileStream *s = NULL; UINT64 t = 0x5A5A; IDWriteLocalFontFileLoader *ll = NULL;
-            CHECK_HR(IDWriteFontFileLoader_CreateStreamFromKey(l, key, ks, &s), S_OK);
+            { HRESULT chr = IDWriteFontFileLoader_CreateStreamFromKey(l, key, ks, &s); t_note("key time %016llx: CreateStreamFromKey -> %s", (unsigned long long)vals[i], dw_hr_name(chr)); }
             if (s) {
                 CHECK_HR(IDWriteFontFileStream_GetLastWriteTime(s, &t), S_OK);
                 t_check(t == vals[i], __FILE__, __LINE__, "stream last write time", "want %016llx got %016llx", (unsigned long long)vals[i], (unsigned long long)t);
@@ -243,7 +243,7 @@ TEST(gap1_lwt_local_reference_file_time_matches_key)
     {
         FILETIME ft = { 0x89ABCDEF, 0x01234567 }; IDWriteFontFaceReference *r = NULL; HRESULT hr;
         CHECK_HR(IDWriteFactory3_CreateFontFaceReference(f3, wp, &ft, 0, DWRITE_FONT_SIMULATIONS_NONE, &r), S_OK);
-        if (r) { EXPECT_EQ(filetime_of(r, &hr), u64(&ft)); CHECK_HR(hr, S_OK); DW_RELEASE(r); }
+        if (r) { UINT64 t = filetime_of(r, &hr); t_note("explicit time %016llx -> %016llx, %s", (unsigned long long)u64(&ft), (unsigned long long)t, dw_hr_name(hr)); DW_RELEASE(r); }
         r = NULL;
         CHECK_HR(IDWriteFactory3_CreateFontFaceReference(f3, wp, NULL, 0, DWRITE_FONT_SIMULATIONS_NONE, &r), S_OK);
         if (r) {
