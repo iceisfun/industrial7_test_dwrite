@@ -213,11 +213,12 @@ TEST(sh_each_create_adds_one_reference_for_each_iid) {
     }
 }
 TEST(sh_factory_usable_after_dropping_all_own_references) {
-    IUnknown *a = NULL, *b = NULL; IDWriteTextFormat *tf; NEED_EXPORT();
+    IUnknown *a = NULL; IDWriteFactory *b = NULL; IDWriteTextFormat *tf; NEED_EXPORT();
     CHECK_HR_OK(rfp_create(FT_SHARED, &IID_IUnknown, (void **)&a));
     DW_RELEASE(a);
-    CHECK_HR_OK(rfp_create(FT_SHARED, &IID_IUnknown, (void **)&b));
-    tf = rfp_fmt((IDWriteFactory *)b, 12.0f, L"en-us");
+    /* the IUnknown pointer is not an IDWriteFactory vtable: request the interface explicitly */
+    CHECK_HR_OK(rfp_create(FT_SHARED, &IID_IDWriteFactory, (void **)&b)); REQUIRE(b);
+    tf = rfp_fmt(b, 12.0f, L"en-us");
     CHECK(tf != NULL);
     DW_RELEASE(tf); DW_RELEASE(b);
 }

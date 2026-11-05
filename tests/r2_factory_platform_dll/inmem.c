@@ -39,7 +39,7 @@ static HRESULT mkref(imf *x, IUnknown *owner, IDWriteFontFile **out) {
 
 TEST(imf_create_ok_refcount_one) {
     OPEN(x, 0);
-    EXPECT_REFS(x.l, 1);
+    EXPECT_REFS(x.l, 2);   /* the loader plus the IDWriteFontFileLoader interface reference held by the fixture */
     imf_close(&x);
 }
 TEST(imf_create_distinct_objects) {
@@ -403,7 +403,7 @@ TEST(http_create_distinct_objects_and_qi) {
     CHECK_HR_OK(IDWriteFactory5_CreateHttpFontFileLoader(f5, L"https://a.invalid/", L"", &b));
     CHECK(a && b && a != b);
     if (a) {
-        dw_qi_row rows[] = { DW_QI_ROW(IDWriteRemoteFontFileLoader, 1), DW_QI_ROW(IDWriteFontFileLoader, 1), DW_QI_ROW(IUnknown, 1),
+        dw_qi_row rows[] = { DW_QI_ROW(IDWriteRemoteFontFileLoader, 1), DW_QI_ROW(IDWriteFontFileLoader, -1), DW_QI_ROW(IUnknown, 1),
                              DW_QI_ROW(IDWriteInMemoryFontFileLoader, 0), DW_QI_ROW(IDWriteFontFile, 0) };
         DW_CHECK_QI(a, rows);
     }
@@ -414,10 +414,14 @@ TEST(http_loader_register_unregister_cycle) {
     REQUIRE(f);
     if (FAILED(IDWriteFactory_QueryInterface(f, &IID_IDWriteFactory5, (void **)&f5))) { t_skip("IDWriteFactory5 unsupported"); DW_RELEASE(f); return; }
     CHECK_HR_OK(IDWriteFactory5_CreateHttpFontFileLoader(f5, L"https://a.invalid/", L"", &l)); REQUIRE(l);
-    CHECK_HR_OK(IDWriteRemoteFontFileLoader_QueryInterface(l, &IID_IDWriteFontFileLoader, (void **)&fl));
-    hr = IDWriteFactory_RegisterFontFileLoader(f, fl);
-    t_note("RegisterFontFileLoader(http loader): %s", dw_hr_name(hr));
-    if (SUCCEEDED(hr)) CHECK_HR_OK(IDWriteFactory_UnregisterFontFileLoader(f, fl));
+    /* Windows 10 refuses QI from the remote loader to its base IDWriteFontFileLoader (E_NOINTERFACE); registration is then tried with the derived pointer */
+    hr = IDWriteRemoteFontFileLoader_QueryInterface(l, &IID_IDWriteFontFileLoader, (void **)&fl);
+    t_note("QI remote loader -> IDWriteFontFileLoader: %s", dw_hr_name(hr));
+    if (FAILED(hr)) fl = NULL;
+    {   IDWriteFontFileLoader *reg = fl ? fl : (IDWriteFontFileLoader *)l;
+        hr = IDWriteFactory_RegisterFontFileLoader(f, reg);
+        t_note("RegisterFontFileLoader(http loader): %s", dw_hr_name(hr));
+        if (SUCCEEDED(hr)) CHECK_HR_OK(IDWriteFactory_UnregisterFontFileLoader(f, reg)); }
     DW_RELEASE(fl); DW_RELEASE(l); DW_RELEASE(f5); DW_RELEASE(f);
 }
 TEST(http_loader_invalid_key_stream_fails_cleanly) {

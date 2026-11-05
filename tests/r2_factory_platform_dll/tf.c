@@ -4,6 +4,8 @@
  * CreateTextLayout rejects a NULL string or format and negative / NaN maxWidth / maxHeight.
  * CreateNumberSubstitution accepts a NULL locale only for method NONE (2). */
 #include "rfp.h"
+/* the run that reaches the end of the text reports either the remaining text length or (Windows) the open-ended UINT32_MAX - start */
+#define CHECK_LAST_RANGE(r, start, tlen) CHECKF((r).length == (UINT32)((tlen) - (start)) || (r).length == (UINT32)(0xffffffffu - (start)), "last range length 0x%x", (unsigned)(r).length)
 
 static HRESULT mk(IDWriteFactory *f, const WCHAR *fam, int w, int st, int str, float sz, const WCHAR *loc, IDWriteTextFormat **o) {
     return IDWriteFactory_CreateTextFormat(f, fam, NULL, (DWRITE_FONT_WEIGHT)w, (DWRITE_FONT_STYLE)st, (DWRITE_FONT_STRETCH)str, sz, loc, o);
@@ -176,7 +178,7 @@ TEST(loc_empty_locale_layout_inherits_format_locale) {
     locale_of(tf, fb, 100, &flen);
     CHECK_HR_OK(IDWriteTextLayout_GetLocaleName(l, 0, lb, 100, &r));
     CHECK(!lstrcmpW(fb, lb));
-    EXPECT_EQ(r.startPosition, 0); EXPECT_EQ(r.length, 7);
+    EXPECT_EQ(r.startPosition, 0); CHECK_LAST_RANGE(r, 0, 7);
     DW_RELEASE(l); DW_RELEASE(tf);
 }
 TEST(loc_explicit_locale_round_trip) {
@@ -230,7 +232,7 @@ TEST(loc_layout_range_locale_override_keeps_format_locale) {
     CHECK_HR_OK(IDWriteTextLayout_SetLocaleName(l, L"fr-fr", set));
     CHECK_HR_OK(IDWriteTextLayout_GetLocaleName(l, 0, b, 40, &r)); CHECK(!lstrcmpiW(b, L"en-us")); EXPECT_EQ(r.startPosition, 0); EXPECT_EQ(r.length, 2);
     CHECK_HR_OK(IDWriteTextLayout_GetLocaleName(l, 2, b, 40, &r)); CHECK(!lstrcmpiW(b, L"fr-fr")); EXPECT_EQ(r.startPosition, 2); EXPECT_EQ(r.length, 3);
-    CHECK_HR_OK(IDWriteTextLayout_GetLocaleName(l, 5, b, 40, &r)); CHECK(!lstrcmpiW(b, L"en-us")); EXPECT_EQ(r.startPosition, 5); EXPECT_EQ(r.length, 2);
+    CHECK_HR_OK(IDWriteTextLayout_GetLocaleName(l, 5, b, 40, &r)); CHECK(!lstrcmpiW(b, L"en-us")); EXPECT_EQ(r.startPosition, 5); CHECK_LAST_RANGE(r, 5, 7);
     DW_RELEASE(l); DW_RELEASE(tf);
 }
 TEST(loc_user_default_locale_name_is_non_empty) {
@@ -287,7 +289,7 @@ TEST(tl_length_shorter_than_buffer_uses_prefix) {
     IDWriteTextFormat *tf; IDWriteTextLayout *l = NULL; IDWriteFactory *f = dw_shared(); REQUIRE(f);
     tf = rfp_fmt(f, 12.0f, L"en-us"); REQUIRE(tf);
     CHECK_HR_OK(IDWriteFactory_CreateTextLayout(f, L"abcdefgh", 3, tf, 100.0f, 100.0f, &l)); REQUIRE(l);
-    {   DWRITE_TEXT_RANGE r = { 0, 8 }; WCHAR b[16]; HRESULT hr = IDWriteTextLayout_GetLocaleName(l, 2, b, 16, &r); CHECK_HR_OK(hr); EXPECT_EQ(r.length, 3); }
+    {   DWRITE_TEXT_RANGE r = { 0, 8 }; WCHAR b[16]; HRESULT hr = IDWriteTextLayout_GetLocaleName(l, 2, b, 16, &r); CHECK_HR_OK(hr); CHECK_LAST_RANGE(r, 0, 3); }
     DW_RELEASE(l); DW_RELEASE(tf);
 }
 TEST(tl_layout_keeps_format_from_other_factory_working) {
