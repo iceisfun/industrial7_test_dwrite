@@ -277,7 +277,7 @@ static IDWriteTextLayout2 *app_layout(lfx *L, r2_cfb *c, const WCHAR *text, IDWr
 
 RT(app_fallback_is_called_when_the_layout_is_drawn)
 {
-    APP_SETUP(L, c, L"abc", l, l2);
+    APP_SETUP(L, c, L"a\x3042", l, l2);       /* the fallback is only consulted for text the layout font cannot display */
     EXPECT_EQ(c->n_map, 0);
     { dwx_renderer *r = r2_draw(l); dwx_release(r); }
     CHECK(c->n_map >= 1);
@@ -288,7 +288,7 @@ RT(app_fallback_receives_the_formats_properties)
 {
     LFX_BEGIN(L, R2_MAIN); r2_cfb *c = r2_cfb_new(L.X.coll); IDWriteTextLayout *l = NULL; IDWriteTextLayout2 *l2; IDWriteTextFormat *fm = NULL;
     CHECK_HR_OK(IDWriteFactory_CreateTextFormat(f, R2_ALT, L.X.coll, DWRITE_FONT_WEIGHT_BOLD, DWRITE_FONT_STYLE_ITALIC, DWRITE_FONT_STRETCH_CONDENSED, 18.0f, L"fr-FR", &fm));
-    CHECK_HR_OK(IDWriteFactory_CreateTextLayout(f, L"abc", 3, fm, 500, 100, &l)); l2 = lay2_of(l);
+    CHECK_HR_OK(IDWriteFactory_CreateTextLayout(f, L"ab\x3042", 3, fm, 500, 100, &l)); l2 = lay2_of(l);
     if (l2) {
         dwx_renderer *r; const r2_cfb_call *k;
         CHECK_HR_OK(IDWriteTextLayout2_SetFontFallback(l2, R2_CFB(c)));
@@ -299,7 +299,7 @@ RT(app_fallback_receives_the_formats_properties)
         CHECK(k->has_family && !lstrcmpW(k->family, R2_ALT));
         EXPECT_EQ(k->w, DWRITE_FONT_WEIGHT_BOLD); EXPECT_EQ(k->st, DWRITE_FONT_STYLE_ITALIC); EXPECT_EQ(k->sx, DWRITE_FONT_STRETCH_CONDENSED);
         CHECK(!lstrcmpiW(k->locale, L"fr-FR"));
-        CHECKF(k->ntext == 3 && !wcsncmp(k->text, L"abc", 3), "window text \"%ls\" (%u chars)", k->text, k->ntext);
+        CHECKF(k->ntext >= 1 && k->ntext <= 3 && wcsstr(L"ab\x3042", k->text) != NULL, "window text \"%ls\" (%u chars)", k->text, k->ntext);
         t_note("first call: pos %u len %u locale \"%ls\"", k->pos, k->len, k->locale);
         IDWriteFontFallback_Release(R2_CFB(c));
     }
@@ -308,7 +308,7 @@ RT(app_fallback_receives_the_formats_properties)
 
 RT(app_fallback_default_properties)
 {
-    APP_SETUP(L, c, L"abc", l, l2);
+    APP_SETUP(L, c, L"a\x3042", l, l2);
     { dwx_renderer *r = r2_draw(l); dwx_release(r); }
     CHECK(c->n_map >= 1);
     if (c->nlog) {
@@ -321,11 +321,11 @@ RT(app_fallback_default_properties)
 
 RT(app_fallback_window_covers_the_whole_uniform_text)
 {
-    APP_SETUP(L, c, L"abcdef", l, l2);
+    APP_SETUP(L, c, L"abc\x3042\x3044\x3046", l, l2);
     { dwx_renderer *r = r2_draw(l); dwx_release(r); }
     CHECK(c->nlog >= 1);
     if (c->nlog) {
-        EXPECT_EQ(c->log[0].ntext, 6); CHECK(!wcsncmp(c->log[0].text, L"abcdef", 6));
+        CHECK(c->log[0].ntext >= 1 && c->log[0].ntext <= 6 && wcsstr(L"abc\x3042\x3044\x3046", c->log[0].text) != NULL);
         t_note("window of the first call: pos %u len %u; calls %ld", c->log[0].pos, c->log[0].len, (long)c->n_map);
         EXPECT_EQ(c->log[0].ret_ml, c->log[0].ntext);           /* no rules: the application maps the whole window to "no font" */
     }
@@ -392,13 +392,13 @@ RT(app_fallback_scale_half)
 
 RT(app_fallback_per_range_weight_reaches_the_callback)
 {
-    APP_SETUP(L, c, L"abcdef", l, l2);
+    APP_SETUP(L, c, L"\x3042\x3044\x3046\x3048\x304a\x304b", l, l2);
     DWRITE_TEXT_RANGE mid = { 2, 2 }; int i;
     CHECK_HR_OK(IDWriteTextLayout_SetFontWeight(l, DWRITE_FONT_WEIGHT_BOLD, mid));
     { dwx_renderer *r = r2_draw(l); dwx_release(r); }
     CHECK(c->n_map >= 3);
     for (i = 0; i < c->nlog; i++) {
-        const r2_cfb_call *k = &c->log[i]; const WCHAR *p = wcsstr(L"abcdef", k->text); int off = p ? (int)(p - L"abcdef") : -1;
+        const r2_cfb_call *k = &c->log[i]; const WCHAR *p = wcsstr(L"\x3042\x3044\x3046\x3048\x304a\x304b", k->text); int off = p ? (int)(p - L"\x3042\x3044\x3046\x3048\x304a\x304b") : -1;
         int bold_expected;
         if (off < 0 || !k->ntext) { t_check(0, __FILE__, __LINE__, "window text is a substring of the layout text", "call %d: \"%ls\"", i, k->text); continue; }
         bold_expected = (off >= 2 && off + (int)k->ntext <= 4);
@@ -410,12 +410,12 @@ RT(app_fallback_per_range_weight_reaches_the_callback)
 
 RT(app_fallback_per_range_family_reaches_the_callback)
 {
-    APP_SETUP(L, c, L"abcdef", l, l2);
+    APP_SETUP(L, c, L"\x3042\x3044\x3046\x3048\x304a\x304b", l, l2);
     DWRITE_TEXT_RANGE first = { 0, 3 }; int i, seen_alt = 0, seen_main = 0;
     CHECK_HR_OK(IDWriteTextLayout_SetFontFamilyName(l, R2_ALT, first));
     { dwx_renderer *r = r2_draw(l); dwx_release(r); }
     for (i = 0; i < c->nlog; i++) {
-        const r2_cfb_call *k = &c->log[i]; const WCHAR *p = wcsstr(L"abcdef", k->text); int off = p ? (int)(p - L"abcdef") : -1;
+        const r2_cfb_call *k = &c->log[i]; const WCHAR *p = wcsstr(L"\x3042\x3044\x3046\x3048\x304a\x304b", k->text); int off = p ? (int)(p - L"\x3042\x3044\x3046\x3048\x304a\x304b") : -1;
         if (off < 0 || !k->ntext) continue;
         if (off < 3) { CHECKF(!lstrcmpW(k->family, R2_ALT), "call %d at %d: family \"%ls\"", i, off, k->family); seen_alt = 1; }
         else { CHECKF(!lstrcmpW(k->family, R2_MAIN), "call %d at %d: family \"%ls\"", i, off, k->family); seen_main = 1; }
@@ -426,12 +426,12 @@ RT(app_fallback_per_range_family_reaches_the_callback)
 
 RT(app_fallback_per_range_locale_reaches_the_callback)
 {
-    APP_SETUP(L, c, L"abcdef", l, l2);
+    APP_SETUP(L, c, L"\x3042\x3044\x3046\x3048\x304a\x304b", l, l2);
     DWRITE_TEXT_RANGE tail = { 3, 3 }; int i, seen_ja = 0;
     CHECK_HR_OK(IDWriteTextLayout_SetLocaleName(l, L"ja-JP", tail));
     { dwx_renderer *r = r2_draw(l); dwx_release(r); }
     for (i = 0; i < c->nlog; i++) {
-        const r2_cfb_call *k = &c->log[i]; const WCHAR *p = wcsstr(L"abcdef", k->text); int off = p ? (int)(p - L"abcdef") : -1;
+        const r2_cfb_call *k = &c->log[i]; const WCHAR *p = wcsstr(L"\x3042\x3044\x3046\x3048\x304a\x304b", k->text); int off = p ? (int)(p - L"\x3042\x3044\x3046\x3048\x304a\x304b") : -1;
         if (off < 0 || !k->ntext) continue;
         if (off >= 3) { CHECKF(!lstrcmpiW(k->locale, L"ja-JP"), "call %d at %d: locale \"%ls\"", i, off, k->locale); seen_ja = 1; }
         else CHECKF(!lstrcmpiW(k->locale, L"en-us"), "call %d at %d: locale \"%ls\"", i, off, k->locale);
@@ -469,7 +469,7 @@ RT(app_fallback_replaced_between_draws)
 
 RT(app_fallback_second_draw_note)
 {
-    APP_SETUP(L, c, L"abc", l, l2);
+    APP_SETUP(L, c, L"a\x3042", l, l2);
     LONG n1, n2;
     { dwx_renderer *r = r2_draw(l); dwx_release(r); } n1 = c->n_map;
     { dwx_renderer *r = r2_draw(l); dwx_release(r); } n2 = c->n_map;

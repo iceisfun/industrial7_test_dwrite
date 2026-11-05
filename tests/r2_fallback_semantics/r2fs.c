@@ -225,12 +225,32 @@ int r2_walk(IDWriteFontFallback *fb, const WCHAR *text, const r2_args *a0, char 
     return nseg;
 }
 
+/* merge adjacent segments naming the same family: where an implementation cuts a run inside one family is not part of the contract */
+static void walk_coalesce(const char *in, char *out, int cap)
+{
+    char tmp[512]; char *tok, *save = NULL; char lastfam[128] = ""; unsigned total = 0; int have = 0, used = 0;
+    snprintf(tmp, sizeof tmp, "%s", in);
+    out[0] = 0;
+    for (tok = strtok_s(tmp, "|", &save); ; tok = strtok_s(NULL, "|", &save)) {
+        unsigned n = 0; char fam[128] = "";
+        if (tok) { char *c = strchr(tok, ':'); if (c) { n = (unsigned)atoi(tok); snprintf(fam, sizeof fam, "%s", c + 1); } }
+        if (have && (!tok || strcmp(fam, lastfam))) {
+            int w = snprintf(out + used, cap - used, "%s%u:%s", used ? "|" : "", total, lastfam);
+            if (w > 0 && used + w < cap) used += w;
+            have = 0; total = 0;
+        }
+        if (!tok) break;
+        snprintf(lastfam, sizeof lastfam, "%s", fam); total += n; have = 1;
+    }
+}
+
 void r2_walk_check_(IDWriteFontFallback *fb, const WCHAR *text, const r2_args *a, const char *expected, const char *file, int line)
 {
-    char buf[512]; int cov = 1, n = r2_walk(fb, text, a, buf, sizeof buf, &cov);
+    char buf[512], cb[512], ce[512]; int cov = 1, n = r2_walk(fb, text, a, buf, sizeof buf, &cov);
     char name[600];
+    walk_coalesce(buf, cb, sizeof cb); walk_coalesce(expected, ce, sizeof ce);
     snprintf(name, sizeof name, "walk == \"%s\"", expected);
-    t_check(n >= 0 && !strcmp(buf, expected), file, line, name, "got \"%s\" (segments %d)", buf, n);
+    t_check(n >= 0 && !strcmp(cb, ce), file, line, name, "got \"%s\" (segments %d)", buf, n);
     (void)cov;
 }
 
