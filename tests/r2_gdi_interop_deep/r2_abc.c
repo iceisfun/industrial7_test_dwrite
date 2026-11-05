@@ -57,10 +57,10 @@ static void abc_vs(const char *fam, int natural)
                 /* GDI_CLASSIC advances are whole pixels */
                 if (fabs(adv - floor(adv + 0.5)) > 0.05) nonint++;
             }
-            CHECKF(fabs(adv - (double)(abc.abcA + (int)abc.abcB + abc.abcC)) <= (natural ? 3.0 + 0.04 * px : 1.0),
+            CHECKF(fabs(adv - (double)(abc.abcA + (int)abc.abcB + abc.abcC)) <= (natural ? 4.25 : 0.05),   /* Win10: classic advances are exact; natural (hinted GDI vs unhinted) differ by up to 4.01 px at 72 px */
                    "%s %s %dpx U+%04X: dwrite advance %.3f GDI A+B+C %d", fam, natural ? "natural" : "classic", px, r2_chars[ic], adv, abc.abcA + (int)abc.abcB + abc.abcC);
-            CHECKF(fabs(lsb - (double)abc.abcA) <= 3.0, "%s %dpx U+%04X: dwrite lsb %.3f GDI abcA %d", fam, px, r2_chars[ic], lsb, abc.abcA);
-            CHECKF(fabs(bw - (double)abc.abcB) <= 3.0 + 0.04 * px, "%s %dpx U+%04X: dwrite black box %.3f GDI abcB %u", fam, px, r2_chars[ic], bw, abc.abcB);
+            CHECKF(fabs(lsb - (double)abc.abcA) <= 2.05, "%s %dpx U+%04X: dwrite lsb %.3f GDI abcA %d", fam, px, r2_chars[ic], lsb, abc.abcA);
+            CHECKF(fabs(bw - (double)abc.abcB) <= (natural ? 4.75 : 3.9), "%s %dpx U+%04X: dwrite black box %.3f GDI abcB %u", fam, px, r2_chars[ic], bw, abc.abcB);
             if (adv == (double)(abc.abcA + (int)abc.abcB + abc.abcC)) exact++;
         }
     }
@@ -89,16 +89,17 @@ static void abc_design(const char *fam)
         n++;
         CHECKF(r2_iabs((int)gm.gmCellIncX - (int)dm.advanceWidth) <= 1, "%s U+%04X: gmCellIncX %d vs advanceWidth %d", fam, r2_chars[ic], gm.gmCellIncX, dm.advanceWidth);
         CHECKF(gm.gmCellIncY == 0, "%s: gmCellIncY %d", fam, gm.gmCellIncY);
-        /* some fonts (Consolas) carry hmtx side bearings that differ from the glyph bounding box GDI reports */
-        if (!strcmp(fam, "Consolas")) {
-            if (r2_iabs((int)gm.gmBlackBoxX - ((int)dm.advanceWidth - dm.leftSideBearing - dm.rightSideBearing)) > 2 || r2_iabs(gm.gmptGlyphOrigin.x - dm.leftSideBearing) > 1)
-                t_note("%s U+%04X: GDI box x %u origin %ld vs design lsb %d", fam, r2_chars[ic], gm.gmBlackBoxX, gm.gmptGlyphOrigin.x, dm.leftSideBearing);
-        } else
-        CHECKF(r2_iabs((int)gm.gmBlackBoxX - ((int)dm.advanceWidth - dm.leftSideBearing - dm.rightSideBearing)) <= 2,
-               "%s U+%04X: black box x %u vs %d", fam, r2_chars[ic], gm.gmBlackBoxX, dm.advanceWidth - dm.leftSideBearing - dm.rightSideBearing);
+        /* Win10: Consolas U+0066 has hmtx lsb 0 while the glyph box GDI reports starts 80 design units in (box 80 narrower, origin 80 to the right) */
+        if (!strcmp(fam, "Consolas") && r2_chars[ic] == 'f') {
+            CHECKF((int)gm.gmBlackBoxX - ((int)dm.advanceWidth - dm.leftSideBearing - dm.rightSideBearing) == -80, "%s U+%04X: black box x %u vs %d", fam, r2_chars[ic], gm.gmBlackBoxX, dm.advanceWidth - dm.leftSideBearing - dm.rightSideBearing);
+            CHECKF(gm.gmptGlyphOrigin.x - dm.leftSideBearing == 80, "%s U+%04X: origin x %ld vs lsb %d", fam, r2_chars[ic], gm.gmptGlyphOrigin.x, dm.leftSideBearing);
+        } else {
+            CHECKF(r2_iabs((int)gm.gmBlackBoxX - ((int)dm.advanceWidth - dm.leftSideBearing - dm.rightSideBearing)) <= 2,
+                   "%s U+%04X: black box x %u vs %d", fam, r2_chars[ic], gm.gmBlackBoxX, dm.advanceWidth - dm.leftSideBearing - dm.rightSideBearing);
+            CHECKF(r2_iabs(gm.gmptGlyphOrigin.x - dm.leftSideBearing) <= 1, "%s U+%04X: origin x %ld vs lsb %d", fam, r2_chars[ic], gm.gmptGlyphOrigin.x, dm.leftSideBearing);
+        }
         CHECKF(r2_iabs((int)gm.gmBlackBoxY - ((int)dm.advanceHeight - dm.topSideBearing - dm.bottomSideBearing)) <= 2,
                "%s U+%04X: black box y %u vs %d", fam, r2_chars[ic], gm.gmBlackBoxY, dm.advanceHeight - dm.topSideBearing - dm.bottomSideBearing);
-        if (strcmp(fam, "Consolas")) CHECKF(r2_iabs(gm.gmptGlyphOrigin.x - dm.leftSideBearing) <= 1, "%s U+%04X: origin x %ld vs lsb %d", fam, r2_chars[ic], gm.gmptGlyphOrigin.x, dm.leftSideBearing);
         /* origin y is the top of the box above the baseline: verticalOriginY - topSideBearing is the same quantity in dwrite's vertical frame,
          * measured from the vertical origin; relate through the font's ascent so only the difference is compared */
         CHECKF(r2_iabs((gm.gmptGlyphOrigin.y - (int)gm.gmBlackBoxY) + ((int)dm.advanceHeight - dm.verticalOriginY - dm.bottomSideBearing)) <= 2,
@@ -230,9 +231,9 @@ TEST(r2_gdi_interop_deep_abc_compat_close_to_design_arial)
                 if (!g) continue;
                 CHECK_HR_OK(IDWriteFontFace_GetGdiCompatibleGlyphMetrics(c.face, (float)r2_px[ip], 1.0f, NULL, nat, &g, 1, &cm, FALSE));
                 CHECK_HR_OK(IDWriteFontFace_GetDesignGlyphMetrics(c.face, &g, 1, &dm, FALSE));
-                CHECKF(fabs(((double)cm.advanceWidth - (double)dm.advanceWidth) * s) <= (r2_px[ip] * 0.08 > 1.5 ? r2_px[ip] * 0.08 : 1.5), "px %d nat %d U+%04X advance %d vs design %d", r2_px[ip], nat, r2_chars[ic], cm.advanceWidth, dm.advanceWidth);
-                CHECKF(fabs((cm.leftSideBearing - dm.leftSideBearing) * s) <= 1.5, "px %d nat %d U+%04X lsb %d vs design %d", r2_px[ip], nat, r2_chars[ic], cm.leftSideBearing, dm.leftSideBearing);
-                CHECKF(fabs((cm.rightSideBearing - dm.rightSideBearing) * s) <= 2.5, "px %d nat %d U+%04X rsb %d vs design %d", r2_px[ip], nat, r2_chars[ic], cm.rightSideBearing, dm.rightSideBearing);
+                CHECKF(fabs(((double)cm.advanceWidth - (double)dm.advanceWidth) * s) <= (nat ? 1.5 : (r2_px[ip] / 16.0 + 0.01 > 1.5 ? r2_px[ip] / 16.0 + 0.01 : 1.5)),   /* Win10: natural within 1.4 px, classic grows to px/16 (4.04 px at 72) */ "px %d nat %d U+%04X advance %d vs design %d", r2_px[ip], nat, r2_chars[ic], cm.advanceWidth, dm.advanceWidth);
+                CHECKF(fabs((cm.leftSideBearing - dm.leftSideBearing) * s) <= 1.0, "px %d nat %d U+%04X lsb %d vs design %d", r2_px[ip], nat, r2_chars[ic], cm.leftSideBearing, dm.leftSideBearing);
+                CHECKF(fabs((cm.rightSideBearing - dm.rightSideBearing) * s) <= 1.0, "px %d nat %d U+%04X rsb %d vs design %d", r2_px[ip], nat, r2_chars[ic], cm.rightSideBearing, dm.rightSideBearing);
             }
     r2_close(&c);
 }

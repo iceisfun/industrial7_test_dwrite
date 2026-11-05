@@ -221,10 +221,11 @@ RT(renderer_not_retained_after_draw)
     RH_DRAW_OK(l, r, 0.0f, 0.0f);
     EXPECT_EQ(r->ref, 1);
     { const rh_ev *g = rh_nth(r, RH_GLYPH, 0); if (g) { EXPECT_EQ(g->effect, (IUnknown *)fx); CHECK(g->effect_refs >= 2); } else CHECK(0); }
-    { ULONG held = dw_refcount((IUnknown *)fx);                  /* ours + whatever the layout keeps (the count it keeps is implementation detail) */
-      CHECK(held >= 2); t_note("effect refcount after the first Draw: %lu", held);
-      RH_DRAW_OK(l, r, 0.0f, 0.0f); EXPECT_REFS(fx, held); }       /* Draw added nothing permanent */
+    EXPECT_REFS(fx, 3);                                          /* ours + the layout's + one the first Draw leaves cached in the layout (Win10) */
+    RH_DRAW_OK(l, r, 0.0f, 0.0f);
+    EXPECT_REFS(fx, 3);                                          /* a second Draw added nothing permanent */
     IDWriteTextLayout_Release(l);
+    EXPECT_REFS(fx, 1);
     dwx_release(fx); rh_free(r); R2_END();
 }
 
@@ -238,10 +239,11 @@ RT(leak_effect_and_inline_released_with_layout)
         IDWriteTextLayout_SetInlineObject(l, (IDWriteInlineObject *)io, RNG(2, 1));
         IDWriteTextLayout_SetDrawingEffect(l, (IUnknown *)fx, RNG(0, 2));
         IDWriteTextLayout_SetUnderline(l, TRUE, RNG(0, 2));
+        EXPECT_REFS(io, 2); EXPECT_REFS(fx, 2);
         RH_DRAW_OK(l, r, 0.0f, 0.0f); RH_DRAW_OK(l, r, 1.0f, 1.0f);
-        { ULONG hi = dw_refcount((IUnknown *)io), hf = dw_refcount((IUnknown *)fx); CHECK(hi >= 2 && hf >= 2);
-          dwx_release(io); dwx_release(fx);
-          EXPECT_REFS(io, hi - 1); EXPECT_REFS(fx, hf - 1); }   /* the layout still holds them after our references are gone */
+        EXPECT_REFS(io, 3); EXPECT_REFS(fx, 3);                 /* the first Draw leaves one cached reference in the layout (Win10) */
+        dwx_release(io); dwx_release(fx);
+        EXPECT_REFS(io, 2); EXPECT_REFS(fx, 2);                 /* the layout still holds them after our references are gone */
         IDWriteTextLayout_Release(l);
         rh_free(r);
     }
@@ -258,9 +260,9 @@ RT(leak_after_aborted_draw)
         IDWriteTextLayout_SetDrawingEffect(l, (IUnknown *)fx, RNG(0, 2));
         RH_DRAW_OK(l, r, 0.0f, 0.0f);
         r->ret_set[RH_XFORM] = 1; r->ret[RH_XFORM] = E_FAIL;
-        { ULONG hi = dw_refcount((IUnknown *)io), hf = dw_refcount((IUnknown *)fx);
-          CHECK_HR(rh_draw(l, r, CTX_A, 0.0f, 0.0f), E_FAIL);
-          EXPECT_REFS(io, hi); EXPECT_REFS(fx, hf);              /* the aborted Draw leaves no extra reference */ }
+        EXPECT_REFS(io, 3); EXPECT_REFS(fx, 3);                  /* after the first successful Draw (one cached reference in the layout, Win10) */
+        CHECK_HR(rh_draw(l, r, CTX_A, 0.0f, 0.0f), E_FAIL);
+        EXPECT_REFS(io, 3); EXPECT_REFS(fx, 3);                  /* the aborted Draw leaves no extra reference */
         IDWriteTextLayout_Release(l);
         EXPECT_REFS(io, 1); EXPECT_REFS(fx, 1);
         dwx_release(io); dwx_release(fx); rh_free(r);
@@ -274,9 +276,9 @@ RT(leak_effect_refcount_unchanged_by_draws)
     IDWriteTextLayout_SetDrawingEffect(l, (IUnknown *)fx, RNG(0, 4));
     IDWriteTextLayout_SetUnderline(l, TRUE, RNG(0, 4)); IDWriteTextLayout_SetStrikethrough(l, TRUE, RNG(0, 4));
     RH_DRAW_OK(l, r, 0.0f, 0.0f);                                 /* the first Draw may take internal references that stay with the layout */
-    { ULONG held = dw_refcount((IUnknown *)fx); CHECK(held >= 2);
-      for (i = 0; i < 5; i++) { RH_DRAW_OK(l, r, 0.0f, 0.0f); EXPECT_REFS(fx, held); } }
+    EXPECT_REFS(fx, 3);                                           /* the first Draw leaves one cached reference in the layout (Win10) */
+    for (i = 0; i < 5; i++) { RH_DRAW_OK(l, r, 0.0f, 0.0f); EXPECT_REFS(fx, 3); }
     { int k; for (k = 0; k < r->nev; k++) if (r->ev[k].type >= RH_GLYPH) { EXPECT_EQ(r->ev[k].effect, (IUnknown *)fx); } }
-    IDWriteTextLayout_Release(l);
+    IDWriteTextLayout_Release(l); EXPECT_REFS(fx, 1);
     dwx_release(fx); rh_free(r); R2_END();
 }

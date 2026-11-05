@@ -39,8 +39,10 @@ static void hdc_otm_heights(const char *fam)
                 if (r2_use_typo(hf) != 0) t_note("%s: typographic or unknown metrics selection; GDI ascent/descent come from the win values", fam);
                 else if (em > 0 && SUCCEEDED(IDWriteFontFace1_GetGdiCompatibleMetrics(c.f1, (float)em, 1.0f, NULL, &g1))) {
                     double asc = r2_du2px(g1.ascent, em, g1.designUnitsPerEm), desc = r2_du2px(g1.descent, em, g1.designUnitsPerEm);
-                    CHECKF(fabs(asc - (double)o->otmTextMetrics.tmAscent) <= 4.0, "%s h=%d: compat ascent %.2f px vs tmAscent %ld", fam, h, asc, o->otmTextMetrics.tmAscent);
-                    CHECKF(fabs(desc - (double)o->otmTextMetrics.tmDescent) <= 4.0, "%s h=%d: compat descent %.2f px vs tmDescent %ld", fam, h, desc, o->otmTextMetrics.tmDescent);
+                    /* Win10: with lfHeight < 0 the compat metrics match GDI to rounding; with a cell height they differ by up to a pixel (Trebuchet MS at 12 by 3) */
+                    double tol = h < 0 ? 0.05 : (!strcmp(fam, "Trebuchet MS") && h == 12 ? 3.01 : 1.01);
+                    CHECKF(fabs(asc - (double)o->otmTextMetrics.tmAscent) <= tol, "%s h=%d: compat ascent %.2f px vs tmAscent %ld", fam, h, asc, o->otmTextMetrics.tmAscent);
+                    CHECKF(fabs(desc - (double)o->otmTextMetrics.tmDescent) <= tol, "%s h=%d: compat descent %.2f px vs tmDescent %ld", fam, h, desc, o->otmTextMetrics.tmDescent);
                     if (asc != (double)o->otmTextMetrics.tmAscent || desc != (double)o->otmTextMetrics.tmDescent)
                         t_note("%s h=%d em=%d: compat asc/desc %.3f/%.3f GDI %ld/%ld", fam, h, em, asc, desc, o->otmTextMetrics.tmAscent, o->otmTextMetrics.tmDescent);
                 }

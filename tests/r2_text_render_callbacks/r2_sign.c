@@ -95,13 +95,8 @@ RT(sign_qi_random_iid_fails)
 RT(sign_addref_release_arithmetic)
 {
     SIGN_BEGIN(16.0f);
-    /* the returned counts are only guaranteed to be meaningful for debugging: check direction and that the object is balanced afterwards */
-    ULONG b = dw_refcount((IUnknown *)sign), a1, a2, r1, r2;
-    a1 = IDWriteInlineObject_AddRef(sign); a2 = IDWriteInlineObject_AddRef(sign);
-    r1 = IDWriteInlineObject_Release(sign); r2 = IDWriteInlineObject_Release(sign);
-    t_note("sign refcounts: start %lu, AddRef %lu %lu, Release %lu %lu", b, a1, a2, r1, r2);
-    CHECK(a1 > 0 && a2 > 0 && r1 > 0);
-    EXPECT_REFS(sign, b);
+    EXPECT_EQ(IDWriteInlineObject_AddRef(sign), 2); EXPECT_EQ(IDWriteInlineObject_AddRef(sign), 3);
+    EXPECT_EQ(IDWriteInlineObject_Release(sign), 2); EXPECT_EQ(IDWriteInlineObject_Release(sign), 1);
     SIGN_END();
 }
 RT(sign_two_signs_are_distinct_objects)

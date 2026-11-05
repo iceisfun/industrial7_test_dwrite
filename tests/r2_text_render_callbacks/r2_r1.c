@@ -114,10 +114,32 @@ RT(r1_horizontal_decoration_angles_are_zero_even_in_rtl_paragraph)
       if (u && s && g) {
         EXPECT_EQ(u->angle, 0); EXPECT_EQ(s->angle, 0); EXPECT_EQ(g->angle, 0);
         EXPECT_EQ(u->r1, 1); EXPECT_EQ(s->r1, 1); EXPECT_EQ(g->r1, 1);
-        t_note("decoration readingDirection in an RTL paragraph: underline %d strikethrough %d", (int)u->ul.readingDirection, (int)s->st.readingDirection);
-        CHECK((unsigned)u->ul.readingDirection < 4 && (unsigned)s->st.readingDirection < 4);
+        /* Win10 reports the decoration reading direction of the text run (its bidi level), not the paragraph's: Latin text stays left-to-right here */
+        EXPECT_EQ(u->ul.readingDirection, DWRITE_READING_DIRECTION_LEFT_TO_RIGHT);
+        EXPECT_EQ(s->st.readingDirection, DWRITE_READING_DIRECTION_LEFT_TO_RIGHT);
+        EXPECT_EQ(u->ul.flowDirection, DWRITE_FLOW_DIRECTION_TOP_TO_BOTTOM); EXPECT_EQ(s->st.flowDirection, DWRITE_FLOW_DIRECTION_TOP_TO_BOTTOM);
       } else CHECK(0); }
     rh_free(r); IDWriteTextLayout_Release(l); R2_END();
+}
+RT(r1_decoration_reading_direction_follows_run_level_not_paragraph)
+{
+    static const wchar_t *tx[2] = { L"ABCD", L"\x05d0\x05d1\x05d2\x05d3" }; int a, d, r1;
+    R2_BEGIN();
+    for (a = 0; a < 2; a++) for (d = 0; d < 2; d++) for (r1 = 0; r1 < 2; r1++) {
+        IDWriteTextLayout *l = r2_layout_w(&X, tx[a], 16.0f, 200.0f, 50.0f, DWRITE_FONT_WEIGHT_NORMAL); rh *r; if (!l) { CHECK(0); continue; }
+        r = rh_new(); r->allow_r1 = r1;
+        IDWriteTextLayout_SetReadingDirection(l, d ? DWRITE_READING_DIRECTION_RIGHT_TO_LEFT : DWRITE_READING_DIRECTION_LEFT_TO_RIGHT);
+        IDWriteTextLayout_SetUnderline(l, TRUE, RNG(0, 4)); IDWriteTextLayout_SetStrikethrough(l, TRUE, RNG(0, 4));
+        RH_DRAW_OK(l, r, 0.0f, 0.0f);
+        { const rh_ev *u = rh_nth(r, RH_UNDER, 0), *s = rh_nth(r, RH_STRIKE, 0);
+          if (u && s) {   /* Hebrew runs are level 1 in either paragraph direction; Latin runs level 0 */
+            DWRITE_READING_DIRECTION want = a ? DWRITE_READING_DIRECTION_RIGHT_TO_LEFT : DWRITE_READING_DIRECTION_LEFT_TO_RIGHT;
+            CHECKF(u->ul.readingDirection == want && s->st.readingDirection == want, "text %d para-rtl %d r1 %d: underline %d strikethrough %d want %d", a, d, r1, (int)u->ul.readingDirection, (int)s->st.readingDirection, (int)want);
+            EXPECT_EQ(u->ul.flowDirection, DWRITE_FLOW_DIRECTION_TOP_TO_BOTTOM); EXPECT_EQ(s->st.flowDirection, DWRITE_FLOW_DIRECTION_TOP_TO_BOTTOM);
+          } else CHECK(0); }
+        rh_free(r); IDWriteTextLayout_Release(l);
+    }
+    R2_END();
 }
 RT(r1_horizontal_inline_object_angle_zero)
 {
