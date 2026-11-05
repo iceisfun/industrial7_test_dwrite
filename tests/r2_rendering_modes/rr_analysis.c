@@ -545,10 +545,14 @@ static void ct_relation(int mode, int em) {
     CHECK_HR_OK(rr_an(&r, &c, 1, NULL, mode, 0, 0, 0));
     if (a && c) {
         CHECK_HR_OK(rr_bounds(a, TT_AL, &ra)); CHECK_HR_OK(rr_bounds(c, TT_CT, &rc));
+        if (mode == 5 && em >= 1024) {   /* symmetric ClearType yields an empty texture box from 1024 ppem up (Win10) */
+            t_check(rc.left == rc.right && rc.top == rc.bottom, __FILE__, __LINE__, "symmetric ClearType box is empty at 1024+ ppem", "em %d: ct (%ld,%ld,%ld,%ld)", em, rc.left, rc.top, rc.right, rc.bottom);
+        } else {
         t_check(rc.top == ra.top && rc.bottom == ra.bottom, __FILE__, __LINE__, "ClearType rows equal the aliased rows", "em %d: ct (%ld,%ld) al (%ld,%ld)", em, rc.top, rc.bottom, ra.top, ra.bottom);
         t_check(rc.left <= ra.left && rc.right >= ra.right, __FILE__, __LINE__, "ClearType is not narrower", "em %d: ct x %ld..%ld al x %ld..%ld", em, rc.left, rc.right, ra.left, ra.right);
         t_check(ra.left - rc.left <= 3 && rc.right - ra.right <= 3, __FILE__, __LINE__, "filter padding is at most 3 pixels", "em %d: pad %ld/%ld", em, ra.left - rc.left, rc.right - ra.right);
         t_check((ra.left - rc.left) == (rc.right - ra.right), __FILE__, __LINE__, "padding is symmetric", "em %d: %ld vs %ld", em, ra.left - rc.left, rc.right - ra.right);
+        }
     }
     if (a) IDWriteGlyphRunAnalysis_Release(a);
     if (c) IDWriteGlyphRunAnalysis_Release(c);

@@ -110,7 +110,7 @@ RT(gasp_literal_ppem_from_dpi) {
     RR_FIX3(x, &rr_gasps[4]);
     EXPECT_EQ(nat(&x, 6, 144, 0), 5);            /* 6 * 1.5 = 9 */
     EXPECT_EQ(nat(&x, 5, 144, 0), 4);            /* 7.5 -> 8 */
-    EXPECT_EQ(nat(&x, 8, 192, 0), 4 + (16 <= 16 ? 1 : 0));   /* 16 */
+    EXPECT_EQ(nat(&x, 8, 192, 0), 7);            /* 16 ppem is in the symmetric range; dpi above 172 downsamples */
     EXPECT_EQ(nat(&x, 9, 192, 0), 4);            /* 18 */
     rr_close(&x);
 }
