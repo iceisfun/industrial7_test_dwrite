@@ -157,7 +157,7 @@ T(translate_consecutive_same_format_glyphs_merge) {
     crb_close(&x);
 }
 T(translate_plain_glyphs_between_bitmap_glyphs_do_not_split_a_group) {
-    NEED_F4(); static const UINT16 s[][6] = { { 3, 0, 4 }, { 3, 1, 1, 4 }, { 4, 28, 7, 28, 28, 3 }, { 3, 0, 5, 0, 6 }, { 3, 0, 4, 0, 5, 0, 6, 0 } };
+    NEED_F4(); static const UINT16 s[][8] = { { 3, 0, 4 }, { 3, 1, 1, 4 }, { 4, 28, 7, 28, 28, 3 }, { 3, 0, 5, 0, 6 }, { 3, 0, 4, 0, 5, 0, 6, 0 } };
     static const int n[] = { 3, 4, 6, 5, 8 }; int i;
     for (i = 0; i < 5; i++) { char tag[32]; snprintf(tag, sizeof tag, "gap %d", i); check(f4, &x, tag, s[i], n[i], 20.0f, 0, 3, 4, F_TT | F_PNG | F_JPEG | F_TIFF, 0, DWRITE_MEASURING_MODE_NATURAL, NULL); }
     /* concrete case: glyph 3 and 4 both PNG@32 with two plain glyphs between them -> one run [3,4] whose first advance spans the gap */

@@ -16,7 +16,7 @@ static void take(crb *x, snap *s) {
 /* index of the (single) stream whose read count grew between a and b, -1 when none / several */
 static int grew(const snap *a, const snap *b, LONG *by) {
     int i, hit = -1; *by = 0;
-    for (i = 0; i < a->n && i < b->n; i++) if (b->reads[i] != a->reads[i]) { if (hit >= 0) return -1; hit = i; *by = b->reads[i] - a->reads[i]; }
+    for (i = 0; i < 16; i++) if (b->reads[i] != a->reads[i]) { if (hit >= 0) return -1; hit = i; *by = b->reads[i] - a->reads[i]; }
     return hit;
 }
 static void copy_mode(crb *x, int on) { int i; for (i = 0; i < x->h.ld->nstreams; i++) x->h.ld->streams[i]->copy_fragments = on; }
@@ -74,7 +74,7 @@ T(release_empty_results_never_touch_the_stream) {
         }
     }
     take(&x, &z);
-    { int j; LONG tot = 0; for (j = 0; j < z.n && j < a.n; j++) tot += z.reads[j] - a.reads[j]; EXPECT_EQ(tot, 0); }
+    { int j; LONG tot = 0; for (j = 0; j < 16; j++) tot += z.reads[j] - a.reads[j]; EXPECT_EQ(tot, 0); }
     EXPECT_EQ(z.outstanding, a.outstanding);
     crb_close(&x);
 }

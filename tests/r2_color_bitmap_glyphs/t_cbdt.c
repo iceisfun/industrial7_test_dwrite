@@ -332,3 +332,50 @@ T(cbdt_cblc_without_cbdt_is_not_a_bitmap_font_note) {
     } else crb_close(&x); }
     free(lc); free(dt); free(png);
 }
+
+T(cbdt_image_data_struct_layout_and_constants) {
+    /* offsets used by FontFace::GetGlyphImageData (!0xfb340) and the 0x40 byte clear in DWriteFontFace::GetGlyphImageData (!0xdc780) */
+    EXPECT_EQ(sizeof(DWRITE_GLYPH_IMAGE_DATA), 64);
+    EXPECT_EQ(offsetof(DWRITE_GLYPH_IMAGE_DATA, imageData), 0); EXPECT_EQ(offsetof(DWRITE_GLYPH_IMAGE_DATA, imageDataSize), 8); EXPECT_EQ(offsetof(DWRITE_GLYPH_IMAGE_DATA, uniqueDataId), 0xC);
+    EXPECT_EQ(offsetof(DWRITE_GLYPH_IMAGE_DATA, pixelsPerEm), 0x10); EXPECT_EQ(offsetof(DWRITE_GLYPH_IMAGE_DATA, pixelSize), 0x14); EXPECT_EQ(offsetof(DWRITE_GLYPH_IMAGE_DATA, horizontalLeftOrigin), 0x1C);
+    EXPECT_EQ(offsetof(DWRITE_GLYPH_IMAGE_DATA, horizontalRightOrigin), 0x24); EXPECT_EQ(offsetof(DWRITE_GLYPH_IMAGE_DATA, verticalTopOrigin), 0x2C); EXPECT_EQ(offsetof(DWRITE_GLYPH_IMAGE_DATA, verticalBottomOrigin), 0x34);
+    EXPECT_EQ(F_TT, 1); EXPECT_EQ(F_CFF, 2); EXPECT_EQ(F_COLR, 4); EXPECT_EQ(F_SVG, 8); EXPECT_EQ(F_PNG, 0x10); EXPECT_EQ(F_JPEG, 0x20); EXPECT_EQ(F_TIFF, 0x40); EXPECT_EQ(F_PREM, 0x80);
+    EXPECT_EQ(DWRITE_GLYPH_IMAGE_FORMATS_NONE, 0);
+}
+T(cbdt_two_bitmapsize_records_with_one_ppem_cover_different_glyphs) {
+    crb_cbstrike st[2]; crb_cbglyph ga[2], gb[3]; uint8_t *lc, *dt, *out; size_t nlc, ndt, nb, pl; ttf_rawtable raw[2]; uint8_t *png = crb_png(4, 4, 0x33, &pl); int i;
+    memset(st, 0, sizeof st); memset(ga, 0, sizeof ga); memset(gb, 0, sizeof gb);
+    for (i = 0; i < 2; i++) { ga[i].gid = 2 + (unsigned)i; ga[i].img = png; ga[i].imglen = pl; ga[i].m.h = ga[i].m.w = 4; }
+    for (i = 0; i < 3; i++) { gb[i].gid = 10 + (unsigned)i; gb[i].img = png; gb[i].imglen = pl; gb[i].m.h = gb[i].m.w = 4; }
+    st[0].ppem_x = st[0].ppem_y = 24; st[0].depth = 32; st[0].imgfmt = 17; st[0].idxfmt = 1; st[0].g = ga; st[0].ng = 2;
+    st[1] = st[0]; st[1].g = gb; st[1].ng = 3;
+    crb_cbtables(st, 2, &lc, &nlc, &dt, &ndt);
+    memcpy(raw[0].tag, "CBLC", 5); raw[0].data = lc; raw[0].len = (unsigned)nlc; memcpy(raw[1].tag, "CBDT", 5); raw[1].data = dt; raw[1].len = (unsigned)ndt;
+    out = crb_blob(raw, 2, 0, &nb);
+    { crb x; if (crb_open(&x, out, nb)) {
+        unsigned g;
+        for (g = 0; g < 16; g++) { UINT32 f; int want = (g == 2 || g == 3 || (g >= 10 && g <= 12)); CHECK_HR_OK(crb_gif(&x, (UINT16)g, 24, 24, &f)); CHECKF(((f & F_PNG) != 0) == want, "glyph %u: 0x%x", g, f); }
+        crb_close(&x);
+    } else crb_close(&x); }
+    free(lc); free(dt); free(png);
+}
+T(cbdt_same_glyph_in_two_strikes_of_equal_ppem_note) {
+    /* two entries with equal ppem and format for one glyph: which one GetGlyphImageData returns is decided by the unstable sort of the entries; only record it */
+    crb_cbstrike st[2]; crb_cbglyph ga[1], gb[1]; uint8_t *lc, *dt, *out; size_t nlc, ndt, nb, p1, p2; ttf_rawtable raw[2]; uint8_t *pa = crb_png(4, 4, 0x41, &p1), *pb = crb_png(5, 5, 0x42, &p2);
+    memset(st, 0, sizeof st); memset(ga, 0, sizeof ga); memset(gb, 0, sizeof gb);
+    ga[0].gid = 2; ga[0].img = pa; ga[0].imglen = p1; ga[0].m.h = ga[0].m.w = 4; gb[0].gid = 2; gb[0].img = pb; gb[0].imglen = p2; gb[0].m.h = gb[0].m.w = 5;
+    st[0].ppem_x = st[0].ppem_y = 24; st[0].depth = 32; st[0].imgfmt = 17; st[0].idxfmt = 1; st[0].g = ga; st[0].ng = 1; st[1] = st[0]; st[1].g = gb;
+    crb_cbtables(st, 2, &lc, &nlc, &dt, &ndt);
+    memcpy(raw[0].tag, "CBLC", 5); raw[0].data = lc; raw[0].len = (unsigned)nlc; memcpy(raw[1].tag, "CBDT", 5); raw[1].data = dt; raw[1].len = (unsigned)ndt;
+    out = crb_blob(raw, 2, 0, &nb);
+    { crb x; if (crb_open(&x, out, nb)) {
+        DWRITE_GLYPH_IMAGE_DATA d; void *ctx = NULL; UINT32 f;
+        CHECK_HR_OK(crb_gif(&x, 2, 24, 24, &f)); EXPECT_EQ(f, F_PNG);
+        CHECK_HR_OK(crb_gid(&x, 2, 24, F_PNG, &d, &ctx));
+        CHECKF(d.imageData && (d.imageDataSize == p1 || d.imageDataSize == p2), "size %u", d.imageDataSize);
+        t_note("duplicate strike entries: returned the %s", d.imageDataSize == p1 ? "first (4x4)" : "second (5x5)");
+        if (ctx) IDWriteFontFace4_ReleaseGlyphImageData(x.f4, ctx);
+        crb_close(&x);
+    } else crb_close(&x); }
+    free(lc); free(dt); free(pa); free(pb);
+}
