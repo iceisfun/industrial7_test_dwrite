@@ -222,3 +222,47 @@ IDWriteFont *g1_sysfont(IDWriteFactory *f, const WCHAR *family, DWRITE_FONT_WEIG
     DW_RELEASE(fam); DW_RELEASE(c);
     return font;
 }
+
+/* ---- one synthetic font through a custom collection ------------------------------------------------------------------------- */
+int g1_fnt_open(g1_fnt *g, const ttf_spec *s)
+{
+    size_t n; uint8_t *b = ttf_build(s, &n); UINT32 key;
+    memset(g, 0, sizeof *g);
+    if (!b) return 0;
+    g->f = dw_new_factory(DWRITE_FACTORY_TYPE_ISOLATED);
+    if (!g->f) { free(b); return 0; }
+    g->fl = dwx_loader_new();
+    key = dwx_loader_add(g->fl, b, n); free(b);
+    if (FAILED(dwx_loader_register(g->fl, g->f))) return 0;
+    g->cl = dwx_coll_new(g->fl);
+    dwx_coll_add_key(g->cl, key);
+    if (FAILED(dwx_coll_register(g->cl, g->f))) return 0;
+    if (FAILED(dwx_coll_create(g->cl, g->f, &g->coll)) || !g->coll) return 0;
+    if (IDWriteFontCollection_GetFontFamilyCount(g->coll) < 1) return 0;
+    if (FAILED(IDWriteFontCollection_GetFontFamily(g->coll, 0, &g->fam)) || !g->fam) return 0;
+    if (FAILED(IDWriteFontFamily_GetFont(g->fam, 0, &g->font)) || !g->font) return 0;
+    if (FAILED(IDWriteFont_CreateFontFace(g->font, &g->face)) || !g->face) return 0;
+    g->ok = 1;
+    return 1;
+}
+void g1_fnt_close(g1_fnt *g)
+{
+    DW_RELEASE(g->face); DW_RELEASE(g->font); DW_RELEASE(g->fam); DW_RELEASE(g->coll);
+    if (g->cl) { dwx_coll_unregister(g->cl); dwx_release(g->cl); g->cl = NULL; }
+    if (g->fl) { dwx_loader_unregister(g->fl); dwx_release(g->fl); g->fl = NULL; }
+    DW_RELEASE(g->f);
+}
+
+int g1_patch_os2(ttf_spec *s, unsigned off, const void *bytes, unsigned len)
+{
+    static ttf_rawtable raws[256]; static int nr;
+    size_t sz; uint8_t *blob = ttf_build(s, &sz), *copy; unsigned tl = 0; const uint8_t *t; int cnt = 0, i;
+    if (!blob) return 0;
+    t = ttf_find_table(blob, sz, "OS/2", &tl);
+    if (!t || off + len > tl || nr > 250) { free(blob); return 0; }
+    copy = (uint8_t *)malloc(tl); memcpy(copy, t, tl); memcpy(copy + off, bytes, len); free(blob);
+    for (i = 0; i < s->nraw; i++) { if (!memcmp(s->raw[i].tag, "OS/2", 4)) continue; raws[nr + cnt++] = s->raw[i]; }
+    memcpy(raws[nr + cnt].tag, "OS/2", 5); raws[nr + cnt].data = copy; raws[nr + cnt].len = tl; cnt++;
+    s->raw = &raws[nr]; s->nraw = cnt; nr += cnt;
+    return 1;
+}

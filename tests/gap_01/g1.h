@@ -76,4 +76,14 @@ void g1_face_close(g1_face *g);
 void *g1_qi(IUnknown *u, const IID *iid);                      /* QueryInterface helper (NULL when unsupported) */
 /* System font object for a family (regular style unless given); NULL when the family is not installed. */
 IDWriteFont *g1_sysfont(IDWriteFactory *f, const WCHAR *family, DWRITE_FONT_WEIGHT w, DWRITE_FONT_STYLE st);
+
+/* ---- one synthetic font reached through a private custom collection (IDWriteFont, face and family) ------------------------ */
+typedef struct g1_fnt {
+    IDWriteFactory *f; dwx_mem_loader *fl; dwx_coll_loader *cl; IDWriteFontCollection *coll; IDWriteFontFamily *fam; IDWriteFont *font; IDWriteFontFace *face; int ok;
+} g1_fnt;
+int  g1_fnt_open(g1_fnt *g, const ttf_spec *s);
+void g1_fnt_close(g1_fnt *g);
+/* Patches bytes into a spec's OS/2 table (copy kept for the life of the process). Returns 1 on success. */
+int  g1_patch_os2(ttf_spec *s, unsigned off, const void *bytes, unsigned len);
+#define G1_FNT(g, spec) g1_fnt g; memset(&g, 0, sizeof g); if (!g1_fnt_open(&g, &(spec))) { g1_fnt_close(&g); t_skip("synthetic font collection unavailable"); return; }
 #endif
