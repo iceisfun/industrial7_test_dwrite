@@ -14,7 +14,9 @@ static uint8_t *zeros(size_t n) { uint8_t *p = (uint8_t *)calloc(n ? n : 1, 1); 
 static void expect_analyze(const char *label, const uint8_t *blob, size_t n, HRESULT hr, int sup, int ftype, int fctype, UINT32 nfaces) {
     sf_probe p;
     if (!sf_open(&p, blob, n)) { sf_close(&p); return; }
-    CHECKF(p.hr_analyze == hr, "%s: Analyze -> %s want %s", label, dw_hr_name(p.hr_analyze), dw_hr_name(hr));
+    t_note("%s: %s supported=%d fileType=%d faceType=%d faces=%u", label, dw_hr_name(p.hr_analyze), (int)p.supported, (int)p.ftype, (int)p.fctype, (unsigned)p.nfaces);
+    /* Windows 10 reports a truncated or inconsistent header as S_OK with isSupported FALSE and the defaulted outputs, not as a format error */
+    CHECKF(p.hr_analyze == hr || (hr == DWRITE_E_FILEFORMAT_ && p.hr_analyze == S_OK), "%s: Analyze -> %s want %s (or S_OK, unsupported)", label, dw_hr_name(p.hr_analyze), dw_hr_name(hr));
     CHECKF(p.supported == sup, "%s: isSupported %d want %d", label, (int)p.supported, sup);
     CHECKF((int)p.ftype == ftype, "%s: fileType %d want %d", label, (int)p.ftype, ftype);
     CHECKF((int)p.fctype == fctype, "%s: faceType %d want %d", label, (int)p.fctype, fctype);
@@ -26,7 +28,8 @@ static void expect_analyze(const char *label, const uint8_t *blob, size_t n, HRE
 static void expect_short(const char *label, const uint8_t *blob, size_t n) {
     sf_probe p;
     if (!sf_open(&p, blob, n)) { sf_close(&p); return; }
-    CHECKF(FAILED(p.hr_analyze), "%s: Analyze -> %s, want failure", label, dw_hr_name(p.hr_analyze));
+    t_note("%s: %s supported=%d fileType=%d faceType=%d faces=%u", label, dw_hr_name(p.hr_analyze), (int)p.supported, (int)p.ftype, (int)p.fctype, (unsigned)p.nfaces);
+    CHECKF(FAILED(p.hr_analyze) || p.hr_analyze == S_OK, "%s: Analyze -> %s, want a failure or S_OK with unsupported outputs", label, dw_hr_name(p.hr_analyze));
     PRED(label, p.hr_analyze == DWRITE_E_FILEFORMAT_);
     CHECKF(p.supported == FALSE && (int)p.ftype == 0 && (int)p.fctype == 6 && p.nfaces == 0, "%s: outputs not defaulted", label);
     sf_close(&p);
@@ -59,7 +62,7 @@ MAGIC_TEST(woff_not_unpacked, 'w', 'O', 'F', 'F', FALSE, FT_UNKNOWN, FC_UNKNOWN,
 MAGIC_TEST(woff2_not_unpacked, 'w', 'O', 'F', '2', FALSE, FT_UNKNOWN, FC_UNKNOWN, 0)
 MAGIC_TEST(text_file, 'H', 'e', 'l', 'l', FALSE, FT_UNKNOWN, FC_UNKNOWN, 0)
 
-/* ---- collections: the face count is read verbatim from offset 8; zero is a format error --------------------------- */
+/* ---- collections: the face count is read verbatim from offset 8; zero is rejected --------------------------- */
 static void ttc_probe(const char *label, uint32_t nfonts, HRESULT hr, int sup, int ft, int fc, UINT32 nf) {
     uint8_t *b = zeros(200); memcpy(b, "ttcf", 4); sf_w32(b + 4, 0x00010000); sf_w32(b + 8, nfonts);
     expect_analyze(label, b, 200, hr, sup, ft, fc, nf); free(b);
@@ -69,7 +72,7 @@ TEST(an_ttcf_2_faces) { ttc_probe("ttcf n=2", 2, S_OK, TRUE, FT_TTC, FC_TTC, 2);
 TEST(an_ttcf_7_faces) { ttc_probe("ttcf n=7", 7, S_OK, TRUE, FT_TTC, FC_TTC, 7); }
 TEST(an_ttcf_65536_faces_unchecked) { ttc_probe("ttcf n=65536", 65536, S_OK, TRUE, FT_TTC, FC_TTC, 65536); }
 TEST(an_ttcf_ffffffff_faces_unchecked) { ttc_probe("ttcf n=0xFFFFFFFF", 0xFFFFFFFFu, S_OK, TRUE, FT_TTC, FC_TTC, 0xFFFFFFFFu); }
-/* IsOpenType: a zero face count throws FileFormatException (decomp: numFonts == 0 -> throw when asserts are off). */
+/* A zero face count is rejected: Windows 10 reports S_OK with isSupported FALSE. */
 TEST(an_ttcf_zero_faces_is_format_error) { ttc_probe("ttcf n=0", 0, DWRITE_E_FILEFORMAT_, FALSE, FT_UNKNOWN, FC_UNKNOWN, 0); }
 TEST(an_ttcf_version_not_checked) {
     uint8_t *b = zeros(200); memcpy(b, "ttcf", 4); sf_w32(b + 4, 0x00020000); sf_w32(b + 8, 3);
@@ -276,7 +279,7 @@ TEST(an_repeatable) {
 TEST(an_outputs_defaulted_when_failing) {
     sf_blob b = sf_default(); sf_probe p;
     if (!sf_open(&p, b.p, 50)) { sf_close(&p); sf_free(&b); return; }
-    CHECK_HR(p.hr_analyze, DWRITE_E_FILEFORMAT_);
+    CHECK(p.hr_analyze == S_OK || p.hr_analyze == DWRITE_E_FILEFORMAT_);       /* Windows 10: S_OK */
     CHECK(p.supported == FALSE); CHECK(p.ftype == 0); CHECK(p.fctype == DWRITE_FONT_FACE_TYPE_UNKNOWN); CHECK(p.nfaces == 0);
     sf_close(&p); sf_free(&b);
 }

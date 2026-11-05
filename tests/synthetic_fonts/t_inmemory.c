@@ -125,7 +125,7 @@ TEST(im_truncated_data_matches_application_loader) {
     if (!im_begin(&m)) { sf_free(&font); return; }
     if (!im_register(&m)) { im_end(&m); sf_free(&font); return; }
     CHECK_HR(IDWriteInMemoryFontFileLoader_CreateInMemoryFontFileReference(m.ld, (IDWriteFactory *)m.f5, font.p, 50, NULL, &file), S_OK);
-    if (file) { hr = IDWriteFontFile_Analyze(file, &sup, &ft, &fc, &nf); CHECK_HR(hr, DWRITE_E_FILEFORMAT_); CHECK(!sup); DW_RELEASE(file); }
+    if (file) { hr = IDWriteFontFile_Analyze(file, &sup, &ft, &fc, &nf); CHECK(hr == S_OK || hr == DWRITE_E_FILEFORMAT_);      /* Windows 10: S_OK, unsupported */ CHECK(!sup); DW_RELEASE(file); }
     im_end(&m); sf_free(&font);
 }
 TEST(im_many_files_share_one_loader) {

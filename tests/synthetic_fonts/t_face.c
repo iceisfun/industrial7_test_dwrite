@@ -237,10 +237,17 @@ TEST(cf_face_qi_matrix) {
     NEED_PROBE(p);
     CHECK_HR(sf_face(&p, DWRITE_FONT_FACE_TYPE_TRUETYPE, 0, 0), S_OK);
     if (p.face) {
-        dw_qi_row rows[] = { DW_QI_ROW(IDWriteFontFace, 1), DW_QI_ROW(IDWriteFontFace1, 1), DW_QI_ROW(IDWriteFactory, 0), DW_QI_ROW(IDWriteFont, 0),
-                             DW_QI_ROW(IDWriteFontFile, 0), DW_QI_ROW(IDWriteTextFormat, 0), DW_QI_ROW(IDWriteFontFace2, -1), DW_QI_ROW(IDWriteFontFace3, -1),
+        dw_qi_row rows[] = { DW_QI_ROW(IDWriteFontFace, 1), DW_QI_ROW(IDWriteFontFace1, 1), DW_QI_ROW(IDWriteFontFace2, -1), DW_QI_ROW(IDWriteFontFace3, -1),
                              DW_QI_ROW(IDWriteFontFace4, -1), DW_QI_ROW(IDWriteFontFace5, -1), DW_QI_ROW(IDWriteFontFaceReference, -1) };
+        /* Windows answers E_NOTIMPL (not E_NOINTERFACE) for some well-known IIDs the face does not implement */
+        const IID *no[] = { &IID_IDWriteFactory, &IID_IDWriteFont, &IID_IDWriteFontFile, &IID_IDWriteTextFormat }; const char *nn[] = { "IDWriteFactory", "IDWriteFont", "IDWriteFontFile", "IDWriteTextFormat" }; int i;
         DW_CHECK_QI(p.face, rows);
+        for (i = 0; i < 4; i++) {
+            void *q = (void *)(ULONG_PTR)1; HRESULT hq = IUnknown_QueryInterface((IUnknown *)p.face, no[i], &q);
+            CHECKF(hq == E_NOINTERFACE || hq == E_NOTIMPL, "%s: QI failure code %s", nn[i], dw_hr_name(hq));
+            CHECKF(q == NULL, "%s: out pointer not zeroed on failure (%p)", nn[i], q);
+            if (SUCCEEDED(hq) && q) IUnknown_Release((IUnknown *)q);
+        }
     }
     END_PROBE(p);
 }
