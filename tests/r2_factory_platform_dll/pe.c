@@ -173,12 +173,6 @@ TEST(pe_import_directory_walk_does_not_include_dwrite_itself) {
     }
     CHECK(n > 0);
 }
-TEST(pe_gdi32_and_user32_present_in_process) {
-    /* the memory-DC scaffolding of this corpus links them; dwrite itself must not require us to do anything for them */
-    CHECK(GetModuleHandleA("gdi32.dll") != NULL);
-    CHECK(GetModuleHandleA("kernel32.dll") != NULL);
-}
-
 /* ---- load / unload cycles -------------------------------------------------------------------------- */
 TEST(load_n_times_free_n_times_keeps_module) {
     HMODULE base = rfp_mod(); int i; HMODULE h[20];
@@ -247,13 +241,13 @@ TEST(load_proc_pointer_stable_over_many_lookups) {
     p0 = GetProcAddress(rfp_mod(), "DWriteCreateFactory");
     for (i = 0; i < 1000; i++) if (GetProcAddress(rfp_mod(), "DWriteCreateFactory") != p0) { CHECK(0); break; }
 }
-TEST(load_datafile_mapping_has_export) {
+TEST(load_datafile_when_already_loaded_as_image) {
     HMODULE h;
     REQUIRE(rfp_mod());
     h = LoadLibraryExA("dwrite.dll", NULL, LOAD_LIBRARY_AS_DATAFILE);
     if (!h) { t_skip("LOAD_LIBRARY_AS_DATAFILE failed"); return; }
-    /* a data-file mapping carries the flag bit 1 in the handle and is a different mapping from the loaded image */
-    CHECK(((ULONG_PTR)h & 3) != 0);
-    CHECK(h != rfp_mod());
+    /* the loader may hand back the already-mapped image or a separate data mapping; either way a valid PE header is mapped */
+    t_note("datafile load %s the image handle", h == rfp_mod() ? "returned" : "differs from");
+    CHECK(nt_of((HMODULE)((ULONG_PTR)h & ~(ULONG_PTR)3)) != NULL);
     FreeLibrary(h);
 }

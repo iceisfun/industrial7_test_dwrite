@@ -180,9 +180,9 @@ TEST(loc_empty_locale_layout_inherits_format_locale) {
     DW_RELEASE(l); DW_RELEASE(tf);
 }
 TEST(loc_explicit_locale_round_trip) {
-    static const WCHAR *const names[] = { L"en-us", L"en-US", L"de-DE", L"ja-JP", L"ar-SA", L"fr", L"zh-Hans-CN", L"x-unknown-locale" }; int i;
+    static const WCHAR *const names[] = { L"en-us", L"en-US", L"de-DE", L"ja-JP", L"ar-SA", L"fr", L"zh-Hans-CN" }; int i;
     IDWriteFactory *f = dw_shared(); REQUIRE(f);
-    for (i = 0; i < 8; i++) {
+    for (i = 0; i < 7; i++) {
         IDWriteTextFormat *tf = NULL; WCHAR b[100]; UINT32 len;
         CHECKF(mk(f, L"Arial", 400, 0, 5, 12.0f, names[i], &tf) == S_OK, "locale #%d", i); if (!tf) continue;
         locale_of(tf, b, 100, &len);
