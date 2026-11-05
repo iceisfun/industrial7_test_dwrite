@@ -250,7 +250,9 @@ TEST(fcl_create_ok_basics)
     EXPECT_EQ(x.cl->n_create, 1);
     EXPECT_EQ(dwx_refs(x.cl), 2);   /* only the registration + ours */
     if (c) EXPECT_REFS(c, 1);
+    EXPECT_REFS(x.f, 1);            /* a collection does not hold a reference on its factory */
     DW_RELEASE(c);
+    EXPECT_REFS(x.f, 1);
     fcl_close(&x);
 }
 TEST(fcl_create_loader_is_called_inside_the_call)
