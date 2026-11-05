@@ -90,6 +90,7 @@ TEST(gra_create_measuring_out_of_range) {
 
 TEST(gra_create_null_run) {
     GRA_FIX(fx);
+    if (t_is_wine()) { t_skip("emulator dereferences the unvalidated run pointer"); gra_close(&fx); return; }
     IDWriteGlyphRunAnalysis *a = (IDWriteGlyphRunAnalysis *)GRA_SENTINEL;
     CHECK_HR(IDWriteFactory_CreateGlyphRunAnalysis(fx.f, NULL, 1.0f, NULL, DWRITE_RENDERING_MODE_ALIASED, DWRITE_MEASURING_MODE_NATURAL, 0, 0, &a), GRA_E_INVALIDARG);
     CHECK_OUT_NULL(a);
@@ -98,6 +99,7 @@ TEST(gra_create_null_run) {
 
 TEST(gra_create_null_fontface) {
     GRA_FIX(fx);
+    if (t_is_wine()) { t_skip("emulator dereferences the unvalidated run pointer"); gra_close(&fx); return; }
     gra_run(&fx, "A", 24.0f);
     fx.run.fontFace = NULL;
     IDWriteGlyphRunAnalysis *a = (IDWriteGlyphRunAnalysis *)GRA_SENTINEL;
@@ -108,6 +110,7 @@ TEST(gra_create_null_fontface) {
 
 TEST(gra_create_null_indices) {
     GRA_FIX(fx);
+    if (t_is_wine()) { t_skip("emulator dereferences the unvalidated run pointer"); gra_close(&fx); return; }
     gra_run(&fx, "ABC", 24.0f);
     fx.run.glyphIndices = NULL;
     IDWriteGlyphRunAnalysis *a = (IDWriteGlyphRunAnalysis *)GRA_SENTINEL;
@@ -567,6 +570,7 @@ TEST(gra_create_f2_null_args) {
         CHECK_HR(IDWriteFactory2_CreateGlyphRunAnalysis(f2, NULL, NULL, DWRITE_RENDERING_MODE_ALIASED, DWRITE_MEASURING_MODE_NATURAL, DWRITE_GRID_FIT_MODE_DEFAULT, DWRITE_TEXT_ANTIALIAS_MODE_CLEARTYPE, 0, 0, &a), GRA_E_INVALIDARG);
         CHECK_OUT_NULL(a);
     }
+    if (t_is_wine()) { t_skip("emulator dereferences the unvalidated run pointer"); gra_close(&fx); return; }
     gra_run(&fx, "A", 24.0f);
     fx.run.fontFace = NULL;
     a = (IDWriteGlyphRunAnalysis *)GRA_SENTINEL;
