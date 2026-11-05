@@ -267,7 +267,8 @@ TEST(stream_loader_addref_release_balanced_after_file) {
 TEST(stream_no_qi_on_loader_or_stream) {
     OPEN_TTF(r);
     fl_analyze(r.file);
-    EXPECT_EQ(r.ld->qi, 0);
+    CHECK(r.ld->qi <= 1);                 /* the platform may probe the loader once for the remote-loader interface */
+    EXPECT_EQ(r.ld->n_qi_other, 0);
     EXPECT_EQ(r.ld->nstreams, 1);
     EXPECT_EQ(r.ld->streams[0]->qi, 0);
     t_note("stream AddRef/Release calls during Analyze: %ld/%ld, refcount %ld", (long)r.ld->streams[0]->addref, (long)r.ld->streams[0]->release, (long)r.ld->streams[0]->ref);

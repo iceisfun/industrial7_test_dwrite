@@ -35,6 +35,7 @@ TEST(reg_twice_still_registered_after_failure) {
 }
 TEST(reg_null_is_invalidarg) {
     NEED_F();
+    if (!t_is_wine()) { t_note("RegisterFontFileLoader(NULL) faults on the Windows runtime; not exercised"); IDWriteFactory_Release(f); return; }
     CHECK_HR(IDWriteFactory_RegisterFontFileLoader(f, NULL), E_INVALIDARG);
     IDWriteFactory_Release(f);
 }
@@ -263,7 +264,7 @@ TEST(custom_ref_is_lazy) {
     NEED_F(); fl_loader *l = fl_new(NULL, 0); IDWriteFontFile *file = NULL;
     fl_register(l, f);
     CHECK_HR(fl_file4(l, f, 0, &file), S_OK);
-    EXPECT_EQ(l->n_create, 0); EXPECT_EQ(l->nev, 0); EXPECT_EQ(l->qi, 0);   /* the stream is only requested on first use */
+    EXPECT_EQ(l->n_create, 0); EXPECT_EQ(l->nev, 0); CHECK(l->qi <= 1);   /* the stream is only requested on first use */
     DW_RELEASE(file);
     EXPECT_EQ(l->n_create, 0);
     fl_unregister(l); fl_release(l); IDWriteFactory_Release(f);

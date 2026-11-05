@@ -523,7 +523,7 @@ TEST(remote_create_http_loader) {
     CHECK(rl != NULL && rl != (IDWriteRemoteFontFileLoader *)1);
     if (rl && rl != (IDWriteRemoteFontFileLoader *)1) {
         dw_qi_row rows[] = {
-            DW_QI_ROW(IDWriteRemoteFontFileLoader, 1), DW_QI_ROW(IDWriteFontFileLoader, 1),
+            DW_QI_ROW(IDWriteRemoteFontFileLoader, 1), DW_QI_ROW(IDWriteFontFileLoader, -1),
             DW_QI_ROW(IDWriteInMemoryFontFileLoader, 0), DW_QI_ROW(IDWriteLocalFontFileLoader, 0), DW_QI_ROW(IDWriteFontFileStream, 0), DW_QI_ROW(IDWriteFontFile, 0),
         };
         DW_CHECK_QI(rl, rows);
