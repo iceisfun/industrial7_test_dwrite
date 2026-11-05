@@ -2,8 +2,6 @@
 {
 "name": "DWriteCreateFactory",
 "ordinal": 1,
-"rva": 275648,
-"forwarder": null,
-"ref": "dwrite.dll!0x434c0"
+"forwarder": null
 }
 ]
