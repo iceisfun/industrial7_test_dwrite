@@ -85,7 +85,7 @@ TEST(dxgap2_session_font_set_contents_unchanged_after_removal)
     if (a) a0 = IDWriteFontSet_GetFontCount(a);
     AddFontResourceW(p.wpath); p.added = 1;
     sf_remove(&p);
-    /* a newly obtained set may lag behind the font change notification; poll briefly and only record it */
+    /* Win10 22H2 returns the restored set immediately (one poll); the bounded poll only tolerates change-notification lag */
     for (i = 0; i < 20; i++) {
         DW_RELEASE(b);
         if (FAILED(IDWriteFactory3_GetSystemFontSet(f3, &b)) || !b) break;
@@ -95,6 +95,7 @@ TEST(dxgap2_session_font_set_contents_unchanged_after_removal)
     }
     CHECK(b != NULL);
     t_note("old set count %u, new set count %u after %d polls", a0, bn, i);
+    CHECKF(bn == a0, "font count after removal %u vs %u before", bn, a0);
     /* the set obtained earlier is a snapshot and does not change */
     if (a) { CHECK(IDWriteFontSet_GetFontCount(a) == a0); }
     DW_RELEASE(a); DW_RELEASE(b);

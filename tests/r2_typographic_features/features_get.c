@@ -63,23 +63,28 @@ RT(gt_order_independent_of_reverse_input) {
     expect_list(&c_, x.h.face, LATIN(), NULL, want, 7, "reverse");
     r2_font_close(&x); R2_END();
 }
-RT(gt_order_forty_features_exercises_large_sort) {
-    /* more than 32 elements are sorted with the partitioning sort rather than insertion sort; the result is still ascending */
-    t_skip("feature lists longer than a fixed internal limit fault in some dwrite builds (Win10 22H2 faults with 40)"); return;
-    R2_BEGIN(); otl_table g; otl_init(&g); int s = otl_add_script(&g, "latn"), i, fi[64];
-    char tag[5]; DWRITE_FONT_FEATURE_TAG t[MAXT]; UINT32 n = 0; HRESULT hr;
-    for (i = 0; i < 20; i++) { sprintf(tag, "ss%02d", 20 - i); fi[i] = feat1(&g, tag, G_A, 3); }
-    for (i = 0; i < 20; i++) { sprintf(tag, "cv%02d", 20 - i); fi[20 + i] = feat1(&g, tag, G_A, 3); }
-    { int k; otl_langsys *l; otl_add_langsys(&g, s, "dflt", -1, 0); l = &g.sc[s].ls[0]; for (k = 0; k < 40; k++) l->f[l->nf++] = fi[k]; }
-    FONT_OR_SKIP(x, &g, NULL);
-    hr = r2_features(&c_, x.h.face, LATIN(), NULL, MAXT, &n, t);
-    CHECK_HR(hr, S_OK); EXPECT_EQ(n, 40);
-    for (i = 0; i < 20 && n == 40; i++) {
-        sprintf(tag, "cv%02d", i + 1); CHECKF((UINT32)t[i] == r2_tag(tag), "slot %d", i);
-        sprintf(tag, "ss%02d", i + 1); CHECKF((UINT32)t[20 + i] == r2_tag(tag), "slot %d", 20 + i);
-    }
-    r2_font_close(&x); R2_END();
+static int cmp_tag_text(const void *a, const void *b) { return memcmp(a, b, 4); }
+/* Lists the first nf of 60 single-lookup features (ss30..ss01 then cv30..cv01, deliberately descending, all sharing one lookup)
+ * and expects them back ascending by tag text. More than 32 elements are sorted with the partitioning sort rather than
+ * insertion sort. Win10 22H2 returns all counts from 1 to 60 without a fault. */
+static int check_large_sorted(r2_ctx *c_, int nf) {
+    IDWriteFactory *f = c_->f;
+    otl_table g; otl_init(&g); int s = otl_add_script(&g, "latn"), i, fi[64], lk;
+    char tag[5], want[64][4]; DWRITE_FONT_FEATURE_TAG t[MAXT]; UINT32 n = 0;
+    lk = otl_add_lookup(&g, OTL_SINGLE, 1, 1, 0, G_A, 3);
+    for (i = 0; i < 30; i++) { sprintf(tag, "ss%02d", 30 - i); fi[i] = otl_add_feature(&g, tag, 1, lk); memcpy(want[i], tag, 4); }
+    for (i = 0; i < 30; i++) { sprintf(tag, "cv%02d", 30 - i); fi[30 + i] = otl_add_feature(&g, tag, 1, lk); memcpy(want[30 + i], tag, 4); }
+    { otl_langsys *l; otl_add_langsys(&g, s, "dflt", -1, 0); l = &g.sc[s].ls[0]; for (i = 0; i < nf; i++) l->f[l->nf++] = fi[i]; }
+    qsort(want, nf, 4, cmp_tag_text);
+    r2_font x;
+    if (FAILED(r2_font_open(&x, f, 0, &g, NULL)) || !x.h.face) { r2_font_close(&x); return 0; }
+    CHECK_HR(r2_features(c_, x.h.face, r2_sa_of(c_, L"A", 1), NULL, MAXT, &n, t), S_OK); EXPECT_EQ(n, nf);
+    for (i = 0; i < nf && (int)n == nf; i++) CHECKF((UINT32)t[i] == r2_tag(want[i]), "count %d slot %d", nf, i);
+    r2_font_close(&x);
+    return 1;
 }
+RT(gt_order_forty_features_exercises_large_sort) { R2_BEGIN(); int ok = check_large_sorted(&c_, 40); R2_END(); if (!ok) t_skip("synthetic layout font rejected by the factory"); }
+RT(gt_order_sixty_features_all_returned_ascending) { R2_BEGIN(); int ok = check_large_sorted(&c_, 60); R2_END(); if (!ok) t_skip("synthetic layout font rejected by the factory"); }
 RT(gt_tags_are_the_raw_four_bytes_of_the_table) {
     R2_BEGIN(); otl_table g; otl_init(&g); int s = otl_add_script(&g, "latn"), k = feat1(&g, "kern", G_A, 3);
     DWRITE_FONT_FEATURE_TAG t[4]; UINT32 n = 0;

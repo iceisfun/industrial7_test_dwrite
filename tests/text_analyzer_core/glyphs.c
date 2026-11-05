@@ -620,8 +620,10 @@ TEST(place_kern_range_only_first_pair)
     CHECK_HR_OK(shape(an, &F, L"AVAV", &o));
     CHECK_HR_OK(ta_place(an, F.face, L"AVAV", FALSE, FALSE, 2048.0f, feat, flen, 2, &o));
     CHECK_FLOAT_EQ(o.adv[0], 1000.0f);        /* kerning disabled for characters 0..1 */
-    /* a range with an empty feature list gets no default kerning either, so adv[2] is not asserted */
-    t_note("AVAV advances: %g %g %g %g", o.adv[0], o.adv[1], o.adv[2], o.adv[3]);
+    CHECK_FLOAT_EQ(o.adv[1], 1000.0f);
+    /* an explicit (empty) feature list replaces the defaults, so the second pair is not kerned either (Win10 22H2) */
+    CHECK_FLOAT_EQ(o.adv[2], 1000.0f);
+    CHECK_FLOAT_EQ(o.adv[3], 1000.0f);
     SHAPE_END();
 }
 TEST(place_kern_not_across_space)
