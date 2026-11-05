@@ -76,4 +76,6 @@ DWRITE_TEXT_METRICS vt_metrics(IDWriteTextLayout *l);
 float vt_runw(const dwx_draw *d);
 #define CHECK_NEARF(a, b) CHECK_NEAR((a), (b), 0.001)
 #define CHECK_WEQ(a, b) do { const WCHAR *a_ = (a), *b_ = (b); t_check(a_ && b_ && !wcscmp(a_, b_), __FILE__, __LINE__, #a " == " #b, "wide string mismatch: got \"%ls\" want \"%ls\"", a_ ? a_ : L"(null)", b_ ? b_ : L"(null)"); } while (0)
+/* Font face of a family of the private collection (first font); caller releases. */
+IDWriteFontFace *vt_face(vt_fx *x, const WCHAR *family);
 #endif

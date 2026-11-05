@@ -111,3 +111,13 @@ DWRITE_TEXT_METRICS vt_metrics(IDWriteTextLayout *l)
     return m;
 }
 float vt_runw(const dwx_draw *d) { return d ? dwx_run_width(d) : -1.0f; }
+
+IDWriteFontFace *vt_face(vt_fx *x, const WCHAR *family)
+{
+    UINT32 idx = 0; BOOL exists = FALSE; IDWriteFontFamily *fam = NULL; IDWriteFont *font = NULL; IDWriteFontFace *face = NULL;
+    if (FAILED(IDWriteFontCollection_FindFamilyName(x->coll, family, &idx, &exists)) || !exists) return NULL;
+    if (FAILED(IDWriteFontCollection_GetFontFamily(x->coll, idx, &fam))) return NULL;
+    if (SUCCEEDED(IDWriteFontFamily_GetFont(fam, 0, &font))) { IDWriteFont_CreateFontFace(font, &face); IDWriteFont_Release(font); }
+    IDWriteFontFamily_Release(fam);
+    return face;
+}
