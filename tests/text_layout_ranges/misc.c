@@ -208,3 +208,33 @@ TEST(misc_set_get_through_all_interface_versions)
     DW_RELEASE(l4); DW_RELEASE(l3); DW_RELEASE(l2); DW_RELEASE(l1);
     IDWriteTextLayout_Release(l); TLR_END();
 }
+
+/* ---- additional range-semantics checks ---- */
+TEST(misc_set_then_revert_to_default_merges_to_single_run)
+{
+    TLR_BEGIN(); TLR_LAYOUT(l, L"abcdefghij", 16.0f); DWRITE_TEXT_RANGE r;
+    CHECK_HR(IDWriteTextLayout_SetFontSize(l, 32.0f, RNG(3, 4)), S_OK);
+    CHECK_HR(IDWriteTextLayout_SetFontSize(l, 16.0f, RNG(3, 4)), S_OK);
+    /* equal complete formats are one run again */
+    CHECK_FLOAT_EQ(tlr_size(l, 5, &r), 16.0f); CHECK_RANGE(r, 0, TLR_ALL);
+    CHECK_FLOAT_EQ(tlr_size(l, 0, &r), 16.0f); CHECK_RANGE(r, 0, TLR_ALL);
+    IDWriteTextLayout_Release(l); TLR_END();
+}
+TEST(misc_adjacent_equal_ranges_merge)
+{
+    TLR_BEGIN(); TLR_LAYOUT(l, L"abcdefghij", 16.0f); DWRITE_TEXT_RANGE r;
+    CHECK_HR(IDWriteTextLayout_SetFontWeight(l, DWRITE_FONT_WEIGHT_BOLD, RNG(2, 3)), S_OK);
+    CHECK_HR(IDWriteTextLayout_SetFontWeight(l, DWRITE_FONT_WEIGHT_BOLD, RNG(5, 2)), S_OK);
+    CHECK(tlr_weight(l, 3, &r) == DWRITE_FONT_WEIGHT_BOLD); CHECK_RANGE(r, 2, 5);
+    IDWriteTextLayout_Release(l); TLR_END();
+}
+TEST(misc_overlapping_ranges_later_wins)
+{
+    TLR_BEGIN(); TLR_LAYOUT(l, L"abcdefghij", 16.0f); DWRITE_TEXT_RANGE r;
+    CHECK_HR(IDWriteTextLayout_SetFontWeight(l, DWRITE_FONT_WEIGHT_BOLD, RNG(0, 6)), S_OK);
+    CHECK_HR(IDWriteTextLayout_SetFontWeight(l, DWRITE_FONT_WEIGHT_LIGHT, RNG(4, 4)), S_OK);
+    CHECK(tlr_weight(l, 1, &r) == DWRITE_FONT_WEIGHT_BOLD); CHECK_RANGE(r, 0, 4);
+    CHECK(tlr_weight(l, 5, &r) == DWRITE_FONT_WEIGHT_LIGHT); CHECK_RANGE(r, 4, 4);
+    CHECK(tlr_weight(l, 9, &r) == DWRITE_FONT_WEIGHT_NORMAL); CHECK_RANGE(r, 8, TLR_ALL - 8);
+    IDWriteTextLayout_Release(l); TLR_END();
+}
