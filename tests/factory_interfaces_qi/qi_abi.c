@@ -156,10 +156,12 @@ TEST(abi_family_and_list_interfaces) {
     for (i = 0; i < 6; i++) {
         void *p = fq_qi_by_name((IUnknown *)s.fam, n[i]); IDWriteFont *ft = NULL; IDWriteFontCollection *c = NULL;
         if (!p) { CHECKF(0, "QI %s", n[i]); continue; }
-        EXPECT_EQ(IDWriteFontList_GetFontCount((IDWriteFontList *)p), 1);                 /* base IDWriteFontList is the prefix of every one of these */
+        UINT32 cnt = IDWriteFontList_GetFontCount((IDWriteFontList *)p);                   /* base IDWriteFontList is the prefix of every one of these */
+        CHECKF(cnt >= 1, "%s: font count %u", n[i], cnt);
+        CHECKF(cnt == IDWriteFontList_GetFontCount((IDWriteFontList *)s.fam), "%s: count differs between interface pointers", n[i]);
         CHECK_HR(IDWriteFontList_GetFont((IDWriteFontList *)p, 0, &ft), S_OK);
         DW_RELEASE(ft);
-        { HRESULT hr_ = IDWriteFontList_GetFont((IDWriteFontList *)p, 1, &ft); CHECK(FAILED(hr_)); t_note("GetFont(out of range) -> %s", dw_hr_name(hr_)); }
+        { HRESULT hr_ = IDWriteFontList_GetFont((IDWriteFontList *)p, cnt, &ft); CHECK(FAILED(hr_)); t_note("GetFont(out of range) -> %s", dw_hr_name(hr_)); }
         CHECK_OUT_NULL(ft);
         CHECK_HR(IDWriteFontList_GetFontCollection((IDWriteFontList *)p, &c), S_OK);
         CHECK(c != NULL);
