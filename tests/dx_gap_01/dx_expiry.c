@@ -15,9 +15,8 @@ typedef struct dxg_font { char path[MAX_PATH]; WCHAR wpath[MAX_PATH]; int added;
 
 static int dxg_write_font(dxg_font *f)
 {
-    ttf_spec s; size_t n; uint8_t *b; HANDLE h; DWORD wr = 0; char ps[64];
-    ttf_default_spec(&s); snprintf(ps, sizeof ps, "%s-Regular", DXG_FAMILY); ttf_set_names(&s, DXG_FAMILY, "Regular", DXG_FAMILY, ps);
-    b = ttf_build(&s, &n);
+    size_t n = 0; uint8_t *b; HANDLE h; DWORD wr = 0;
+    b = ttf_build_styled(DXG_FAMILY, 400, 5, 0, &n);
     if (!b) return 0;
     t_tmpfile(f->path, sizeof f->path, "dxg_expiry.ttf");
     h = CreateFileA(f->path, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
