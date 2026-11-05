@@ -87,7 +87,7 @@ TEST(ft_lists_gsub_features) {
     dwx_font_close(&ff.h); TA_END();
 }
 TEST(ft_exact_buffer_succeeds) {
-    TA_BEGIN(); NEED_FF(1); UINT32 n = 0, m = 0; DWRITE_FONT_FEATURE_TAG t[16], big[16];
+    TA_BEGIN(); NEED_FF(1); UINT32 n = 0, m = 0; DWRITE_FONT_FEATURE_TAG t[20], big[20];
     IDWriteTextAnalyzer2_GetTypographicFeatures(a2, ff.h.face, ff.latin, L"en-us", 0, &n, NULL);
     CHECK(n >= 1 && n <= 16);
     t[n] = (DWRITE_FONT_FEATURE_TAG)0x5A5A5A5A;
@@ -98,7 +98,7 @@ TEST(ft_exact_buffer_succeeds) {
     dwx_font_close(&ff.h); TA_END();
 }
 TEST(ft_one_short_buffer_reports_required_count) {
-    TA_BEGIN(); NEED_FF(1); UINT32 n = 0, m = 0; DWRITE_FONT_FEATURE_TAG t[16];
+    TA_BEGIN(); NEED_FF(1); UINT32 n = 0, m = 0; DWRITE_FONT_FEATURE_TAG t[20];
     IDWriteTextAnalyzer2_GetTypographicFeatures(a2, ff.h.face, ff.latin, L"en-us", 0, &n, NULL);
     t[n - 1] = (DWRITE_FONT_FEATURE_TAG)0x5A5A5A5A;
     CHECK_HR(IDWriteTextAnalyzer2_GetTypographicFeatures(a2, ff.h.face, ff.latin, L"en-us", n - 1, &m, t), TA_E_BUFFER);
