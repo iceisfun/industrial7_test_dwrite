@@ -121,6 +121,14 @@ static int brt_rect_mismatch(brt_ctx *c, int x0, int y0, int x1, int y1, uint32_
     }
     return n;
 }
+/* GDI objects released by the render target are deleted asynchronously, and handle values are recycled, so lifetime checks count
+ * the process's GDI objects: poll until the count is at most `limit` (returns the final count). */
+static DWORD brt_gdi_count(void) { return GetGuiResources(GetCurrentProcess(), GR_GDIOBJECTS); }
+static DWORD brt_gdi_settle(DWORD limit) {
+    int i; DWORD n = 0;
+    for (i = 0; i < 300; i++) { GdiFlush(); n = brt_gdi_count(); if (n <= limit) break; Sleep(10); }
+    return n;
+}
 static int brt_isize(float v) { return (int)floorf(v); }
 
 /* ---- drawing -------------------------------------------------------------------------------------------------- */

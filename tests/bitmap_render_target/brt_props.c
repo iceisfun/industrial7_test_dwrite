@@ -42,12 +42,13 @@ TEST(brt_resize_same_dc_handle) {
 }
 
 TEST(brt_resize_new_bitmap_handle_old_deleted) {
-    brt_ctx c; HGDIOBJ before, after; brt_open(&c, NULL, 10, 10, 0);
-    before = GetCurrentObject(c.dc, OBJ_BITMAP);
+    brt_ctx c; HGDIOBJ before, after; DWORD n0, n1; brt_open(&c, NULL, 10, 10, 0);
+    before = GetCurrentObject(c.dc, OBJ_BITMAP); n0 = brt_gdi_count();
     CHECK_HR_OK(IDWriteBitmapRenderTarget_Resize(c.rt, 20, 10));
     after = GetCurrentObject(c.dc, OBJ_BITMAP);
     CHECK(before != after);
-    EXPECT_EQ(GetObjectType(before), 0);           /* the previous DIB was deleted */
+    n1 = brt_gdi_settle(n0);
+    t_check(n1 <= n0, __FILE__, __LINE__, "previous DIB deleted", "GDI objects %lu before Resize, %lu after", n0, n1);
     EXPECT_EQ(GetObjectType(after), OBJ_BITMAP);
     brt_close(&c);
 }
@@ -164,14 +165,15 @@ TEST(brt_resize_returns_ok_for_valid_table) {
 }
 
 TEST(brt_resize_to_zero_restores_stock_bitmap) {
-    brt_ctx c; BITMAP b; HGDIOBJ old; SIZE s; brt_open(&c, NULL, 10, 10, 0);
-    old = GetCurrentObject(c.dc, OBJ_BITMAP);
+    brt_ctx c; BITMAP b; HGDIOBJ old; SIZE s; DWORD n0, n1; brt_open(&c, NULL, 10, 10, 0);
+    old = GetCurrentObject(c.dc, OBJ_BITMAP); n0 = brt_gdi_count();
     CHECK_HR_OK(IDWriteBitmapRenderTarget_Resize(c.rt, 0, 0));
     IDWriteBitmapRenderTarget_GetSize(c.rt, &s);
     EXPECT_EQ(s.cx, 0); EXPECT_EQ(s.cy, 0);
     memset(&b, 0, sizeof b); GetObjectA(GetCurrentObject(c.dc, OBJ_BITMAP), sizeof b, &b);
     EXPECT_EQ(b.bmWidth, 1); EXPECT_EQ(b.bmHeight, 1); EXPECT_EQ(b.bmBitsPixel, 1);
-    EXPECT_EQ(GetObjectType(old), 0);              /* the 10x10 DIB was deleted */
+    n1 = brt_gdi_settle(n0 - 1);
+    t_check(n1 < n0, __FILE__, __LINE__, "10x10 DIB deleted", "GDI objects %lu before Resize(0,0), %lu after", n0, n1);
     brt_close(&c);
 }
 

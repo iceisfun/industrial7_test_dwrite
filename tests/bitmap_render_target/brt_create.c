@@ -390,8 +390,9 @@ TEST(brt_size_non_multiple_of_four) {
 /* ---- IUnknown ---------------------------------------------------------------------------------------------------- */
 TEST(brt_unknown_addref_release) {
     brt_ctx c; brt_open(&c, NULL, 4, 4, 0);
-    EXPECT_EQ(IDWriteBitmapRenderTarget_AddRef(c.rt), 2); EXPECT_EQ(IDWriteBitmapRenderTarget_AddRef(c.rt), 3);
-    EXPECT_EQ(IDWriteBitmapRenderTarget_Release(c.rt), 2); EXPECT_EQ(IDWriteBitmapRenderTarget_Release(c.rt), 1);
+    ULONG n;
+    n = IDWriteBitmapRenderTarget_AddRef(c.rt); EXPECT_EQ(n, 2); n = IDWriteBitmapRenderTarget_AddRef(c.rt); EXPECT_EQ(n, 3);
+    n = IDWriteBitmapRenderTarget_Release(c.rt); EXPECT_EQ(n, 2); n = IDWriteBitmapRenderTarget_Release(c.rt); EXPECT_EQ(n, 1);
     brt_close(&c);
 }
 
@@ -456,12 +457,12 @@ TEST(brt_unknown_qi_from_rt1_back_to_rt) {
 }
 
 TEST(brt_unknown_rt1_addref_shares_count) {
-    brt_ctx c; brt_open(&c, NULL, 4, 4, 0);
+    brt_ctx c; ULONG n; brt_open(&c, NULL, 4, 4, 0);
     if (!c.rt1) { brt_close(&c); t_skip("no RT1"); return; }
-    EXPECT_EQ(IDWriteBitmapRenderTarget1_AddRef(c.rt1), 2);          /* one object, one count */
-    EXPECT_EQ(IDWriteBitmapRenderTarget_AddRef(c.rt), 3);
-    EXPECT_EQ(IDWriteBitmapRenderTarget1_Release(c.rt1), 2);
-    EXPECT_EQ(IDWriteBitmapRenderTarget_Release(c.rt), 1);
+    n = IDWriteBitmapRenderTarget1_AddRef(c.rt1); EXPECT_EQ(n, 2);          /* one object, one count */
+    n = IDWriteBitmapRenderTarget_AddRef(c.rt); EXPECT_EQ(n, 3);
+    n = IDWriteBitmapRenderTarget1_Release(c.rt1); EXPECT_EQ(n, 2);
+    n = IDWriteBitmapRenderTarget_Release(c.rt); EXPECT_EQ(n, 1);
     brt_close(&c);
 }
 
@@ -476,13 +477,19 @@ TEST(brt_unknown_vtable_slots_nonnull) {
 
 /* ---- lifetime -------------------------------------------------------------------------------------------------- */
 TEST(brt_life_release_frees_dc_and_bitmap) {
-    brt_ctx c; HDC dc; HGDIOBJ bmp;
+    /* Handle values are recycled by GDI, so probing the old handles with GetObjectType is unreliable: count the process's GDI
+     * objects instead (the memory DC and the DIB section are the two objects the target owns). */
+    brt_ctx c; DWORD before, during, after = 0;
+    { brt_ctx w; brt_open(&w, NULL, 8, 8, 0); brt_close(&w); }          /* warm up lazily created GDI state */
+    before = GetGuiResources(GetCurrentProcess(), GR_GDIOBJECTS);
     brt_open(&c, NULL, 10, 10, 0);
-    dc = c.dc; bmp = GetCurrentObject(dc, OBJ_BITMAP);
-    EXPECT_EQ(GetObjectType(dc), OBJ_MEMDC); EXPECT_EQ(GetObjectType(bmp), OBJ_BITMAP);
+    if (!c.rt) return;
+    EXPECT_EQ(GetObjectType(c.dc), OBJ_MEMDC); EXPECT_EQ(GetObjectType(GetCurrentObject(c.dc, OBJ_BITMAP)), OBJ_BITMAP);
+    during = GetGuiResources(GetCurrentProcess(), GR_GDIOBJECTS);
+    t_check(during >= before + 2, __FILE__, __LINE__, "target owns GDI objects", "before %lu while open %lu", before, during);
     brt_close(&c);
-    EXPECT_EQ(GetObjectType(dc), 0);                  /* destructor: DeleteDC */
-    EXPECT_EQ(GetObjectType(bmp), 0);                 /* and DeleteObject on the DIB */
+    after = brt_gdi_settle(before);                 /* deletion is asynchronous on Windows */
+    t_check(after <= before, __FILE__, __LINE__, "DC and DIB freed on the last Release", "before %lu while open %lu after release %lu", before, during, after);
 }
 
 TEST(brt_life_gdi_object_count_stable) {
@@ -641,6 +648,7 @@ static DWORD WINAPI brt_thread_main(LPVOID arg) {
 TEST(brt_life_threads_independent_targets) {
     if (t_is_wine()) { t_skip("concurrent target creation hangs in the non-Windows implementation"); return; }
     HANDLE th[8]; brt_thr info[8]; int i, good = 0;
+    (void)dw_shared();                      /* create the shared factory before the threads race to */
     for (i = 0; i < 8; i++) { info[i].ok = 0; info[i].id = i; th[i] = CreateThread(NULL, 0, brt_thread_main, &info[i], 0, NULL); }
     for (i = 0; i < 8; i++) { if (th[i]) { WaitForSingleObject(th[i], 20000); CloseHandle(th[i]); } good += info[i].ok; }
     EXPECT_EQ(good, 8);

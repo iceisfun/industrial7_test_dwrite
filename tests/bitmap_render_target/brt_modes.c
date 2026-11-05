@@ -278,10 +278,22 @@ static void brt_xf_run(const brt_xf_row *t, int n, int rmode, int sideways, DWRI
         CHECK_HR_OK(IDWriteBitmapRenderTarget_SetCurrentTransform(c.rt, &t[i].m));
         hr = brt_draw_run(&c, &r, t[i].ox, t[i].oy, DWRITE_MEASURING_MODE_NATURAL, c.rp_mode[rmode], 0x0000FF, &bb);
         t_check(hr == S_OK, __FILE__, __LINE__, "draw", "%s: %s", t[i].name, dw_hr_name(hr));
+        if (sideways) {
+            /* Windows rotates the glyph about a point derived from the font (not the baseline origin), so only the size, solidity
+             * and containment of the result are portable: the box is the upright box with its axes swapped, then transformed. */
+            float bw = BRT_BY1(em), bh = BRT_BX1(em) - BRT_BX0(em);
+            float ew = t[i].ppd * (fabsf(t[i].m.m11) * bw + fabsf(t[i].m.m21) * bh), eh = t[i].ppd * (fabsf(t[i].m.m12) * bw + fabsf(t[i].m.m22) * bh);
+            if (brt_bbox_not(&c, W, &px)) {
+                int pw = (int)(px.right - px.left), ph = (int)(px.bottom - px.top);
+                t_check(fabsf(pw - ew) <= 2.5f && fabsf(ph - eh) <= 2.5f, __FILE__, __LINE__, "sideways box size", "%s (render %d): pixels %dx%d expected about %gx%g", t[i].name, rmode, pw, ph, ew, eh);
+                t_check(brt_rect_mismatch(&c, px.left + 2, px.top + 2, px.right - 2, px.bottom - 2, 0x0000FF, 3) == 0, __FILE__, __LINE__, "sideways box solid", "%s (render %d)", t[i].name, rmode);
+            } else t_check(0, __FILE__, __LINE__, "drawn", "%s: nothing drawn", t[i].name);
+        } else {
         brt_quad(&t[i].m, t[i].ppd, t[i].ox, t[i].oy, em, sideways, q);
         brt_quad_check(&c, q, 3.0f, 0x0000FF, W, 3, &ib, &ob, &nin);
         t_check(ib == 0 && ob == 0, __FILE__, __LINE__, "transformed box", "%s (render %d sideways %d): interior bad %d of %d, outside bad %d", t[i].name, rmode, sideways, ib, nin, ob);
         t_check(nin > 0, __FILE__, __LINE__, "interior sample", "%s: only %d interior pixels", t[i].name, nin);
+        }
         if (brt_bbox_not(&c, W, &px))
             t_check(bb.left <= px.left && bb.top <= px.top && bb.right >= px.right && bb.bottom >= px.bottom, __FILE__, __LINE__, "blackBox contains pixels", "%s: box {%ld,%ld,%ld,%ld} pixels {%ld,%ld,%ld,%ld}",
                     t[i].name, bb.left, bb.top, bb.right, bb.bottom, px.left, px.top, px.right, px.bottom);
@@ -379,12 +391,21 @@ TEST(brtm_sideways_rotated_back_equals_upright) {
     IDWriteBitmapRenderTarget_SetCurrentTransform(c.rt, &m);
     brt_fill(&c, W);
     CHECK_HR_OK(brt_draw_run(&c, &r, 0, 0, DWRITE_MEASURING_MODE_NATURAL, c.rp_mode[1], K, NULL));
-    for (y = 0; y < h; y++) for (x = 0; x < w; x++) {
-        float d1, d2; (void)d1; (void)d2;
-        if (!brt_near(brt_px(&c, x, y), ref[y * w + x] & 0xFFFFFF, 0)) bad++;
+    {
+        /* Windows positions a sideways glyph about a font-derived point, so the rotated result is the upright glyph up to a
+         * translation: compare the size of the inked region and the amount of ink. */
+        RECT a, b; int na = 0, nb = 0;
+        CHECK(brt_bbox_not(&c, W, &b));
+        for (y = 0; y < h; y++) for (x = 0; x < w; x++) { if ((ref[y * w + x] & 0xFFFFFF) != W) na++; if (brt_px(&c, x, y) != W) nb++; }
+        a.left = a.top = a.right = a.bottom = 0;
+        for (y = 0; y < h; y++) for (x = 0; x < w; x++) if ((ref[y * w + x] & 0xFFFFFF) != W) {
+            if (!a.right) { a.left = x; a.top = y; a.right = x + 1; a.bottom = y + 1; }
+            if (x < a.left) a.left = x; if (y < a.top) a.top = y; if (x + 1 > a.right) a.right = x + 1; if (y + 1 > a.bottom) a.bottom = y + 1;
+        }
+        t_note("sideways+rotate vs upright: ink %d vs %d, box %ldx%ld vs %ldx%ld", nb, na, b.right - b.left, b.bottom - b.top, a.right - a.left, a.bottom - a.top);
+        CHECK(labs((b.right - b.left) - (a.right - a.left)) <= 2 && labs((b.bottom - b.top) - (a.bottom - a.top)) <= 2);
+        CHECK(labs(nb - na) <= na / 10 + 4);
     }
-    t_note("sideways+rotate vs upright: %d differing pixels (edge rounding)", bad);
-    CHECK(bad < 200);              /* identical up to edge rounding */
     free(ref); brt_close(&c);
 }
 
@@ -542,10 +563,22 @@ static void brt_sys_I(brt_ctx *c, int fi, int rmode, DWRITE_MEASURING_MODE mm, f
     brt_fill(c, W);
     hr = brt_draw_run(c, &r, ox, oy, mm, c->rp_mode[rmode], 0x802010, &bb);
     t_check(hr == S_OK, __FILE__, __LINE__, "draw I", "%ls render %d: %s", brt_sysfonts[fi], rmode, dw_hr_name(hr));
-    /* outline bounds are relative to the baseline origin with y down */
-    col = (int)floorf(ox + (x0 + x1) * 0.5f);
-    for (y = (int)ceilf(oy + y0) + 3; y < (int)floorf(oy + y1) - 3; y++) if (!brt_near(brt_px(c, col, y), 0x802010, 3)) bad++;
-    t_check(bad == 0, __FILE__, __LINE__, "stem column solid", "%ls em %g render %d: %d bad pixels in column %d (outline x %g..%g y %g..%g)", brt_sysfonts[fi], em, rmode, bad, col, x0, x1, y0, y1);
+    /* outline bounds are relative to the baseline origin with y down.  Anti-aliased (ClearType / hinted) stems have fringe
+     * pixels whose exact colour depends on the rasteriser: look at the three columns around the stem centre, take the one
+     * that differs most from the background on the middle row, and require it to be uniform down the stem. */
+    {
+        int cmid = (int)floorf(ox + (x0 + x1) * 0.5f), ymid = (int)floorf(oy + (y0 + y1) * 0.5f), best = cmid, bestd = -1, k;
+        uint32_t ref;
+        for (k = cmid - 1; k <= cmid + 1; k++) {
+            uint32_t v = brt_px(c, k, ymid); int d = 0, s;
+            for (s = 0; s < 24; s += 8) { int e = (int)((v >> s) & 0xFF) - 0xFF; d += e < 0 ? -e : e; }
+            if (d > bestd) { bestd = d; best = k; }
+        }
+        col = best; ref = brt_px(c, col, ymid);
+        t_check(bestd > 0, __FILE__, __LINE__, "stem drawn", "%ls em %g render %d: columns %d..%d blank on the middle row", brt_sysfonts[fi], em, rmode, cmid - 1, cmid + 1);
+        for (y = (int)ceilf(oy + y0) + 3; y < (int)floorf(oy + y1) - 3; y++) if (!brt_near(brt_px(c, col, y), ref, 3)) bad++;
+    }
+    t_check(bad == 0, __FILE__, __LINE__, "stem column uniform", "%ls em %g render %d: %d non-uniform pixels in column %d (outline x %g..%g y %g..%g)", brt_sysfonts[fi], em, rmode, bad, col, x0, x1, y0, y1);
     if (brt_bbox_not(c, W, &px)) {
         t_check(labs(px.left - (long)floorf(ox + x0)) <= 3 && labs(px.right - (long)ceilf(ox + x1)) <= 3 && labs(px.top - (long)floorf(oy + y0)) <= 3 && labs(px.bottom - (long)ceilf(oy + y1)) <= 3,
                 __FILE__, __LINE__, "pixels match outline bounds", "%ls em %g render %d: pixels {%ld,%ld,%ld,%ld} outline {%g,%g,%g,%g}", brt_sysfonts[fi], em, rmode, px.left, px.top, px.right, px.bottom, ox + x0, oy + y0, ox + x1, oy + y1);
