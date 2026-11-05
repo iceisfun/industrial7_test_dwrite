@@ -289,10 +289,10 @@ TEST(fset_str_list_bad_index_lengths)
         unsigned i;
         for (i = 0; i < 4; i++) {
             len = 0x55; hr = IDWriteStringList_GetStringLength(l, bad[i], &len);
-            CHECKF(FAILED(hr), "GetStringLength(%u) -> %s", bad[i], dw_hr_name(hr));
+            CHECKF(hr == E_FAIL, "GetStringLength(%u) -> %s", bad[i], dw_hr_name(hr));   /* IndexOutOfRangeException carries E_FAIL */
             CHECKF(len == 0xFFFFFFFFu, "length %u", len);
             len = 0x55; hr = IDWriteStringList_GetLocaleNameLength(l, bad[i], &len);
-            CHECKF(FAILED(hr), "GetLocaleNameLength(%u) -> %s", bad[i], dw_hr_name(hr));
+            CHECKF(hr == E_FAIL, "GetLocaleNameLength(%u) -> %s", bad[i], dw_hr_name(hr));   /* IndexOutOfRangeException carries E_FAIL */
             CHECKF(len == 0xFFFFFFFFu, "length %u", len);
         }
         DW_RELEASE(l);
@@ -312,11 +312,11 @@ TEST(fset_str_list_bad_index_strings)
         for (i = 0; i < 3; i++) {
             wmemset(buf, 0x2222, 16);
             hr = IDWriteStringList_GetString(l, bad[i], buf, 16);
-            CHECKF(FAILED(hr), "GetString(%u) -> %s", bad[i], dw_hr_name(hr));
+            CHECKF(hr == E_FAIL, "GetString(%u) -> %s", bad[i], dw_hr_name(hr));   /* IndexOutOfRangeException carries E_FAIL */
             CHECKF(buf[0] == 0, "buffer cleared before the throw: 0x%x", buf[0]);
             wmemset(buf, 0x2222, 16);
             hr = IDWriteStringList_GetLocaleName(l, bad[i], buf, 16);
-            CHECKF(FAILED(hr), "GetLocaleName(%u) -> %s", bad[i], dw_hr_name(hr));
+            CHECKF(hr == E_FAIL, "GetLocaleName(%u) -> %s", bad[i], dw_hr_name(hr));   /* IndexOutOfRangeException carries E_FAIL */
             CHECKF(buf[0] == 0, "buffer cleared before the throw: 0x%x", buf[0]);
             /* size 0 wins over the index check */
             wmemset(buf, 0x2222, 16);
