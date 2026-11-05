@@ -107,9 +107,12 @@ static void sf_metrics_from_tables(const WCHAR *fam) {
         int wa = os2 && ol >= 78 ? BE16(os2 + 74) : 0, wd = os2 && ol >= 78 ? BE16(os2 + 76) : 0;
         int ta = os2 && ol >= 78 ? BE16S(os2 + 68) : 0, td = os2 && ol >= 78 ? -BE16S(os2 + 70) : 0, tg = os2 && ol >= 78 ? BE16S(os2 + 72) : 0;
         int typo = os2 && ol >= 78 && (BE16(os2 + 62) & 0x80);
+        /* win metrics are used unless the font carries AAT morph tables (mort/morx) and no OpenType layout tables (GDEF/GPOS/GSUB) */
+        int has_aat = ot_find(&s.dir, TG("morx")) != NULL || ot_find(&s.dir, TG("mort")) != NULL;
+        int has_ot = ot_find(&s.dir, TG("GDEF")) != NULL || ot_find(&s.dir, TG("GPOS")) != NULL || ot_find(&s.dir, TG("GSUB")) != NULL;
         int ea, ed, eg;
         if (typo) { ea = ta; ed = td; eg = tg; }
-        else if ((wa || wd) && !s.has_cff) { int g = ha + hd + hg - wa - wd; ea = wa; ed = wd; eg = g > 0 ? g : 0; }
+        else if ((wa || wd) && (!has_aat || has_ot)) { int g = ha + hd + hg - wa - wd; ea = wa; ed = wd; eg = g > 0 ? g : 0; }
         else { ea = ha; ed = hd; eg = hg > 0 ? hg : 0; }
         if (m.ascent != ea || m.descent != ed || m.lineGap != eg) CHECKF(0, "ascent/descent/gap %u/%u/%d, rule says %d/%d/%d (hhea %d/%d/%d win %d/%d typo %d/%d/%d use_typo %d)", m.ascent, m.descent, m.lineGap, ea, ed, eg, ha, hd, hg, wa, wd, ta, td, tg, typo);
         else CHECK(1);

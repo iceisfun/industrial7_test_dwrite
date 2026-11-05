@@ -216,3 +216,39 @@ TEST(fw_missing_required_tables_note) {
         synth_close(&s);
     }
 }
+
+/* ---- which vertical metrics source: AAT morph tables without OpenType layout tables select the hhea values ---- */
+static void metrics_with_raw(const char *tag, int with_gsub, UINT32 *asc, UINT32 *desc, INT32 *gap) {
+    static const uint8_t z[16] = { 0, 1, 0, 0 };
+    ttf_rawtable rt; ttf_spec sp; synth s; DWRITE_FONT_METRICS m;
+    memset(&s, 0, sizeof s); memset(rt.tag, 0, 5); memcpy(rt.tag, tag, 4); rt.data = z; rt.len = 16;
+    ttf_default_spec(&sp); sp.raw = &rt; sp.nraw = 1;
+    if (with_gsub) { sp.gsub = ks_feat; sp.ngsub = 1; }
+    *asc = *desc = 0xFFFF; *gap = -1;
+    if (!synth_open(&s, &sp)) { t_note("font with %s not created: %s", tag, dw_hr_name(s.hr)); synth_close(&s); return; }
+    IDWriteFontFace_GetMetrics(s.h.face, &m); *asc = m.ascent; *desc = m.descent; *gap = m.lineGap;
+    synth_close(&s);
+}
+TEST(fw_morx_without_ot_layout_uses_hhea_metrics) {
+    UINT32 a, d; INT32 g; metrics_with_raw("morx", 0, &a, &d, &g);
+    if (a != 0xFFFF) { EXPECT_EQ(a, 1700); EXPECT_EQ(d, 400); EXPECT_EQ(g, 90); }
+}
+TEST(fw_mort_without_ot_layout_uses_hhea_metrics) {
+    UINT32 a, d; INT32 g; metrics_with_raw("mort", 0, &a, &d, &g);
+    if (a != 0xFFFF) { EXPECT_EQ(a, 1700); EXPECT_EQ(d, 400); EXPECT_EQ(g, 90); }
+}
+TEST(fw_morx_with_gsub_uses_win_metrics) {
+    UINT32 a, d; INT32 g; metrics_with_raw("morx", 1, &a, &d, &g);
+    if (a != 0xFFFF) { EXPECT_EQ(a, 1800); EXPECT_EQ(d, 450); EXPECT_EQ(g, 0); }
+}
+TEST(fw_mort_with_gsub_uses_win_metrics) {
+    UINT32 a, d; INT32 g; metrics_with_raw("mort", 1, &a, &d, &g);
+    if (a != 0xFFFF) { EXPECT_EQ(a, 1800); EXPECT_EQ(d, 450); EXPECT_EQ(g, 0); }
+}
+TEST(fw_gsub_alone_keeps_win_metrics) {
+    ttf_spec sp; synth s; DWRITE_FONT_METRICS m; memset(&s, 0, sizeof s);
+    ttf_default_spec(&sp); sp.gsub = ks_feat; sp.ngsub = 1;
+    if (!synth_open(&s, &sp)) { t_skip("open"); synth_close(&s); return; }
+    IDWriteFontFace_GetMetrics(s.h.face, &m); EXPECT_EQ(m.ascent, 1800); EXPECT_EQ(m.descent, 450);
+    synth_close(&s);
+}

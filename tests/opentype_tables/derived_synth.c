@@ -36,8 +36,9 @@ MF(box_right_is_head_xmax, NOP, glyphBoxRight, 1100)
 MF(box_bottom_is_head_ymin, NOP, glyphBoxBottom, 0)
 
 /* ---- ascent / descent / lineGap ---- */
-/* For a TrueType (glyf) font DirectWrite uses usWinAscent/usWinDescent when either is non-zero; lineGap is what remains of the
- * hhea line height: max(0, hheaAsc + |hheaDesc| + hheaGap - winAsc - winDesc). */
+/* DirectWrite uses usWinAscent/usWinDescent when either is non-zero, unless the font has AAT morph tables (mort/morx) and no
+ * GDEF/GPOS/GSUB; lineGap is then what remains of the hhea line height: max(0, hheaAsc + |hheaDesc| + hheaGap - winAsc - winDesc).
+ * With USE_TYPO_METRICS (OS/2 fsSelection bit 7) the typographic values are used; without OS/2 or with both win values 0, hhea. */
 MF(ascent_win_default, NOP, ascent, 1800)
 MF(descent_win_default, NOP, descent, 450)
 MF(linegap_win_default_clamped_to_zero, NOP, lineGap, 0)
