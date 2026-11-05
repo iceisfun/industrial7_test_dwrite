@@ -184,3 +184,14 @@ void tlr_model_run(const tlr_model *m, UINT32 pos, tlr_cell *value, DWRITE_TEXT_
     *value = *cur; r->startPosition = s; r->length = e - s;
 }
 UINT32 tlr_rand(UINT32 *s) { *s = *s * 1664525u + 1013904223u; return *s >> 8; }
+
+UINT32 tlr_clusters(IDWriteTextLayout *l, float *widths, UINT32 max)
+{
+    DWRITE_CLUSTER_METRICS cm[256]; UINT32 n = 0, i; HRESULT hr;
+    if (max > 256) max = 256;
+    hr = IDWriteTextLayout_GetClusterMetrics(l, cm, 256, &n);
+    t_check(hr == S_OK, __FILE__, __LINE__, "GetClusterMetrics", "got %s", dw_hr_name(hr));
+    if (hr != S_OK) return 0;
+    for (i = 0; i < n && i < max; i++) widths[i] = cm[i].width;
+    return n;
+}

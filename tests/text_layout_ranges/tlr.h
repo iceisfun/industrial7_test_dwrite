@@ -76,6 +76,8 @@ BOOL                tlr_strike(IDWriteTextLayout *l, UINT32 pos, DWRITE_TEXT_RAN
 /* family / locale as wide strings (static ring of buffers, valid until 8 more calls); length reported by the *Length call is verified against wcslen. */
 const WCHAR *tlr_family(IDWriteTextLayout *l, UINT32 pos, DWRITE_TEXT_RANGE *r);
 const WCHAR *tlr_locale(IDWriteTextLayout *l, UINT32 pos, DWRITE_TEXT_RANGE *r);
+/* Cluster widths of the whole layout (one entry per cluster, up to `max`); returns the cluster count (0 on failure). */
+UINT32 tlr_clusters(IDWriteTextLayout *l, float *widths, UINT32 max);
 /* Interface-valued getters: return the pointer (AddRef'd by the call, caller releases), require S_OK. */
 IUnknown *tlr_effect(IDWriteTextLayout *l, UINT32 pos, DWRITE_TEXT_RANGE *r);
 IDWriteInlineObject *tlr_inline(IDWriteTextLayout *l, UINT32 pos, DWRITE_TEXT_RANGE *r);
