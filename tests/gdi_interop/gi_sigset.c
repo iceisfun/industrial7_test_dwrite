@@ -30,6 +30,7 @@ TEST(gis_face_null)
 {
     gi_fix x; FONTSIGNATURE s; static const gi_cf set[] = { { "GiSig", 400, 0, 5 } }; GI_FIX_OR_SKIP(x, set);
     if (!x.gdi1) { t_skip("no interop1"); gi_fix_close(&x); return; }
+    if (t_is_wine()) { t_skip("the emulator dereferences a NULL face"); gi_fix_close(&x); return; }
     gi_sig_fill(&s);
     CHECK_HR(IDWriteGdiInterop1_GetFontSignature_(x.gdi1, (IDWriteFontFace *)NULL, &s), DW_E_INVALIDARG);
     CHECK(gi_sig_zero(&s));
