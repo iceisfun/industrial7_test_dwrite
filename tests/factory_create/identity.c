@@ -52,13 +52,15 @@ TEST(id_shared_same_after_all_released) {
     DW_RELEASE(again);
 }
 TEST(id_shared_same_pointer_many_cycles) {
-    IUnknown *base = (IUnknown *)dw_shared(); int i, bad = 0; NEED_EXPORT();
+    IUnknown *base; int i, bad = 0; NEED_EXPORT();
+    base = mk(FT_SHARED);   /* IUnknown view; the helper's IDWriteFactory view may be a different pointer */
     REQUIRE(base);
     for (i = 0; i < 200; i++) {
         IUnknown *p = mk(FT_SHARED);
         if (p != base) bad++;
         DW_RELEASE(p);
     }
+    DW_RELEASE(base);
     CHECKF(bad == 0, "bad=%d", bad);
 }
 TEST(id_shared_stays_alive_when_helper_reference_dropped) {
