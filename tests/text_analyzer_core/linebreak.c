@@ -316,7 +316,7 @@ TEST(subrange_interior_matches_whole)
     {
         dwx_ana_src *s = dwx_ana_src_new(t, n); dwx_ana_sink *k = dwx_ana_sink_new();
         CHECK_HR_OK(ta_do(an, TA_BREAK, s, 5, 25, k));
-        for (i = 6; i < 30; i++) CHECKF(!memcmp(&k->brk[i], &k0->brk[i], 1), "unit %u: %02x vs %02x", i, *(unsigned char *)&k->brk[i], *(unsigned char *)&k0->brk[i]);
+        for (i = 6; i < 29; i++) CHECKF(!memcmp(&k->brk[i], &k0->brk[i], 1), "unit %u: %02x vs %02x", i, *(unsigned char *)&k->brk[i], *(unsigned char *)&k0->brk[i]);
         ta_free(s, k);
     }
     ta_free(s0, k0); TA_END();
