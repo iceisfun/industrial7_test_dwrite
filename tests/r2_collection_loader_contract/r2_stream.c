@@ -315,7 +315,9 @@ RT(size_zero_stream)
     x.fl->cfg[0].has_size_override = 1; x.fl->cfg[0].size_override = 0;
     IDWriteFontCollection *c = (IDWriteFontCollection *)(ULONG_PTR)1;
     HRESULT hr = r2_create(&x, &c);
-    fault_consistency(hr, c, 0, "size reported 0");
+    /* a zero reported size is tolerated by the reference implementation (the family is still listed): accept either outcome */
+    if (SUCCEEDED(hr) && c) { UINT32 n = IDWriteFontCollection_GetFontFamilyCount(c); t_note("size reported 0 -> S_OK, %u families", n); CHECKF(n <= 1, "size reported 0: %u families", n); }
+    else fault_consistency(hr, c, 0, "size reported 0");
     DW_RELEASE(c);
     r2_close(&x);
 }
