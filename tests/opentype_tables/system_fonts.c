@@ -88,7 +88,7 @@ static void sf_metrics_from_tables(const WCHAR *fam) {
     if (FAILED(IDWriteFontFace_QueryInterface(s.face, &IID_IDWriteFontFace1, (void **)&f1)) || !f1) { t_skip("no FontFace1"); sys_close(&s); return; }
     IDWriteFontFace1_GetMetrics(f1, &m);
     if (h) { EXPECT_EQ(m.glyphBoxLeft, BE16S(h + 36)); EXPECT_EQ(m.glyphBoxBottom, BE16S(h + 38)); EXPECT_EQ(m.glyphBoxRight, BE16S(h + 40)); EXPECT_EQ(m.glyphBoxTop, BE16S(h + 42)); }
-    if (post && pl >= 12) { EXPECT_EQ(m.underlinePosition, BE16S(post + 8)); if (BE16S(post + 10) > 0) EXPECT_EQ(m.underlineThickness, BE16S(post + 10)); else CHECK(m.underlineThickness >= 1); }
+    if (post && pl >= 12) { EXPECT_EQ(m.underlinePosition, BE16S(post + 8)); if (BE16S(post + 10) > 0) EXPECT_EQ(m.underlineThickness, BE16S(post + 10)); else EXPECT_EQ(m.underlineThickness, (int)(m.designUnitsPerEm / 14)); }   /* a zero post thickness is replaced by 1/14 em (Win10: 146 at 2048 upem, font with zero OS/2 strike thickness too) */
     if (os2 && ol >= 78) {
         EXPECT_EQ(m.strikethroughPosition, BE16S(os2 + 28));
         EXPECT_EQ(m.strikethroughThickness, BE16S(os2 + 26) > 0 ? BE16S(os2 + 26) : m.underlineThickness);

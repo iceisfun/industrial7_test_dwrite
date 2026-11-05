@@ -126,10 +126,7 @@ TEST(exp_getprocaddress_other_ordinals_fail) {
         SET_ERR(0);
         p = GetProcAddress(dwmod(), (LPCSTR)ords[i]);
         CHECKF(p == NULL, "ordinal %lu resolved", (unsigned long)ords[i]);
-        if (!p && ords[i] != 0) {   /* Win10 reports ERROR_INVALID_ORDINAL; accept either not-found flavour */
-            DWORD e = GetLastError();
-            CHECKF(e == ERROR_PROC_NOT_FOUND || e == ERROR_INVALID_ORDINAL, "ordinal %lu: error %lu", (unsigned long)ords[i], (unsigned long)e);
-        }
+        if (!p && ords[i] != 0) EXPECT_ERR(ERROR_INVALID_ORDINAL);   /* Win10: 182 for every unexported ordinal; ordinal 0 is a NULL name pointer: unspecified */
     }
 }
 TEST(exp_getprocaddress_hash_ordinal_spelling_note) {

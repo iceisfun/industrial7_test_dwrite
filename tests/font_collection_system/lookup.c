@@ -210,16 +210,17 @@ TEST(find_absent_suffix_and_prefix_of_real_family) {
 TEST(find_absent_non_ascii) {
     NEED_SYS();
     static const WCHAR *names[] = { L"\x65E5\x672C\x8A9E\x30D5\x30A9\x30F3\x30C8\x00D7", L"\x0416\x0416\x0416", L"\x00C4\x00D6\x00DC", L"\xD83D\xDE00", L"\xD83D\xDE00\xD83D\xDE00\xD83D\xDE00",
-                                    L"\xD800", L"\xDC00", L"\xDC00\xD800", L"\xFFFF", L"\xFFFE", L"\xFEFF", L"\x0301" };
+                                    L"\xD800", L"\xDC00", L"\xDC00\xD800", L"\xFFFF", L"\xFFFE", L"\xFEFF", L"\x0301", L"\x200B" L"Arial" };
     for (size_t i = 0; i < sizeof names / sizeof names[0]; i++) ABSENT(c, names[i]);
     {
-        /* A leading right-to-left override is ignored by the platform lookup (like the soft hyphen), so
-           the name matches Arial where Arial is installed; report it rather than asserting absence. */
+        /* Win10: a leading right-to-left override is ignored by the platform lookup (like the soft hyphen),
+           so the name resolves to the same family as the plain name; where the plain name is absent, so is this one. */
         static const WCHAR rlo_arial[] = L"\x202E" L"Arial";
-        UINT32 idx = 0; BOOL ex = 1;
-        HRESULT hr = IDWriteFontCollection_FindFamilyName(c, rlo_arial, &idx, &ex);
-        CHECKF(hr == S_OK, "RLO + Arial -> %s", dw_hr_name(hr));
-        t_note("RLO + Arial: exists %d index %u", (int)ex, idx);
+        UINT32 pidx = 0, idx = 0; BOOL pex = 0, ex = 1;
+        CHECK_HR_OK(IDWriteFontCollection_FindFamilyName(c, L"Arial", &pidx, &pex));
+        CHECK_HR_OK(IDWriteFontCollection_FindFamilyName(c, rlo_arial, &idx, &ex));
+        CHECKF(ex == pex, "RLO + Arial exists %d, Arial exists %d", (int)ex, (int)pex);
+        if (pex) EXPECT_EQ(idx, pidx); else EXPECT_EQ(idx, 0xFFFFFFFFu);
     }
     END_SYS();
 }
