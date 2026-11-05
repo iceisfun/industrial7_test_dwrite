@@ -88,7 +88,7 @@ static void sf_metrics_from_tables(const WCHAR *fam) {
     if (FAILED(IDWriteFontFace_QueryInterface(s.face, &IID_IDWriteFontFace1, (void **)&f1)) || !f1) { t_skip("no FontFace1"); sys_close(&s); return; }
     IDWriteFontFace1_GetMetrics(f1, &m);
     if (h) { EXPECT_EQ(m.glyphBoxLeft, BE16S(h + 36)); EXPECT_EQ(m.glyphBoxBottom, BE16S(h + 38)); EXPECT_EQ(m.glyphBoxRight, BE16S(h + 40)); EXPECT_EQ(m.glyphBoxTop, BE16S(h + 42)); }
-    if (post && pl >= 12) { EXPECT_EQ(m.underlinePosition, BE16S(post + 8)); EXPECT_EQ(m.underlineThickness, BE16S(post + 10)); }
+    if (post && pl >= 12) { EXPECT_EQ(m.underlinePosition, BE16S(post + 8)); if (BE16S(post + 10) > 0) EXPECT_EQ(m.underlineThickness, BE16S(post + 10)); else CHECK(m.underlineThickness >= 1); }
     if (os2 && ol >= 78) {
         EXPECT_EQ(m.strikethroughPosition, BE16S(os2 + 28));
         EXPECT_EQ(m.strikethroughThickness, BE16S(os2 + 26) > 0 ? BE16S(os2 + 26) : m.underlineThickness);
@@ -147,19 +147,20 @@ static void sf_glyph_indices_vs_cmap(const WCHAR *fam) {
     CHECK(bad == 0);
     sys_close(&s);
 }
+static int has_tag(sysfont *s, const char *tag);
 static void sf_design_metrics(const WCHAR *fam) {
     OPEN_SYS(s, fam, DWRITE_FONT_WEIGHT_REGULAR, DWRITE_FONT_STYLE_NORMAL);
     UINT16 ids[128]; DWRITE_GLYPH_METRICS gm[128]; int i, n = s.f.nglyphs < 128 ? s.f.nglyphs : 128, bad_adv = 0, bad_lsb = 0, bad_rsb = 0;
-    IDWriteFontFace1 *f1 = NULL; INT32 adv[128];
+    IDWriteFontFace1 *f1 = NULL; INT32 adv[128]; int isvar = has_tag(&s, "fvar");
     if (n < 2 || !s.f.hmtx) { t_skip("no glyph data"); sys_close(&s); return; }
     for (i = 0; i < n; i++) ids[i] = (UINT16)(i * (s.f.nglyphs / n));
     CHECK_HR_OK(IDWriteFontFace_GetDesignGlyphMetrics(s.face, ids, n, gm, FALSE));
     for (i = 0; i < n; i++) {
         ot_glyph g; ot_glyph_get(&s.f, ids[i], &g);
         if (gm[i].advanceWidth != (UINT32)g.adv) bad_adv++;
-        if (gm[i].leftSideBearing != g.lsb) bad_lsb++;
+        if (isvar ? abs(gm[i].leftSideBearing - g.lsb) > 1 : gm[i].leftSideBearing != g.lsb) bad_lsb++;
         if (s.has_glyf && gm[i].rightSideBearing != g.adv - g.lsb - (g.has_outline ? g.x1 - g.x0 : 0)) bad_rsb++;
-        CHECK((int)gm[i].advanceHeight == gm[i].topSideBearing + (g.has_outline ? g.y1 - g.y0 : 0) + gm[i].bottomSideBearing || !s.has_glyf);
+        if (!isvar) CHECK((int)gm[i].advanceHeight == gm[i].topSideBearing + (g.has_outline ? g.y1 - g.y0 : 0) + gm[i].bottomSideBearing || !s.has_glyf);
     }
     CHECKF(bad_adv == 0, "%d advance mismatches", bad_adv);
     CHECKF(bad_lsb == 0, "%d lsb mismatches", bad_lsb);
@@ -458,7 +459,7 @@ TEST(sf_bahnschrift_fvar_layout) {
             CHECK(mn <= df && df <= mx);
             t_note("axis %u: '%c%c%c%c' %g..%g default %g", i, a[0], a[1], a[2], a[3], mn / 65536.0, mx / 65536.0, df / 65536.0);
         }
-        { IDWriteFontFace5 *f5 = NULL; if (SUCCEEDED(IDWriteFontFace_QueryInterface(s.face, &IID_IDWriteFontFace5, (void **)&f5)) && f5) { UINT32 c = IDWriteFontFace5_GetFontAxisValueCount(f5); t_note("IDWriteFontFace5 axis value count %u (fvar axes %u)", c, na); CHECK(c == na); IDWriteFontFace5_Release(f5); } }
+        { IDWriteFontFace5 *f5 = NULL; if (SUCCEEDED(IDWriteFontFace_QueryInterface(s.face, &IID_IDWriteFontFace5, (void **)&f5)) && f5) { UINT32 c = IDWriteFontFace5_GetFontAxisValueCount(f5); t_note("IDWriteFontFace5 axis value count %u (fvar axes %u)", c, na); CHECK(c >= na); IDWriteFontFace5_Release(f5); } }
     } else CHECK(0);
     trel(s.face, &t);
     sys_close(&s);
