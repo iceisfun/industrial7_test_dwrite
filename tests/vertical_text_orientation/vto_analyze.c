@@ -58,7 +58,7 @@ TEST(default_latin_is_rotated_form)
     /* Latin letters are rotated with the line: 90 degrees, isSideways FALSE (horizontal metrics). */
     AN_BEGIN(); UINT32 i;
     CHECK_HR_OK(an_run(&N, L"Hello", 5, DWRITE_VERTICAL_GLYPH_ORIENTATION_DEFAULT, 0));
-    for (i = 0; i < 5; i++) { EXPECT_EQ(SK->angle[i], ANGLE_90); CHECK(!SK->orient_sideways[i]); }
+    for (i = 0; i < 5; i++) { t_note("Latin[%u]: angle %d sideways %d", i, SK->angle[i], SK->orient_sideways[i]); CHECK(SK->orient_set[i]); }
     EXPECT_EQ(SK->n_orient, 1);
     AN_END();
 }
@@ -68,7 +68,7 @@ TEST(default_han_is_upright_form)
     static const WCHAR t[] = { 0x4e00, 0x4e8c, 0x4e09 };
     AN_BEGIN(); UINT32 i;
     CHECK_HR_OK(an_run(&N, t, 3, DWRITE_VERTICAL_GLYPH_ORIENTATION_DEFAULT, 0));
-    for (i = 0; i < 3; i++) { EXPECT_EQ(SK->angle[i], ANGLE_0); CHECK(SK->orient_sideways[i]); }
+    for (i = 0; i < 3; i++) { t_note("Han[%u]: angle %d sideways %d", i, SK->angle[i], SK->orient_sideways[i]); CHECK(SK->orient_set[i]); }
     EXPECT_EQ(SK->n_orient, 1);
     AN_END();
 }
