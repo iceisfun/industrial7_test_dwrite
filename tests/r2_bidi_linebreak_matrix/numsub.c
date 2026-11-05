@@ -55,11 +55,13 @@ POSTEST(contextual_run3,   L"12 34 56", mk_ctx_ar,    0, 8, 3, 0, 3, 6)
 POSTEST(culture_run4,      L"12 34 56", mk_culture_ar, 0, 8, 4, 0, 4)
 POSTEST(sub_range_starts_midrun, L"abcdef", mk_none, 3, 3, 0, 3)
 
-/* zero-length range: neither source nor sink is called */
+/* zero-length range: the sink is not called */
 MT(numsub_zero_length_no_calls) {
     MS_BEGIN(); ms_src *s = ms_src_new(L"abc", 3); ms_sink *k = ms_sink_new(0);
     CHECK_HR_OK(ms_do(an, MA_NUMSUB, s, 1, 0, k));
-    EXPECT_EQ(s->nlog, 0); EXPECT_EQ(k->nev, 0);
+    /* Windows 10 makes at most one source call (it is not a numeric one) and never calls the sink */
+    CHECK(s->nlog <= 1); if (s->nlog) t_note("zero-length range: one source call, fn %d", s->log[0].fn);
+    EXPECT_EQ(k->nev, 0);
     ms_src_free(s); ms_sink_free(k); MS_END();
 }
 MT(numsub_null_object_no_sink_calls) {

@@ -279,22 +279,26 @@ MT(calls_bidi_locale_length_zero_same_result) {
     for (i = 0; i < 8; i++) { EXPECT_EQ(ka->ex[i], kb->ex[i]); EXPECT_EQ(ka->res[i], kb->res[i]); }
     ms_src_free(a); ms_src_free(b); ms_sink_free(ka); ms_sink_free(kb); MS_END();
 }
-static void locale_variant(const WCHAR *loc, int is_null)
+/* bad: a string that is not a well-formed locale name makes AnalyzeBidi fail with E_INVALIDARG on Windows 10 */
+static void locale_variant_ex(const WCHAR *loc, int is_null, int bad)
 {
     MS_BEGIN(); static const WCHAR t[] = { 'a', 'b', ' ', 0x05d0, 0x05d1, ' ', '1', '2', ' ', 'c', 0 };
     ms_src *a = ms_src_new(t, 10), *b = ms_src_new(t, 10); ms_sink *ka = ms_sink_new(0), *kb = ms_sink_new(0); int i;
     b->locale = is_null ? NULL : loc;
-    CHECK_HR_OK(ms_do(an, MA_BIDI, a, 0, 10, ka)); CHECK_HR_OK(ms_do(an, MA_BIDI, b, 0, 10, kb));
+    CHECK_HR_OK(ms_do(an, MA_BIDI, a, 0, 10, ka));
+    if (bad) { CHECK_HR(ms_do(an, MA_BIDI, b, 0, 10, kb), E_INVALIDARG); ms_src_free(a); ms_src_free(b); ms_sink_free(ka); ms_sink_free(kb); MS_END(); return; }
+    CHECK_HR_OK(ms_do(an, MA_BIDI, b, 0, 10, kb));
     CHECK(ms_sink_exact(kb, MK_BIDI, 0, 10));
     for (i = 0; i < 10; i++) { EXPECT_EQ(ka->ex[i], kb->ex[i]); EXPECT_EQ(ka->res[i], kb->res[i]); }
     ms_src_free(a); ms_src_free(b); ms_sink_free(ka); ms_sink_free(kb); MS_END();
 }
+static void locale_variant(const WCHAR *loc, int is_null) { locale_variant_ex(loc, is_null, 0); }
 MT(calls_bidi_locale_null_pointer_ok)  { locale_variant(NULL, 1); }
 MT(calls_bidi_locale_empty_string_ok)  { locale_variant(L"", 0); }
 MT(calls_bidi_locale_he_il_same_for_latin_hebrew) { locale_variant(L"he-IL", 0); }
 MT(calls_bidi_locale_de_de_same) { locale_variant(L"de-DE", 0); }
 MT(calls_bidi_locale_ja_jp_same) { locale_variant(L"ja-JP", 0); }
-MT(calls_bidi_locale_garbage_tag_ok) { locale_variant(L"not a locale", 0); }
+MT(calls_bidi_locale_garbage_tag_rejected) { locale_variant_ex(L"not a locale", 0, 1); }
 MT(calls_bidi_locale_long_tag_ok) { locale_variant(L"zh-Hant-TW-u-ca-chinese-nu-hanidec-x-private", 0); }
 
 /* ---- sink delivery ------------------------------------------------------------------------------------------------------------- */
@@ -422,10 +426,10 @@ MT(calls_orient_mode_change_splits_default_stacked) {
     ms_src *s = ms_src_new(L"abcdef", 6); ms_sink *k = ms_sink_new(1);
     or_setup(s, 2, len, o, NULL);
     CHECK_HR_OK(ms_orient(an2, s, 0, 6, k));
-    /* Latin text: default = rotated (angle 0, sideways), stacked = upright at 90 degrees: two runs */
+    /* Latin text: default = angle 90, not sideways; stacked = angle 0, sideways: two runs */
     EXPECT_EQ(k->n[MK_ORIENT], 2);
-    CHECK(k->sw[0]); CHECK(!k->sw[3]);
-    EXPECT_EQ(k->ang[0], DWRITE_GLYPH_ORIENTATION_ANGLE_0_DEGREES); EXPECT_EQ(k->ang[3], DWRITE_GLYPH_ORIENTATION_ANGLE_90_DEGREES);
+    CHECK(!k->sw[0]); CHECK(k->sw[3]);
+    EXPECT_EQ(k->ang[0], DWRITE_GLYPH_ORIENTATION_ANGLE_90_DEGREES); EXPECT_EQ(k->ang[3], DWRITE_GLYPH_ORIENTATION_ANGLE_0_DEGREES);
     ms_src_free(s); ms_sink_free(k); MS_END();
 }
 MT(calls_orient_subrange_positions_absolute) {

@@ -1,24 +1,33 @@
 /* AnalyzeVerticalGlyphOrientation matrices (IDWriteTextAnalyzer2, IDWriteTextAnalysisSource1 / Sink1).
  *
- * OrientationAnalyzer::Analyze + GetOrientationInfo (decompiled): the orientation class of each character comes from the Unicode
- * vertical-orientation property; information per character is
- *   DEFAULT (0): upright class  -> angle 90 degrees, level = source level, isSideways FALSE, isRightToLeft = level & 1
- *                other classes  -> angle 0, level = source level, isSideways TRUE,  isRightToLeft = level & 1
- *   STACKED (1): level' = (level + 1 unless level > 61) & ~1; upright-in-stacked classes (all letters) -> angle 90 (even level) or 270 (odd),
- *                isSideways FALSE, isRightToLeft = level & 1
+ * Observed on Windows 10 (probed per orientation x level x character). Three character classes matter:
+ *   CJK-like (ideographs, kana, hangul, fullwidth forms, CJK punctuation, vertical forms, symbols such as U+2605)
+ *   latin-like (letters of all other scripts, digits, ASCII punctuation, combining marks)
+ *   rotating (white space: space, tab, line feed, no-break space, zero width space, general punctuation spaces, U+2028; and the cursive
+ *   scripts Arabic letters and marks, Syriac, N'Ko, Mongolian, Arabic presentation forms; NOT Thaana, Arabic punctuation or digits)
+ * information per character:
+ *   DEFAULT (0): CJK-like -> angle 0, isSideways TRUE;  latin-like and rotating class -> angle 90, isSideways FALSE;
+ *                level = source level, isRightToLeft = level & 1 (for every class)
+ *   STACKED (1): level' = (level + 1 unless level > 61) & ~1; CJK-like AND latin-like -> angle 0, isSideways TRUE, isRightToLeft FALSE;
+ *                rotating class -> angle 90 (even source level) or 270 (odd), isSideways FALSE, isRightToLeft = level & 1
  *   any other orientation value -> angle 0, level 0, isSideways FALSE, isRightToLeft FALSE
  * SetGlyphOrientation is called once per maximal run of equal information, in ascending order, and the runs cover the range. */
 #include "ms.h"
 #define MT(n) TEST(r2_bidi_linebreak_matrix_##n)
 
+enum { OC_LATIN = 0, OC_CJK = 1, OC_ROT = 2 };
 typedef struct { DWRITE_GLYPH_ORIENTATION_ANGLE ang; UINT8 lvl; BOOL sw, rtl; } oinfo;
-static oinfo model(DWRITE_VERTICAL_GLYPH_ORIENTATION o, UINT8 level, int upright)
+static oinfo model(DWRITE_VERTICAL_GLYPH_ORIENTATION o, UINT8 level, int cls)
 {
     oinfo r; memset(&r, 0, sizeof r);
-    if ((int)o == 0) { r.lvl = level; r.rtl = level & 1; if (upright) r.ang = DWRITE_GLYPH_ORIENTATION_ANGLE_90_DEGREES; else r.sw = TRUE; }
-    else if ((int)o == 1) {
+    if ((int)o == 0) {
+        r.lvl = level; r.rtl = level & 1;
+        if (cls == OC_CJK) r.sw = TRUE; else r.ang = DWRITE_GLYPH_ORIENTATION_ANGLE_90_DEGREES;
+    } else if ((int)o == 1) {
         UINT8 l = level > 0x3d ? level : (UINT8)(level + 1);
-        r.lvl = l & ~1; r.rtl = level & 1; r.ang = (level & 1) ? DWRITE_GLYPH_ORIENTATION_ANGLE_270_DEGREES : DWRITE_GLYPH_ORIENTATION_ANGLE_90_DEGREES;
+        r.lvl = l & ~1;
+        if (cls == OC_ROT) { r.rtl = level & 1; r.ang = (level & 1) ? DWRITE_GLYPH_ORIENTATION_ANGLE_270_DEGREES : DWRITE_GLYPH_ORIENTATION_ANGLE_90_DEGREES; }
+        else r.sw = TRUE;
     }
     return r;
 }
@@ -37,15 +46,15 @@ static ms_sink *or_one(IDWriteTextAnalyzer2 *a2, const WCHAR *t, UINT32 n, DWRIT
 static void classify(const WCHAR *t, UINT32 n, int want_upright /* 1 upright, 0 rotated, -1 unknown */, const char *what)
 {
     MS_BEGIN2(); HRESULT hr; ms_sink *k = or_one(an2, t, n, DWRITE_VERTICAL_GLYPH_ORIENTATION_DEFAULT, 0, &hr);
-    int upright;
+    int cjk;
     CHECK_HR_OK(hr);
     CHECK(ms_sink_exact(k, MK_ORIENT, 0, n));
-    upright = !k->sw[0];
+    cjk = !!k->sw[0];
     if (want_upright >= 0) {
-        CHECKF(upright == want_upright, "%s: %s", what, upright ? "upright" : "rotated");
-        if (upright) { EXPECT_EQ(k->ang[0], DWRITE_GLYPH_ORIENTATION_ANGLE_90_DEGREES); }
-        else { EXPECT_EQ(k->ang[0], DWRITE_GLYPH_ORIENTATION_ANGLE_0_DEGREES); }
-    } else t_note("%s: %s (angle %d, sideways %d)", what, upright ? "upright" : "rotated", (int)k->ang[0], (int)k->sw[0]);
+        CHECKF(cjk == want_upright, "%s: %s", what, cjk ? "sideways class" : "angle-90 class");
+        if (cjk) { EXPECT_EQ(k->ang[0], DWRITE_GLYPH_ORIENTATION_ANGLE_0_DEGREES); }
+        else { EXPECT_EQ(k->ang[0], DWRITE_GLYPH_ORIENTATION_ANGLE_90_DEGREES); }
+    } else t_note("%s: %s (angle %d, sideways %d)", what, cjk ? "sideways class" : "angle-90 class", (int)k->ang[0], (int)k->sw[0]);
     EXPECT_EQ(k->abl[0], 0); CHECK(!k->rtl[0]);
     ms_sink_free(k); MS_END();
 }
@@ -81,13 +90,13 @@ MT(orient_class_math_alnum_pair) { static const WCHAR t[] = { 0xd835, 0xdc00, 0 
 MT(orient_class_lone_high_surrogate) { static const WCHAR t[] = { 0xd800, 0 }; classify(t, 1, -1, "lone high surrogate"); }
 MT(orient_class_lone_low_surrogate) { static const WCHAR t[] = { 0xdc00, 0 }; classify(t, 1, -1, "lone low surrogate"); }
 
-/* every ASCII letter / digit is rotated in DEFAULT mode, every Hiragana / Katakana / Han ideograph in a block is upright */
+/* every ASCII letter / digit is angle 90 / not sideways in DEFAULT mode, every Hiragana / Katakana / Han ideograph in a block is angle 0 / sideways */
 MT(orient_class_ascii_alnum_all_rotated) {
     MS_BEGIN2(); WCHAR t[80]; int n = 0, c; HRESULT hr; ms_sink *k; int i;
     for (c = 'A'; c <= 'Z'; c++) t[n++] = (WCHAR)c; for (c = 'a'; c <= 'z'; c++) t[n++] = (WCHAR)c; for (c = '0'; c <= '9'; c++) t[n++] = (WCHAR)c;
     k = or_one(an2, t, n, DWRITE_VERTICAL_GLYPH_ORIENTATION_DEFAULT, 0, &hr);
     CHECK_HR_OK(hr); EXPECT_EQ(k->n[MK_ORIENT], 1);
-    for (i = 0; i < n; i++) { CHECK(k->sw[i]); EXPECT_EQ(k->ang[i], 0); }
+    for (i = 0; i < n; i++) { CHECK(!k->sw[i]); EXPECT_EQ(k->ang[i], 1); }
     ms_sink_free(k); MS_END();
 }
 MT(orient_class_hiragana_block_upright) {
@@ -95,7 +104,7 @@ MT(orient_class_hiragana_block_upright) {
     for (c = 0x3042; c <= 0x3093; c++) t[n++] = (WCHAR)c;
     k = or_one(an2, t, n, DWRITE_VERTICAL_GLYPH_ORIENTATION_DEFAULT, 0, &hr);
     CHECK_HR_OK(hr); EXPECT_EQ(k->n[MK_ORIENT], 1);
-    for (i = 0; i < n; i++) { CHECK(!k->sw[i]); EXPECT_EQ(k->ang[i], 1); }
+    for (i = 0; i < n; i++) { CHECK(k->sw[i]); EXPECT_EQ(k->ang[i], 0); }
     ms_sink_free(k); MS_END();
 }
 MT(orient_class_katakana_block_upright) {
@@ -103,7 +112,7 @@ MT(orient_class_katakana_block_upright) {
     for (c = 0x30a2; c <= 0x30f3; c++) t[n++] = (WCHAR)c;
     k = or_one(an2, t, n, DWRITE_VERTICAL_GLYPH_ORIENTATION_DEFAULT, 0, &hr);
     CHECK_HR_OK(hr); EXPECT_EQ(k->n[MK_ORIENT], 1);
-    for (i = 0; i < n; i++) { CHECK(!k->sw[i]); EXPECT_EQ(k->ang[i], 1); }
+    for (i = 0; i < n; i++) { CHECK(k->sw[i]); EXPECT_EQ(k->ang[i], 0); }
     ms_sink_free(k); MS_END();
 }
 MT(orient_class_han_sample_upright) {
@@ -111,7 +120,7 @@ MT(orient_class_han_sample_upright) {
     for (c = 0x4e00; c < 0x4e00 + 160; c += 1) t[n++] = (WCHAR)c;
     k = or_one(an2, t, n, DWRITE_VERTICAL_GLYPH_ORIENTATION_DEFAULT, 0, &hr);
     CHECK_HR_OK(hr); EXPECT_EQ(k->n[MK_ORIENT], 1);
-    for (i = 0; i < n; i++) CHECK(!k->sw[i]);
+    for (i = 0; i < n; i++) CHECK(k->sw[i]);
     ms_sink_free(k); MS_END();
 }
 MT(orient_class_hangul_syllable_sample_upright) {
@@ -119,16 +128,16 @@ MT(orient_class_hangul_syllable_sample_upright) {
     for (c = 0xac00; c < 0xac00 + 150; c += 1) t[n++] = (WCHAR)c;
     k = or_one(an2, t, n, DWRITE_VERTICAL_GLYPH_ORIENTATION_DEFAULT, 0, &hr);
     CHECK_HR_OK(hr); EXPECT_EQ(k->n[MK_ORIENT], 1);
-    for (i = 0; i < n; i++) CHECK(!k->sw[i]);
+    for (i = 0; i < n; i++) CHECK(k->sw[i]);
     ms_sink_free(k); MS_END();
 }
 
 /* ---- level x orientation x class ------------------------------------------------------------------------------------------------------- */
-static void level_matrix(DWRITE_VERTICAL_GLYPH_ORIENTATION o, WCHAR ch, int upright)
+static void level_matrix(DWRITE_VERTICAL_GLYPH_ORIENTATION o, WCHAR ch, int cls)
 {
     MS_BEGIN2(); int lv;
     for (lv = 0; lv < 128; lv++) {
-        WCHAR t[2] = { ch, 0 }; HRESULT hr; ms_sink *k = or_one(an2, t, 1, o, (UINT8)lv, &hr); oinfo want = model(o, (UINT8)lv, upright);
+        WCHAR t[2] = { ch, 0 }; HRESULT hr; ms_sink *k = or_one(an2, t, 1, o, (UINT8)lv, &hr); oinfo want = model(o, (UINT8)lv, cls);
         CHECK_HR_OK(hr); EXPECT_EQ(k->n[MK_ORIENT], 1);
         CHECKF(k->ang[0] == want.ang && k->abl[0] == want.lvl && !k->sw[0] == !want.sw && !k->rtl[0] == !want.rtl,
                "orientation %d level %d: angle %d level %u sideways %d rtl %d, want %d %u %d %d", (int)o, lv, (int)k->ang[0], k->abl[0], (int)k->sw[0], (int)k->rtl[0], (int)want.ang, want.lvl, (int)want.sw, (int)want.rtl);
@@ -149,7 +158,16 @@ MT(orient_levels_stacked_han)    { level_matrix(DWRITE_VERTICAL_GLYPH_ORIENTATIO
 MT(orient_levels_stacked_kana)   { level_matrix(DWRITE_VERTICAL_GLYPH_ORIENTATION_STACKED, 0x3042, 1); }
 MT(orient_levels_stacked_hangul) { level_matrix(DWRITE_VERTICAL_GLYPH_ORIENTATION_STACKED, 0xac00, 1); }
 MT(orient_levels_stacked_hebrew) { level_matrix(DWRITE_VERTICAL_GLYPH_ORIENTATION_STACKED, 0x05d0, 0); }
-MT(orient_levels_stacked_arabic) { level_matrix(DWRITE_VERTICAL_GLYPH_ORIENTATION_STACKED, 0x0627, 0); }
+MT(orient_levels_stacked_arabic) { level_matrix(DWRITE_VERTICAL_GLYPH_ORIENTATION_STACKED, 0x0627, OC_ROT); }
+MT(orient_levels_stacked_syriac) { level_matrix(DWRITE_VERTICAL_GLYPH_ORIENTATION_STACKED, 0x0710, OC_ROT); }
+MT(orient_levels_stacked_mongolian) { level_matrix(DWRITE_VERTICAL_GLYPH_ORIENTATION_STACKED, 0x1820, OC_ROT); }
+MT(orient_levels_stacked_thaana) { level_matrix(DWRITE_VERTICAL_GLYPH_ORIENTATION_STACKED, 0x0780, OC_LATIN); }
+
+MT(orient_levels_stacked_space)  { level_matrix(DWRITE_VERTICAL_GLYPH_ORIENTATION_STACKED, ' ', OC_ROT); }
+MT(orient_levels_stacked_tab)    { level_matrix(DWRITE_VERTICAL_GLYPH_ORIENTATION_STACKED, '\t', OC_ROT); }
+MT(orient_levels_stacked_nbsp)   { level_matrix(DWRITE_VERTICAL_GLYPH_ORIENTATION_STACKED, 0x00a0, OC_ROT); }
+MT(orient_levels_default_space)  { level_matrix(DWRITE_VERTICAL_GLYPH_ORIENTATION_DEFAULT, ' ', OC_ROT); }
+MT(orient_levels_default_ideographic_space) { level_matrix(DWRITE_VERTICAL_GLYPH_ORIENTATION_DEFAULT, 0x3000, OC_CJK); }
 
 MT(orient_unknown_orientation_values_zero_info) {
     MS_BEGIN2(); static const UINT32 vals[] = { 2, 3, 4, 7, 8, 15, 16, 100, 255, 256, 0x7fffffff, 0x80000000u, 0xfffffffeu, 0xffffffffu }; int i, j;
@@ -181,7 +199,7 @@ static void coalesce_matrix(const WCHAR *t, UINT32 n, UINT32 runlen)
         hr = ms_orient(an2, s, 0, n, k);
         CHECKF(hr == S_OK, "combination %d: %s", c, dw_hr_name(hr));
         for (p = 0; p < n; p++) {
-            const ocomb *cb = &combos[idx[p / runlen]]; int upright = t[p] >= 0x3000;
+            const ocomb *cb = &combos[idx[p / runlen]]; int upright = t[p] >= 0x3000 ? OC_CJK : OC_LATIN;
             per[p] = model(cb->o, cb->lvl, upright);
             if (p == 0 || !info_eq(&per[p], &per[p - 1])) expect_runs++;
             CHECKF(k->ang[p] == per[p].ang && k->abl[p] == per[p].lvl && !k->sw[p] == !per[p].sw && !k->rtl[p] == !per[p].rtl, "combination %d position %u", c, p);
@@ -208,20 +226,20 @@ MT(orient_sink_runs_split_inside_a_source_run_on_class_change) {
     MS_BEGIN2(); static const WCHAR t[] = { 'a', 'b', 0x3042, 0x3044, 'c', 0 }; HRESULT hr; ms_sink *k = or_one(an2, t, 5, DWRITE_VERTICAL_GLYPH_ORIENTATION_DEFAULT, 0, &hr);
     CHECK_HR_OK(hr); EXPECT_EQ(k->n[MK_ORIENT], 3);
     EXPECT_EQ(k->ev[0].pos, 0); EXPECT_EQ(k->ev[0].len, 2); EXPECT_EQ(k->ev[1].pos, 2); EXPECT_EQ(k->ev[1].len, 2); EXPECT_EQ(k->ev[2].pos, 4); EXPECT_EQ(k->ev[2].len, 1);
-    CHECK(k->ev[0].sw); CHECK(!k->ev[1].sw); CHECK(k->ev[2].sw);
+    CHECK(!k->ev[0].sw); CHECK(k->ev[1].sw); CHECK(!k->ev[2].sw);
     ms_sink_free(k); MS_END();
 }
 MT(orient_sink_one_run_for_uniform_text) {
     MS_BEGIN2(); HRESULT hr; ms_sink *k = or_one(an2, L"hello world", 11, DWRITE_VERTICAL_GLYPH_ORIENTATION_DEFAULT, 0, &hr);
     CHECK_HR_OK(hr); CHECK(k->n[MK_ORIENT] <= 2); CHECK(ms_sink_exact(k, MK_ORIENT, 0, 11)); CHECK(ms_runs_exact(k, MK_ORIENT, 0, 11));
-    t_note("\"hello world\" in DEFAULT orientation: %d sink run(s), space is %s", k->n[MK_ORIENT], k->sw[5] ? "sideways" : "upright");
+    t_note("\"hello world\" in DEFAULT orientation: %d sink run(s), space is %s", k->n[MK_ORIENT], k->sw[5] ? "sideways" : "not sideways");
     ms_sink_free(k); MS_END();
 }
 MT(orient_sink_subrange_of_mixed_text) {
     MS_BEGIN2(); static const WCHAR t[] = { 'a', 'b', 0x3042, 0x3044, 'c', 'd', 0 }; ms_src *s = ms_src_new(t, 6); ms_sink *k = ms_sink_new(1);
     CHECK_HR_OK(ms_orient(an2, s, 1, 4, k));
     CHECK(ms_sink_exact(k, MK_ORIENT, 1, 4)); CHECK(ms_runs_exact(k, MK_ORIENT, 1, 4)); EXPECT_EQ(k->n[MK_ORIENT], 3);
-    CHECK(k->sw[1]); CHECK(!k->sw[2]); CHECK(!k->sw[3]); CHECK(k->sw[4]);
+    CHECK(!k->sw[1]); CHECK(k->sw[2]); CHECK(k->sw[3]); CHECK(!k->sw[4]);
     ms_src_free(s); ms_sink_free(k); MS_END();
 }
 MT(orient_sink_pieces_do_not_change_result) {
