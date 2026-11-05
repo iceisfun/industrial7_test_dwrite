@@ -438,6 +438,27 @@ FTEST(ffc_symbol_mixed_cmaps_note) {
     t_note("font with (3,1)+(3,0) cmaps: IsSymbolFont=%d", (int)IDWriteFontFace_IsSymbolFont(face));
     dwx_font_close(&h);
 }
+FTEST(ffc_symbol_true_for_panose_family_5) {
+    /* OS/2 panose bFamilyType 5 (Latin Symbol) marks a symbol font even with a Unicode cmap */
+    ttf_spec s; size_t n; uint8_t *b, *os2c; const uint8_t *os2; unsigned ol; ttf_rawtable raw; dwx_font h; IDWriteFontFace *face;
+    ttf_default_spec(&s); b = ttf_build(&s, &n); if (!b) { t_skip("build"); return; }
+    os2 = ffc_blob_table(b, n, "OS/2", &ol); if (!os2 || ol < 78) { free(b); t_skip("OS/2"); return; }
+    os2c = (uint8_t *)malloc(ol); memcpy(os2c, os2, ol); os2c[32] = 5;
+    memcpy(raw.tag, "OS/2", 5); raw.data = os2c; raw.len = ol; s.raw = &raw; s.nraw = 1;
+    face = ffc_open(&h, f, &s, DWRITE_FONT_SIMULATIONS_NONE);
+    if (face) { CHECK(IDWriteFontFace_IsSymbolFont(face)); }
+    dwx_font_close(&h); free(b); free(os2c);
+}
+FTEST(ffc_symbol_false_for_panose_family_2) {
+    ttf_spec s; size_t n; uint8_t *b, *os2c; const uint8_t *os2; unsigned ol; ttf_rawtable raw; dwx_font h; IDWriteFontFace *face;
+    ttf_default_spec(&s); b = ttf_build(&s, &n); if (!b) { t_skip("build"); return; }
+    os2 = ffc_blob_table(b, n, "OS/2", &ol); if (!os2 || ol < 78) { free(b); t_skip("OS/2"); return; }
+    os2c = (uint8_t *)malloc(ol); memcpy(os2c, os2, ol); os2c[32] = 2;
+    memcpy(raw.tag, "OS/2", 5); raw.data = os2c; raw.len = ol; s.raw = &raw; s.nraw = 1;
+    face = ffc_open(&h, f, &s, DWRITE_FONT_SIMULATIONS_NONE);
+    if (face) { CHECK(!IDWriteFontFace_IsSymbolFont(face)); }
+    dwx_font_close(&h); free(b); free(os2c);
+}
 FTEST(ffc_symbol_false_for_3_10_only) {
     ttf_spec s; ttf_cmap c; int dn; const ttf_cmap *d = ttf_default_cmaps(&dn); dwx_font h; IDWriteFontFace *face; int i;
     ttf_default_spec(&s);

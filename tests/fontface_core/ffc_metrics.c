@@ -16,6 +16,8 @@
 #include "ffc.h"
 
 typedef struct { int upm, asc, desc, gap, cap, xh, up, ut, sp, st; } ffc_exp;
+/* default underline thickness when post is missing or reports 0: ((v - v/7) / 2 + v/7) / 8 with v = upm + 7 (about upm / 14) */
+static int ffc_ulthick(int upm) { unsigned v = (unsigned)upm + 7, q = v / 7; return (int)((((v - q) >> 1) + q) >> 3); }
 
 static void ffc_chk_m(const DWRITE_FONT_METRICS *m, const ffc_exp *e, const char *tag) {
     CHECKF(m->designUnitsPerEm == e->upm, "%s upm %u want %d", tag, m->designUnitsPerEm, e->upm);
@@ -358,7 +360,7 @@ FTEST(ffcm_underline_thickness_zero_derived) {
     for (i = 0; i < 5; i++) {
         ttf_spec s; DWRITE_FONT_METRICS m; ttf_default_spec(&s); s.upm = up[i]; s.underline_thick = 0; s.underline_pos = -77;
         if (!ffc_get(f, &s, 0, &m, NULL, NULL)) return;
-        CHECKF(m.underlineThickness == (up[i] + 7) / 14, "upm %d thickness 0 -> %u want %d", up[i], m.underlineThickness, (up[i] + 7) / 14);
+        CHECKF(m.underlineThickness == ffc_ulthick(up[i]), "upm %d thickness 0 -> %u want %d", up[i], m.underlineThickness, ffc_ulthick(up[i]));
         EXPECT_EQ(m.underlinePosition, -77);
     }
 }
@@ -368,7 +370,7 @@ FTEST(ffcm_no_post_underline_defaults) {
         ttf_spec s; DWRITE_FONT_METRICS m; ttf_default_spec(&s); s.upm = up[i]; s.omit |= TTF_OMIT_POST;
         if (!ffc_get(f, &s, 0, &m, NULL, NULL)) return;
         CHECKF(m.underlinePosition == -((up[i] + 5) / 10), "upm %d position %d want %d", up[i], m.underlinePosition, -((up[i] + 5) / 10));
-        CHECKF(m.underlineThickness == (up[i] + 7) / 14, "upm %d thickness %u want %d", up[i], m.underlineThickness, (up[i] + 7) / 14);
+        CHECKF(m.underlineThickness == ffc_ulthick(up[i]), "upm %d thickness %u want %d", up[i], m.underlineThickness, ffc_ulthick(up[i]));
     }
 }
 FTEST(ffcm_strikethrough_table) {
