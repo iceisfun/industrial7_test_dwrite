@@ -793,7 +793,7 @@ FTEST(ffcg_gdi_gm_sys_arial_pixel_advances) {
     CHECK_HR_OK(IDWriteFontFace_GetGlyphIndices(face, &cp, 1, &gi));
     if (!ffc_dgm(face, gi, &d, FALSE)) { IDWriteFontFace_Release(face); return; }
     for (i = 0; i < 9; i++) {
-        double upp = 2048.0 / sizes[i];
+        double upp = 2.0 * 2048.0 / sizes[i];   /* GDI-classic advances are hinted to whole pixels; Win10 deviates from design by just over 1 px */
         if (ffc_gdi_gm(face, sizes[i], 1, NULL, FALSE, gi, &m, FALSE) == E_NOINTERFACE) { t_skip("no IDWriteFontFace1"); break; }
         t_note("Arial 'A' %g px: gdi-classic advance %u (design %u)", sizes[i], m.advanceWidth, d.advanceWidth);
         CHECKF(fabs((double)m.advanceWidth - d.advanceWidth) <= upp, "em %g", sizes[i]);

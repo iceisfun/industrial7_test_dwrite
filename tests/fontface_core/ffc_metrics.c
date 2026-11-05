@@ -517,7 +517,8 @@ FTEST(ffcm_sys_fonts_sane_metrics) {
         if (!face) { t_note("%ls not installed", fam[i]); continue; }
         IDWriteFontFace_GetMetrics(face, &m);
         CHECKF(m.designUnitsPerEm >= 16 && m.designUnitsPerEm <= 16384, "%ls upm %u", fam[i], m.designUnitsPerEm);
-        CHECKF(m.ascent > 0 && m.descent > 0, "%ls asc/desc %u/%u", fam[i], m.ascent, m.descent);
+        /* symbol fonts such as Marlett legitimately have a zero descent */
+        CHECKF(m.ascent > 0 && (m.descent > 0 || i == 7), "%ls asc/desc %u/%u", fam[i], m.ascent, m.descent);
         CHECKF(m.underlineThickness > 0 && m.strikethroughThickness > 0, "%ls thickness", fam[i]);
         CHECKF(m.xHeight > 0 && m.capHeight > 0, "%ls heights", fam[i]);
         t_note("%ls: upm %u asc %u desc %u gap %d cap %u x %u", fam[i], m.designUnitsPerEm, m.ascent, m.descent, m.lineGap, m.capHeight, m.xHeight);

@@ -186,7 +186,7 @@ FTEST(ffc_create_out_zeroed_on_success_path_preset) {
     dwx_font_close(&h);
 }
 FTEST(ffc_create_wrong_flavour_garbage_file) {
-    /* a file that Analyze rejects: CreateFontFace must fail and zero the out pointer */
+    /* a file that Analyze rejects: CreateFontFace outcome is probed (Win10: S_OK); a failure must zero the out pointer */
     size_t n; uint8_t *b = ttf_build_default(&n), *c; size_t cn; dwx_font h; HRESULT hr; IDWriteFontFace *x = (IDWriteFontFace *)(ULONG_PTR)1;
     if (!b) { t_skip("build"); return; }
     c = ttf_corrupt(b, n, TTF_CORRUPT_BAD_MAGIC, 0, &cn);
@@ -194,9 +194,10 @@ FTEST(ffc_create_wrong_flavour_garbage_file) {
     t_note("open of bad-magic font -> %s supported=%d", dw_hr_name(hr), (int)h.supported);
     if (h.file) {
         hr = IDWriteFactory_CreateFontFace(f, DWRITE_FONT_FACE_TYPE_TRUETYPE, 1, &h.file, 0, DWRITE_FONT_SIMULATIONS_NONE, &x);
-        CHECK(FAILED(hr)); CHECK_OUT_NULL(x);
+        /* Win10 creates the face lazily and returns S_OK even though Analyze reported "unsupported" */
+        if (FAILED(hr)) { CHECK_OUT_NULL(x); } else { CHECK(x != NULL && x != (IDWriteFontFace *)(ULONG_PTR)1); }
         t_note("CreateFontFace over bad magic -> %s", dw_hr_name(hr));
-        DW_RELEASE(x);
+        if (SUCCEEDED(hr)) DW_RELEASE(x);
     }
     dwx_font_close(&h); free(b); free(c);
 }
@@ -547,6 +548,25 @@ FTEST(ffc_refcount_create_gives_new_reference) {
     EXPECT_EQ(dw_refcount((IUnknown *)face), before);
     dwx_font_close(&h);
 }
+/* Local QI matrix: like DW_CHECK_QI, but an unsupported IID may fail with E_NOTIMPL (what Win10 dwrite returns) or E_NOINTERFACE. */
+static void ffc_qi_check(IDWriteFontFace *obj, const dw_qi_row *rows, int n) {
+    int i; ULONG base = dw_refcount((IUnknown *)obj);
+    for (i = 0; i < n; i++) {
+        void *p = (void *)(ULONG_PTR)1; HRESULT hr = IUnknown_QueryInterface((IUnknown *)obj, rows[i].iid, &p);
+        if (SUCCEEDED(hr)) {
+            if (rows[i].expect == 0) CHECKF(0, "%s: QI unexpectedly succeeded", rows[i].name);
+            else if (rows[i].expect == 1) CHECKF(hr == S_OK, "%s hr=%s", rows[i].name, dw_hr_name(hr));
+            else t_note("QI %s -> %s", rows[i].name, dw_hr_name(hr));
+            CHECKF(p != NULL && p != (void *)1, "%s: success with bad out pointer", rows[i].name);
+            if (p && p != (void *)1) { CHECKF(dw_same_identity((IUnknown *)p, (IUnknown *)obj), "%s: different COM identity", rows[i].name); IUnknown_Release((IUnknown *)p); }
+        } else if (rows[i].expect == 1) CHECKF(0, "%s: QI failed: %s", rows[i].name, dw_hr_name(hr));
+        else if (rows[i].expect == 0) {
+            CHECKF(hr == E_NOTIMPL || hr == E_NOINTERFACE, "%s: QI failure code %s", rows[i].name, dw_hr_name(hr));
+            CHECKF(p == NULL, "%s: out pointer not zeroed (%p)", rows[i].name, p);
+        } else t_note("QI %s -> %s", rows[i].name, dw_hr_name(hr));
+    }
+    CHECKF(dw_refcount((IUnknown *)obj) == base, "QI matrix leaves refcount balanced (%lu vs %lu)", base, dw_refcount((IUnknown *)obj));
+}
 FTEST(ffc_qi_matrix) {
     dwx_font h; IDWriteFontFace *face = ffc_open_def(&h, f); if (!face) return;
     {
@@ -554,7 +574,7 @@ FTEST(ffc_qi_matrix) {
                              DW_QI_ROW(IDWriteFontFace3, -1), DW_QI_ROW(IDWriteFontFace4, -1), DW_QI_ROW(IDWriteFontFace5, -1), DW_QI_ROW(IDWriteFontFace6, -1),
                              DW_QI_ROW(IDWriteFactory, 0), DW_QI_ROW(IDWriteFont, 0), DW_QI_ROW(IDWriteFontFile, 0), DW_QI_ROW(IDWriteFontFamily, 0),
                              DW_QI_ROW(IDWriteFontCollection, 0), DW_QI_ROW(IDWriteTextFormat, 0), DW_QI_ROW(IDWriteLocalizedStrings, 0) };
-        DW_CHECK_QI(face, rows);
+        ffc_qi_check(face, rows, (int)(sizeof(rows) / sizeof(rows[0])));
     }
     dwx_font_close(&h);
 }
@@ -571,7 +591,8 @@ FTEST(ffc_qi_identity_across_versions) {
 FTEST(ffc_qi_unknown_iid_zeroes_out) {
     dwx_font h; IDWriteFontFace *face = ffc_open_def(&h, f); void *p = (void *)(ULONG_PTR)1; HRESULT hr; if (!face) return;
     hr = IDWriteFontFace_QueryInterface(face, &IID_IDWriteFactory, &p);
-    CHECK(hr == E_NOINTERFACE); CHECK_OUT_NULL(p);
+    /* Win10 dwrite answers E_NOTIMPL for IIDs it does not know */
+    CHECK(hr == E_NOTIMPL || hr == E_NOINTERFACE); CHECK_OUT_NULL(p);
     dwx_font_close(&h);
 }
 FTEST(ffc_qi_refcount_per_interface) {
