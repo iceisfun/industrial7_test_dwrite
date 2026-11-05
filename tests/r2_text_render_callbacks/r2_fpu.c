@@ -200,3 +200,71 @@ RT(fpu_repeated_draws_stay_balanced)
     all_events_default(r);
     rh_free(r); IDWriteTextLayout_Release(l); dwx_release(io); R2_END();
 }
+
+/* ---- the trimming sign ------------------------------------------------------------------------------------------ */
+RT(fpu_sign_creation_restores_caller_mode)
+{
+    R2_BEGIN(); IDWriteTextFormat *t = r2_format(&X, 16.0f, DWRITE_FONT_WEIGHT_NORMAL); IDWriteInlineObject *s = NULL; unsigned saved = r2_getcsr(), after; HRESULT hr;
+    if (!t) { R2_END(); t_skip("format unavailable"); return; }
+    r2_setcsr(CSR_TRUNCATE);
+    hr = IDWriteFactory_CreateEllipsisTrimmingSign(f, t, &s);
+    after = r2_getcsr(); r2_setcsr(saved);
+    CHECK_HR_OK(hr);
+    CHECKF((after & R2_CSR_MASK) == CSR_TRUNCATE, "MXCSR after CreateEllipsisTrimmingSign 0x%x", after);
+    if (s) {
+        DWRITE_INLINE_OBJECT_METRICS a, b;
+        CHECK_HR_OK(IDWriteInlineObject_GetMetrics(s, &a));
+        CHECK_NEARF(a.width, R2_ADV(1000, 16));                /* built in the default FPU mode, not in truncation */
+        r2_setcsr(CSR_TRUNCATE); hr = IDWriteInlineObject_GetMetrics(s, &b); after = r2_getcsr(); r2_setcsr(saved);
+        CHECK_HR_OK(hr); CHECK(!memcmp(&a, &b, sizeof a));
+        IDWriteInlineObject_Release(s);
+    }
+    IDWriteTextFormat_Release(t); R2_END();
+}
+RT(fpu_sign_draw_callbacks_see_default_mode)
+{
+    R2_BEGIN(); IDWriteTextFormat *t = r2_format(&X, 16.0f, DWRITE_FONT_WEIGHT_NORMAL); IDWriteInlineObject *s = NULL; rh *r = rh_new();
+    unsigned saved, after; HRESULT hr;
+    if (!t || FAILED(IDWriteFactory_CreateEllipsisTrimmingSign(f, t, &s)) || !s) { DW_RELEASE(t); rh_free(r); R2_END(); t_skip("sign unavailable"); return; }
+    saved = r2_getcsr();
+    r2_setcsr(CSR_UP);
+    hr = IDWriteInlineObject_Draw(s, CTX_A, (IDWriteTextRenderer *)r, 3.3f, 4.7f, FALSE, FALSE, NULL);
+    after = r2_getcsr(); r2_setcsr(saved);
+    CHECK_HR_OK(hr);
+    CHECK(r->count[RH_GLYPH] == 1);
+    all_events_default(r);
+    CHECKF((after & R2_CSR_MASK) == CSR_UP, "MXCSR after sign Draw 0x%x", after);
+    IDWriteInlineObject_Release(s); IDWriteTextFormat_Release(t); rh_free(r); R2_END();
+}
+RT(fpu_sign_draw_callback_change_contained)
+{
+    R2_BEGIN(); IDWriteTextFormat *t = r2_format(&X, 16.0f, DWRITE_FONT_WEIGHT_NORMAL); IDWriteInlineObject *s = NULL; rh *r = rh_new();
+    unsigned saved, after; HRESULT hr;
+    if (!t || FAILED(IDWriteFactory_CreateEllipsisTrimmingSign(f, t, &s)) || !s) { DW_RELEASE(t); rh_free(r); R2_END(); t_skip("sign unavailable"); return; }
+    r->set_csr[RH_GLYPH] = 1; r->csr_val[RH_GLYPH] = CSR_TRUNCATE;
+    saved = r2_getcsr();
+    hr = IDWriteInlineObject_Draw(s, CTX_A, (IDWriteTextRenderer *)r, 0.0f, 0.0f, FALSE, FALSE, NULL);
+    after = r2_getcsr(); r2_setcsr(saved);
+    CHECK_HR_OK(hr);
+    CHECKF((after & R2_CSR_MASK) == (saved & R2_CSR_MASK), "MXCSR after sign Draw 0x%x, before 0x%x", after, saved);
+    IDWriteInlineObject_Release(s); IDWriteTextFormat_Release(t); rh_free(r); R2_END();
+}
+RT(fpu_trimmed_layout_sign_recursion_default_mode)
+{
+    /* the application's DrawInlineObject calls the sign back: a nested Draw, again with the default mode in its callbacks */
+    R2_BEGIN(); IDWriteTextFormat *t = r2_format(&X, 16.0f, DWRITE_FONT_WEIGHT_NORMAL); IDWriteTextLayout *l = NULL; IDWriteInlineObject *s = NULL; rh *r = rh_new();
+    DWRITE_TRIMMING tr = { DWRITE_TRIMMING_GRANULARITY_CHARACTER, 0, 0 }; unsigned saved, after; HRESULT hr;
+    if (!t || FAILED(IDWriteFactory_CreateTextLayout(f, L"ABCDEFGHIJKLMNOP", 16, t, 60.0f, 100.0f, &l)) ||
+        FAILED(IDWriteFactory_CreateEllipsisTrimmingSign(f, t, &s)) || !s ||
+        FAILED(IDWriteTextLayout_SetWordWrapping(l, DWRITE_WORD_WRAPPING_NO_WRAP)) || FAILED(IDWriteTextLayout_SetTrimming(l, &tr, s))) {
+        DW_RELEASE(s); DW_RELEASE(l); DW_RELEASE(t); rh_free(r); R2_END(); t_skip("trimming setup failed"); return;
+    }
+    saved = r2_getcsr(); r2_setcsr(CSR_TRUNCATE);
+    hr = rh_draw(l, r, CTX_A, 0.0f, 0.0f);
+    after = r2_getcsr(); r2_setcsr(saved);
+    CHECK_HR_OK(hr);
+    EXPECT_EQ(r->count[RH_INLINE], 1);
+    all_events_default(r);
+    CHECKF((after & R2_CSR_MASK) == CSR_TRUNCATE, "MXCSR after Draw 0x%x", after);
+    DW_RELEASE(s); IDWriteTextLayout_Release(l); IDWriteTextFormat_Release(t); rh_free(r); R2_END();
+}

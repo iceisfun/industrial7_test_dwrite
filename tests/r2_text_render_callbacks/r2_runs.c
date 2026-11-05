@@ -226,3 +226,53 @@ RT(renderer_not_retained_after_draw)
     EXPECT_REFS(fx, 1);
     dwx_release(fx); rh_free(r); R2_END();
 }
+
+/* ---- reference hygiene of the application objects ---------------------------------------------------------------- */
+RT(leak_effect_and_inline_released_with_layout)
+{
+    DWX_LEAK_BEGIN(a); R2_BEGIN();
+    {
+        R2_LAYOUT(l, L"AB#CD", 16.0f, 200.0f, 50.0f); rh *r = rh_new();
+        dwx_inline *io = dwx_inline_new(10.0f, 12.0f, 8.0f, FALSE); dwx_effect *fx = dwx_effect_new(1);
+        IDWriteTextLayout_SetInlineObject(l, (IDWriteInlineObject *)io, RNG(2, 1));
+        IDWriteTextLayout_SetDrawingEffect(l, (IUnknown *)fx, RNG(0, 2));
+        IDWriteTextLayout_SetUnderline(l, TRUE, RNG(0, 2));
+        RH_DRAW_OK(l, r, 0.0f, 0.0f); RH_DRAW_OK(l, r, 1.0f, 1.0f);
+        EXPECT_REFS(io, 2); EXPECT_REFS(fx, 2);
+        dwx_release(io); dwx_release(fx);
+        EXPECT_REFS(io, 1); EXPECT_REFS(fx, 1);                 /* the layout still holds them after our references are gone */
+        IDWriteTextLayout_Release(l);
+        rh_free(r);
+    }
+    R2_END();
+    DWX_LEAK_END(a);
+}
+RT(leak_after_aborted_draw)
+{
+    DWX_LEAK_BEGIN(a); R2_BEGIN();
+    {
+        R2_LAYOUT(l, L"AB#CD", 16.0f, 200.0f, 50.0f); rh *r = rh_new();
+        dwx_inline *io = dwx_inline_new(10.0f, 12.0f, 8.0f, FALSE); dwx_effect *fx = dwx_effect_new(1);
+        IDWriteTextLayout_SetInlineObject(l, (IDWriteInlineObject *)io, RNG(2, 1));
+        IDWriteTextLayout_SetDrawingEffect(l, (IUnknown *)fx, RNG(0, 2));
+        r->ret_set[RH_XFORM] = 1; r->ret[RH_XFORM] = E_FAIL;
+        CHECK_HR(rh_draw(l, r, CTX_A, 0.0f, 0.0f), E_FAIL);
+        EXPECT_REFS(io, 2); EXPECT_REFS(fx, 2);
+        IDWriteTextLayout_Release(l);
+        EXPECT_REFS(io, 1); EXPECT_REFS(fx, 1);
+        dwx_release(io); dwx_release(fx); rh_free(r);
+    }
+    R2_END();
+    DWX_LEAK_END(a);
+}
+RT(leak_effect_refcount_unchanged_by_draws)
+{
+    R2_BEGIN(); R2_LAYOUT(l, L"ABCD", 16.0f, 200.0f, 50.0f); rh *r = rh_new(); dwx_effect *fx = dwx_effect_new(1); int i;
+    IDWriteTextLayout_SetDrawingEffect(l, (IUnknown *)fx, RNG(0, 4));
+    IDWriteTextLayout_SetUnderline(l, TRUE, RNG(0, 4)); IDWriteTextLayout_SetStrikethrough(l, TRUE, RNG(0, 4));
+    EXPECT_REFS(fx, 2);
+    for (i = 0; i < 5; i++) { RH_DRAW_OK(l, r, 0.0f, 0.0f); EXPECT_REFS(fx, 2); }
+    { int k; for (k = 0; k < r->nev; k++) if (r->ev[k].type >= RH_GLYPH) { EXPECT_EQ(r->ev[k].effect, (IUnknown *)fx); } }
+    IDWriteTextLayout_Release(l); EXPECT_REFS(fx, 1);
+    dwx_release(fx); rh_free(r); R2_END();
+}
