@@ -392,3 +392,31 @@ TEST(gis_match_unknown_family_system_set)
     }
     DW_RELEASE(sys); DW_RELEASE(g1); DW_RELEASE(g);
 }
+
+/* GetMatchingFontsByLOGFONT throws an ArgumentException("logFont"/"fontSet") for NULL arguments; whether the exception is turned into an
+ * HRESULT or escapes is observed from a child process so that a crash cannot take the whole run with it. */
+CHILD(gimatchnull)
+{
+    IDWriteFactory *f = dw_shared(); IDWriteGdiInterop *g = f ? gi_get(f) : NULL; IDWriteGdiInterop1 *g1; IDWriteFontSet *sub = (IDWriteFontSet *)(ULONG_PTR)0x1234, *sys = NULL; LOGFONTW lf;
+    IDWriteFactory3 *f3 = (IDWriteFactory3 *)dw_factory_v(DWRITE_FACTORY_TYPE_SHARED, 3); HRESULT hr;
+    if (!g || !f3 || argc < 2) return 5;
+    g1 = gi_get1(g);
+    if (!g1 || FAILED(IDWriteFactory3_GetSystemFontSet(f3, &sys)) || !sys) return 5;
+    gi_lf(&lf, "Arial", 400, 0, 1);
+    if (argv[1][0] == 'l') hr = IDWriteGdiInterop1_GetMatchingFontsByLOGFONT(g1, NULL, sys, &sub);
+    else hr = IDWriteGdiInterop1_GetMatchingFontsByLOGFONT(g1, &lf, NULL, &sub);
+    printf("GetMatchingFontsByLOGFONT(%s NULL) -> %s, out %s\n", argv[1][0] == 'l' ? "logfont" : "fontset", dw_hr_name(hr), sub ? "non-NULL" : "NULL");
+    return SUCCEEDED(hr) ? 1 : (sub == NULL ? 0 : 2);
+}
+TEST(gis_match_null_logfont_child)
+{
+    DWORD rc = t_run_child("gimatchnull", "l", 20000);
+    CHECK(rc != 0xDEAD0000 && rc != 0xDEAD0001);
+    t_note("NULL logfont: child exit 0x%lx (0 clean failure with NULL out, 1 success, 2 failure with out set, 5 setup, other = unhandled exception)", rc);
+}
+TEST(gis_match_null_fontset_child)
+{
+    DWORD rc = t_run_child("gimatchnull", "s", 20000);
+    CHECK(rc != 0xDEAD0000 && rc != 0xDEAD0001);
+    t_note("NULL fontset: child exit 0x%lx (0 clean failure with NULL out, 1 success, 2 failure with out set, 5 setup, other = unhandled exception)", rc);
+}
