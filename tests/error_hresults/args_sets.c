@@ -312,3 +312,74 @@ TEST(bitmap_render_target_argument_validation) {
     } else t_skip("bitmap render target unavailable");
     DW_RELEASE(t); DW_RELEASE(g); if (dc) DeleteDC(dc); DONE_FACTORY();
 }
+
+/* ---- font resource, axis values, unicode ranges --------------------------------------------------------------------------------------------------- */
+TEST(fontresource_createface_and_reference_arguments) {
+    if (t_is_wine()) { t_skip("invalid arguments fault in the emulated implementation"); return; }
+    NEED_FACTORY(); IDWriteFactory6 *f6 = NULL; cfix x;
+    if (!cfix_open(&x, f)) { cfix_close(&x); DONE_FACTORY(); t_skip("custom collection unavailable"); return; }
+    if (SUCCEEDED(IDWriteFactory_QueryInterface(f, &IID_IDWriteFactory6, (void **)&f6)) && f6) {
+        IDWriteFontFile *file = NULL; IDWriteFontResource *res = NULL; DWRITE_FONT_AXIS_VALUE av[1] = { { DWRITE_FONT_AXIS_TAG_WEIGHT, 400.f } };
+        if (SUCCEEDED(dwx_loader_file(x.files, f, 0, &file)) && file && SUCCEEDED(IDWriteFactory6_CreateFontResource(f6, file, 0, &res)) && res) {
+            IDWriteFontFace5 *face = SENT(IDWriteFontFace5 *); IDWriteFontFaceReference1 *ref = SENT(IDWriteFontFaceReference1 *);
+            CHECK_HR(IDWriteFontResource_CreateFontFace(res, (DWRITE_FONT_SIMULATIONS)4, NULL, 0, &face), E_INVALIDARG); CHECK_OUT_NULL(face);
+            face = SENT(IDWriteFontFace5 *); CHECK_HR(IDWriteFontResource_CreateFontFace(res, (DWRITE_FONT_SIMULATIONS)0xFFFFFFFFu, NULL, 0, &face), E_INVALIDARG); CHECK_OUT_NULL(face);
+            face = SENT(IDWriteFontFace5 *); CHECK_HR(IDWriteFontResource_CreateFontFace(res, 0, NULL, 1, &face), E_INVALIDARG); CHECK_OUT_NULL(face);
+            face = SENT(IDWriteFontFace5 *); CHECK_HR(IDWriteFontResource_CreateFontFace(res, 0, av, 0x10000, &face), E_INVALIDARG); CHECK_OUT_NULL(face);
+            CHECK_HR(IDWriteFontResource_CreateFontFaceReference(res, (DWRITE_FONT_SIMULATIONS)4, NULL, 0, &ref), E_INVALIDARG); CHECK_OUT_NULL(ref);
+            ref = SENT(IDWriteFontFaceReference1 *); CHECK_HR(IDWriteFontResource_CreateFontFaceReference(res, 0, NULL, 1, &ref), E_INVALIDARG); CHECK_OUT_NULL(ref);
+            ref = SENT(IDWriteFontFaceReference1 *); CHECK_HR(IDWriteFontResource_CreateFontFaceReference(res, 0, av, 0x10000, &ref), E_INVALIDARG); CHECK_OUT_NULL(ref);
+            face = NULL; { HRESULT hr = IDWriteFontResource_CreateFontFace(res, 0, NULL, 0, &face); t_note("CreateFontFace(no axes) = %s", dw_hr_name(hr)); CHECK(hr != E_INVALIDARG); DW_RELEASE(face); }
+            ref = NULL; { HRESULT hr = IDWriteFontResource_CreateFontFaceReference(res, 3, NULL, 0, &ref); CHECK_HR(hr, S_OK); DW_RELEASE(ref); }
+            DW_RELEASE(res);
+        } else t_skip("font resource unavailable");
+        DW_RELEASE(file); DW_RELEASE(f6);
+    } else t_skip("IDWriteFactory6 not available");
+    cfix_close(&x); DONE_FACTORY();
+}
+TEST(face_axis_values_buffer_protocol_variable_font) {
+    NEED_FACTORY(); IDWriteFontFace *face = dw_sysface(f, L"Bahnschrift", DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STRETCH_NORMAL, DWRITE_FONT_STYLE_NORMAL); IDWriteFontFace5 *f5 = NULL;
+    if (face && SUCCEEDED(IDWriteFontFace_QueryInterface(face, &IID_IDWriteFontFace5, (void **)&f5)) && f5) {
+        UINT32 n = IDWriteFontFace5_GetFontAxisValueCount(f5); DWRITE_FONT_AXIS_VALUE v[16]; unsigned i;
+        t_note("Bahnschrift axis value count = %u", n);
+        if (n >= 1 && n <= 16) {
+            CHECK_HR(IDWriteFontFace5_GetFontAxisValues(f5, v, n), S_OK);
+            for (i = 0; i < n; i++) CHECKF(IDWriteFontFace5_GetFontAxisValues(f5, v, i) == EH_NSB, "capacity %u of %u", i, n);
+            CHECK_HR(IDWriteFontFace5_GetFontAxisValues(f5, v, 16), S_OK);
+        } else t_skip("not a variable font on this host");
+        DW_RELEASE(f5);
+    } else t_skip("Bahnschrift not installed or IDWriteFontFace5 unavailable");
+    DW_RELEASE(face); DONE_FACTORY();
+}
+TEST(face_unicode_ranges_buffer_protocol) {
+    NEED_FACTORY(); NEED_FACE(h, f); IDWriteFontFace1 *f1 = NULL;
+    if (SUCCEEDED(IDWriteFontFace_QueryInterface(h.face, &IID_IDWriteFontFace1, (void **)&f1)) && f1) {
+        DWRITE_UNICODE_RANGE r[8]; UINT32 actual = 55; size_t i;
+        /* the synthetic cmap maps U+0020, U+0030-0039, U+0041-005A and U+0061-007A: four ranges */
+        CHECK_HR(IDWriteFontFace1_GetUnicodeRanges(f1, 0, NULL, &actual), EH_NSB); EXPECT_EQ(actual, 4);
+        actual = 55; CHECK_HR(IDWriteFontFace1_GetUnicodeRanges(f1, 3, NULL, &actual), E_INVALIDARG); EXPECT_EQ(actual, 0);
+        memset(r, 0xAA, sizeof r); actual = 55;
+        CHECK_HR(IDWriteFontFace1_GetUnicodeRanges(f1, 2, r, &actual), EH_NSB); EXPECT_EQ(actual, 4);
+        EXPECT_EQ(r[0].first, 0x20); EXPECT_EQ(r[0].last, 0x20); EXPECT_EQ(r[1].first, 0x30); EXPECT_EQ(r[1].last, 0x39);
+        memset(r, 0xAA, sizeof r); actual = 55;
+        CHECK_HR(IDWriteFontFace1_GetUnicodeRanges(f1, 4, r, &actual), S_OK); EXPECT_EQ(actual, 4);
+        EXPECT_EQ(r[2].first, 0x41); EXPECT_EQ(r[2].last, 0x5A); EXPECT_EQ(r[3].first, 0x61); EXPECT_EQ(r[3].last, 0x7A);
+        memset(r, 0xAA, sizeof r); actual = 55;
+        CHECK_HR(IDWriteFontFace1_GetUnicodeRanges(f1, 8, r, &actual), S_OK); EXPECT_EQ(actual, 4);
+        for (i = 4; i < 8; i++) EXPECT_EQ(r[i].first, 0);                  /* the whole destination is zeroed first, unused entries stay 0 */
+        DW_RELEASE(f1);
+    } else t_skip("IDWriteFontFace1 not available");
+    dwx_font_close(&h); DONE_FACTORY();
+}
+TEST(font_unicode_ranges_buffer_protocol) {
+    NEED_COLL(x); IDWriteFontFamily *fam = NULL; IDWriteFont *font = NULL; IDWriteFont1 *font1 = NULL;
+    if (SUCCEEDED(IDWriteFontCollection_GetFontFamily(x.c, 0, &fam)) && fam && SUCCEEDED(IDWriteFontFamily_GetFont(fam, 0, &font)) && font &&
+        SUCCEEDED(IDWriteFont_QueryInterface(font, &IID_IDWriteFont1, (void **)&font1)) && font1) {
+        DWRITE_UNICODE_RANGE r[8]; UINT32 actual = 55;
+        CHECK_HR(IDWriteFont1_GetUnicodeRanges(font1, 0, NULL, &actual), EH_NSB); EXPECT_EQ(actual, 4);
+        actual = 55; CHECK_HR(IDWriteFont1_GetUnicodeRanges(font1, 2, NULL, &actual), E_INVALIDARG);
+        actual = 55; memset(r, 0xAA, sizeof r); CHECK_HR(IDWriteFont1_GetUnicodeRanges(font1, 3, r, &actual), EH_NSB); EXPECT_EQ(actual, 4);
+        actual = 55; CHECK_HR(IDWriteFont1_GetUnicodeRanges(font1, 8, r, &actual), S_OK); EXPECT_EQ(actual, 4);
+    } else t_skip("IDWriteFont1 not available");
+    DW_RELEASE(font1); DW_RELEASE(font); DW_RELEASE(fam); END_COLL(x);
+}
