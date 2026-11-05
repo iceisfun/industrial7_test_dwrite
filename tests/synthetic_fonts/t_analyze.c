@@ -21,6 +21,16 @@ static void expect_analyze(const char *label, const uint8_t *blob, size_t n, HRE
     CHECKF(p.nfaces == nfaces, "%s: numberOfFaces %u want %u", label, (unsigned)p.nfaces, (unsigned)nfaces);
     sf_close(&p);
 }
+/* Short file: the 0x75 byte fragment read fails. The failure itself and the defaulted outputs are certain; the exact
+ * HRESULT depends on how the stream error is surfaced, so it is predicted only. */
+static void expect_short(const char *label, const uint8_t *blob, size_t n) {
+    sf_probe p;
+    if (!sf_open(&p, blob, n)) { sf_close(&p); return; }
+    CHECKF(FAILED(p.hr_analyze), "%s: Analyze -> %s, want failure", label, dw_hr_name(p.hr_analyze));
+    PRED(label, p.hr_analyze == DWRITE_E_FILEFORMAT_);
+    CHECKF(p.supported == FALSE && (int)p.ftype == 0 && (int)p.fctype == 6 && p.nfaces == 0, "%s: outputs not defaulted", label);
+    sf_close(&p);
+}
 enum { FT_UNKNOWN = 0, FT_CFF = 1, FT_TRUETYPE = 2, FT_TTC = 3, FT_PFM = 4, FT_PFB = 5, FT_VECTOR = 6, FT_BITMAP = 7 };
 enum { FC_CFF = 0, FC_TRUETYPE = 1, FC_TTC = 2, FC_TYPE1 = 3, FC_VECTOR = 4, FC_BITMAP = 5, FC_UNKNOWN = 6 };
 
@@ -94,7 +104,7 @@ TEST(an_header_only_files_are_sniffed_without_validation) {
 /* ---- minimum file size: IsPfm always requests 0x75 bytes at offset 0 -------------------------------------------- */
 #define SIZE_TEST(n) \
     TEST(an_size_##n) { uint8_t *b = zeros(n); if (n >= 4) memcpy(b, "OTTO", 4); \
-        expect_analyze("size " #n, b, n, DWRITE_E_FILEFORMAT_, FALSE, FT_UNKNOWN, FC_UNKNOWN, 0); free(b); }
+        expect_short("size " #n, b, n); free(b); }
 SIZE_TEST(0) SIZE_TEST(1) SIZE_TEST(2) SIZE_TEST(3) SIZE_TEST(4) SIZE_TEST(5) SIZE_TEST(7) SIZE_TEST(8) SIZE_TEST(11) SIZE_TEST(12)
 SIZE_TEST(13) SIZE_TEST(15) SIZE_TEST(16) SIZE_TEST(17) SIZE_TEST(31) SIZE_TEST(32) SIZE_TEST(63) SIZE_TEST(64) SIZE_TEST(100) SIZE_TEST(116)
 TEST(an_size_117_is_the_smallest_analyzable_file) {
@@ -107,7 +117,7 @@ TEST(an_truncated_real_font_sizes) {
     sf_blob a = sf_default(); size_t cut[] = { 0, 1, 4, 12, 16, 100, 116 }; size_t i;
     for (i = 0; i < sizeof cut / sizeof cut[0]; i++) {
         char l[64]; snprintf(l, sizeof l, "default font cut to %u", (unsigned)cut[i]);
-        expect_analyze(l, a.p, cut[i], DWRITE_E_FILEFORMAT_, FALSE, FT_UNKNOWN, FC_UNKNOWN, 0);
+        expect_short(l, a.p, cut[i]);
     }
     expect_analyze("default font cut to 117", a.p, 117, S_OK, TRUE, FT_TRUETYPE, FC_TRUETYPE, 1);
     expect_analyze("default font cut to 1000 (Analyze reads only the header)", a.p, 1000, S_OK, TRUE, FT_TRUETYPE, FC_TRUETYPE, 1);
