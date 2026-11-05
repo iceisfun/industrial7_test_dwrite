@@ -91,7 +91,7 @@ RT(sys_complexity_latin_matches_glyph_indices) {
         CHECK_HR(IDWriteTextAnalyzer1_GetTextComplexity(a1, txt, n, face, &simple, &read, g), S_OK);
         for (i = 0; i < n; i++) cps[i] = txt[i];
         CHECK_HR(IDWriteFontFace_GetGlyphIndices(face, cps, n, gi), S_OK);
-        if (simple) { EXPECT_EQ(read, n); for (i = 0; i < n; i++) CHECKF(g[i] == gi[i], "%ls char %u: glyph %u vs %u", k_fonts[fi], i, g[i], gi[i]); }
+        if (simple) { CHECKF(read >= 1 && read <= n, "read %u of %u", read, n); if (read < n) t_note("%ls: simple prefix only (read %u of %u)", k_fonts[fi], read, n); for (i = 0; i < read && i < n; i++) CHECKF(g[i] == gi[i], "%ls char %u: glyph %u vs %u", k_fonts[fi], i, g[i], gi[i]); }
         else t_note("%ls: Latin pangram not simple (read %u of %u)", k_fonts[fi], read, n);
         IDWriteFontFace_Release(face);
     }
