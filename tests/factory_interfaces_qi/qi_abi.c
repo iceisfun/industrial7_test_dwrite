@@ -288,7 +288,8 @@ TEST(abi_face_typed_tails) {
             if (ref) { EXPECT_EQ(IDWriteFontFaceReference_GetFontFaceIndex(ref), 0); IDWriteFontFaceReference_Release(ref); }
         }
         EXPECT_EQ(IDWriteFontFace5_HasVariations(f5), FALSE);
-        t_note("GetFontAxisValueCount on a non-variable face: %u", (unsigned)IDWriteFontFace5_GetFontAxisValueCount(f5));
+        /* probed on Win10 22H2 (std and adm): a non-variable face still reports 4 implied axis values */
+        EXPECT_EQ(IDWriteFontFace5_GetFontAxisValueCount(f5), 4);
         t_note("IDWriteFontFace4 supported glyph image formats: 0x%x", (unsigned)0);
         (void)f4;
     } else CHECKF(0, "QI face1..5");

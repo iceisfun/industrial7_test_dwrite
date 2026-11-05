@@ -126,7 +126,9 @@ TEST(factory_cross_version_qi) {
     int a, b, t;
     for (t = 0; t < 2; t++) {
         IDWriteFactory *base = dw_new_factory(k_types[t]);
+        ULONG before;
         if (!base) { t_skip("no factory"); return; }
+        before = dw_refcount((IUnknown *)base);
         for (a = 0; a <= 7; a++) {
             void *pa = NULL;
             if (FAILED(IUnknown_QueryInterface((IUnknown *)base, dw_factory_iid(a), &pa))) { CHECKF(0, "QI factory%d", a); continue; }
@@ -137,7 +139,11 @@ TEST(factory_cross_version_qi) {
             }
             IUnknown_Release((IUnknown *)pa);
         }
-        t_note("%s factory refcount after the QI matrix: %lu (the shared factory may hold extra references)", k_type_names[t], (unsigned long)dw_refcount((IUnknown *)base));
+        /* Win10 22H2: the shared factory's absolute count is process history (10 here, it varies with earlier activity),
+         * the isolated one is exactly 1; the QI matrix itself must be balanced in both cases. */
+        t_note("%s factory refcount before/after the QI matrix: %lu/%lu", k_type_names[t], (unsigned long)before, (unsigned long)dw_refcount((IUnknown *)base));
+        EXPECT_EQ(dw_refcount((IUnknown *)base), before);
+        if (k_types[t] == DWRITE_FACTORY_TYPE_ISOLATED) EXPECT_EQ(before, 1);
         IDWriteFactory_Release(base);
     }
 }

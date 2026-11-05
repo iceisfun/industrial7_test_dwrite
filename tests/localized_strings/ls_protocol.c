@@ -63,14 +63,17 @@ PERSRC(lsp_find_case) {
     }
 }
 PERSRC(lsp_find_unknown) {
+    /* probed on Win10 22H2 (std and adm, every source): names that are not well-formed BCP-47 tags (digits-only,
+     * embedded space) are rejected with E_INVALIDARG; every well-formed but absent tag is S_OK with exists FALSE. */
     static const WCHAR *const v[] = { L"zz-zz", L"tlh", L"xx", L"qps-ploc", L"en-zz-zz-zz", L"x-private", L"1234", L"en us" };
+    static const HRESULT want[] = { S_OK, S_OK, S_OK, S_OK, S_OK, S_OK, DW_E_INVALIDARG, DW_E_INVALIDARG };
     int k;
     for (k = 0; k < 8; k++) {
         UINT32 idx = 5; BOOL ex = TRUE;
         HRESULT hr = IDWriteLocalizedStrings_FindLocaleName(s, v[k], &idx, &ex);
         t_note("FindLocaleName(%ls) hr=%s ex=%d idx=%u", v[k], dw_hr_name(hr), ex, idx);
-        CHECK(hr == S_OK || hr == DW_E_INVALIDARG);
-        if (hr == S_OK) { CHECK(ex == FALSE); EXPECT_EQ(idx, 0xFFFFFFFFu); }
+        CHECKF(hr == want[k], "FindLocaleName(%ls): %s, want %s", v[k], dw_hr_name(hr), dw_hr_name(want[k]));
+        CHECK(ex == FALSE); EXPECT_EQ(idx, 0xFFFFFFFFu);
     }
 }
 PERSRC(lsp_find_null) {
@@ -92,12 +95,14 @@ PERSRC(lsp_find_empty_and_long) {
     UINT32 idx = 3; BOOL ex = TRUE; WCHAR big[260]; int i;
     HRESULT hr = IDWriteLocalizedStrings_FindLocaleName(s, L"", &idx, &ex);
     t_note("FindLocaleName(\"\") -> %s exists=%d idx=%u", dw_hr_name(hr), ex, idx);
-    if (SUCCEEDED(hr)) CHECK(ex == FALSE);
+    /* probed on Win10 22H2: the empty name is a clean miss */
+    CHECK_HR_OK(hr); CHECK(ex == FALSE); EXPECT_EQ(idx, 0xFFFFFFFFu);
     for (i = 0; i < 259; i++) big[i] = L'a'; big[259] = 0;
     idx = 3; ex = TRUE;
     hr = IDWriteLocalizedStrings_FindLocaleName(s, big, &idx, &ex);
     t_note("FindLocaleName(259 chars) -> %s exists=%d", dw_hr_name(hr), ex);
-    if (SUCCEEDED(hr)) { CHECK(ex == FALSE); EXPECT_EQ(idx, 0xFFFFFFFFu); }
+    /* probed on Win10 22H2: an over-long (259 character) name is rejected */
+    CHECK_HR(hr, DW_E_INVALIDARG); CHECK(ex == FALSE); EXPECT_EQ(idx, 0xFFFFFFFFu);
 }
 
 /* ---- locale names ------------------------------------------------------------------------------------ */
