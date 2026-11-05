@@ -131,6 +131,7 @@ TEST(mem_reference_file_loader_identity) {
 TEST(mem_reference_invalid_arguments) {
     NEED_F5(); size_t n; uint8_t *b = fx_ttf(&n); IDWriteFontFile *file;
     REG_M();
+    if (t_is_wine()) { t_skip("other implementations dereference the NULL"); free(b); END_F5(); return; }
     file = (IDWriteFontFile *)1; CHECK_HR(mkmem(m, f, NULL, (UINT32)n, NULL, &file), E_INVALIDARG); CHECK_OUT_NULL(file);
     file = (IDWriteFontFile *)1; CHECK_HR(mkmem(m, f, b, 0, NULL, &file), E_INVALIDARG); CHECK_OUT_NULL(file);
     file = (IDWriteFontFile *)1; CHECK_HR(mkmem(m, f, NULL, 0, NULL, &file), E_INVALIDARG); CHECK_OUT_NULL(file);
@@ -139,6 +140,7 @@ TEST(mem_reference_invalid_arguments) {
 }
 TEST(mem_reference_invalid_arguments_unregistered) {
     NEED_F5(); size_t n; uint8_t *b = fx_ttf(&n); IDWriteFontFile *file = (IDWriteFontFile *)1;
+    if (t_is_wine()) { t_skip("other implementations dereference the NULL"); free(b); END_F5_UNREG(0); return; }
     CHECK_HR(mkmem(m, f, NULL, 10, NULL, &file), E_INVALIDARG); CHECK_OUT_NULL(file);
     EXPECT_EQ(IDWriteInMemoryFontFileLoader_GetFileCount(m), 0);
     free(b); END_F5_UNREG(0);
@@ -448,8 +450,7 @@ TEST(mem_fontsetbuilder_add_file) {
         if (set) { EXPECT_EQ(IDWriteFontSet_GetFontCount(set), 1); DW_RELEASE(set); }
     }
     if (bld) {
-        HRESULT hr = IDWriteFontSetBuilder1_AddFontFile(bld, NULL);
-        CHECK_HR(hr, E_INVALIDARG);
+        if (!t_is_wine()) CHECK_HR(IDWriteFontSetBuilder1_AddFontFile(bld, NULL), E_INVALIDARG);
         IDWriteFontSetBuilder1_Release(bld);
     }
     DW_RELEASE(file); free(b); END_F5();

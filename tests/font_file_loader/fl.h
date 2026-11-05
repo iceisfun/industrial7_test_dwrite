@@ -24,7 +24,7 @@ typedef struct fl_stream {
 } fl_stream;
 
 typedef struct fl_loader {
-    const IDWriteFontFileLoaderVtbl *lpVtbl;
+    const IDWriteRemoteFontFileLoaderVtbl *lpVtbl;
     volatile LONG ref; int destroyed; LONG qi;
     uint8_t *data; UINT64 size;                 /* served for every key */
     UINT64 reported_size;                       /* GetFileSize result (default = size) */
@@ -44,6 +44,9 @@ typedef struct fl_loader {
     void *issued[256]; int nissued;
     void (*on_read)(struct fl_loader *, UINT64 off, UINT64 size);
     int registered; IDWriteFactory *reg_factory;
+    /* optional IDWriteRemoteFontFileLoader face */
+    int remote; DWRITE_LOCALITY loc; HRESULT loc_hr; LONG n_loc; UINT32 loc_key_size; uint8_t loc_key[64];
+    LONG n_qi_remote; IID last_qi_iid; LONG n_qi_other;
 } fl_loader;
 
 fl_loader *fl_new(const void *data, size_t n);

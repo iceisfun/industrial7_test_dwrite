@@ -72,6 +72,13 @@ static const IDWriteFontFileStreamVtbl st_vt = { st_QI, st_AR, st_RL, st_Read, s
 /* ---- loader ---- */
 static HRESULT WINAPI ld_QI(IDWriteFontFileLoader *This, REFIID r, void **o) {
     fl_loader *l = (fl_loader *)This; InterlockedIncrement(&l->qi);
+    l->last_qi_iid = *r;
+    if (IsEqualIID(r, &IID_IDWriteRemoteFontFileLoader)) {
+        InterlockedIncrement(&l->n_qi_remote);
+        if (l->remote) { *o = This; InterlockedIncrement(&l->ref); return S_OK; }
+        *o = NULL; return E_NOINTERFACE;
+    }
+    InterlockedIncrement(&l->n_qi_other);
     if (IsEqualIID(r, &IID_IUnknown) || IsEqualIID(r, &IID_IDWriteFontFileLoader)) { *o = This; InterlockedIncrement(&l->ref); return S_OK; }
     *o = NULL; return E_NOINTERFACE;
 }
@@ -94,7 +101,15 @@ static HRESULT WINAPI ld_Create(IDWriteFontFileLoader *This, const void *key, UI
     *out = (IDWriteFontFileStream *)s;
     return S_OK;
 }
-static const IDWriteFontFileLoaderVtbl ld_vt = { ld_QI, ld_AR, ld_RL, ld_Create };
+static HRESULT WINAPI ld_CreateRemote(IDWriteRemoteFontFileLoader *This, const void *key, UINT32 ks, IDWriteRemoteFontFileStream **out) { *out = NULL; return E_NOTIMPL; }
+static HRESULT WINAPI ld_Locality(IDWriteRemoteFontFileLoader *This, const void *key, UINT32 ks, DWRITE_LOCALITY *loc) {
+    fl_loader *l = (fl_loader *)This; InterlockedIncrement(&l->n_loc);
+    l->loc_key_size = ks; if (key && ks) memcpy(l->loc_key, key, ks < sizeof l->loc_key ? ks : sizeof l->loc_key);
+    if (l->loc_hr) return l->loc_hr;
+    *loc = l->loc; return S_OK;
+}
+static HRESULT WINAPI ld_FromUrl(IDWriteRemoteFontFileLoader *This, IDWriteFactory *f, const WCHAR *b, const WCHAR *u, IDWriteFontFile **out) { *out = NULL; return E_NOTIMPL; }
+static const IDWriteRemoteFontFileLoaderVtbl ld_vt = { (void *)ld_QI, (void *)ld_AR, (void *)ld_RL, (void *)ld_Create, ld_CreateRemote, ld_Locality, ld_FromUrl };
 
 fl_loader *fl_new(const void *data, size_t n) {
     fl_loader *l = (fl_loader *)calloc(1, sizeof *l);

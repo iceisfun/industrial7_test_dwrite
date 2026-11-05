@@ -117,7 +117,7 @@ TEST(local_create_reference_does_not_open_file_when_time_given) {
     DW_RELEASE(file); IDWriteFactory_Release(f);
 }
 TEST(local_create_long_path_not_found) {
-    IDWriteFactory *f = fl_factory(); IDWriteFontFile *file = (IDWriteFontFile *)1; WCHAR w[400]; int i;
+    IDWriteFactory *f = fl_factory(); IDWriteFontFile *file = (IDWriteFontFile *)1; WCHAR w[1200]; int i;
     if (!f) { t_skip("factory"); return; }
     lstrcpyW(w, L"C:\\"); for (i = 0; i < 40; i++) lstrcatW(w, L"deep_nonexistent_dir\\"); lstrcatW(w, L"x.ttf");
     HRESULT hr = IDWriteFactory_CreateFontFileReference(f, w, NULL, &file);
