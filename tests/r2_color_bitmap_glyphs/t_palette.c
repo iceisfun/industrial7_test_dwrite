@@ -1,6 +1,6 @@
 /* CPAL palette layouts through IDWriteFontFace2::GetColorPaletteCount / GetPaletteEntryCount / GetPaletteEntries / IsColorFont.
  *
- * DWriteFontFace::GetPaletteEntries (dwrite.dll!0xdcbe0): the palette is resolved first (ColorGlyphMap::GetPalette, !0x1d3b0: DWRITE_E_NOCOLOR 0x8898500C when
+ * DWriteFontFace::GetPaletteEntries: the palette is resolved first (ColorGlyphMap::GetPalette: DWRITE_E_NOCOLOR 0x8898500C when
  * paletteIndex >= numPalettes), then firstEntryIndex > entryCount or entryCount > paletteEntries - firstEntryIndex gives E_INVALIDARG; nothing is written on failure.
  * Colour record n of palette p is colorRecords[colorRecordIndices[p] + n]; each channel is byte / 255 (ByteToFloat), CPAL stores B, G, R, A. */
 #include "crb.h"
@@ -13,6 +13,8 @@ static uint8_t *font_cpal(unsigned ver, unsigned nent, unsigned npal, const unsi
 }
 static HRESULT gpe(crb *x, UINT32 p, UINT32 first, UINT32 cnt, DWRITE_COLOR_F *c) { return IDWriteFontFace2_GetPaletteEntries(x->f2, p, first, cnt, c); }
 static float b2f(unsigned v) { return (float)v / 255.0f; }
+/* Win10 converts with a reciprocal multiply, which can differ from byte / 255 in the last bit */
+static int feq(float a, float b) { return fabsf(a - b) <= 1e-6f; }
 #define NEED_FACE2() if (!x.f2) { t_skip("IDWriteFontFace2 unsupported"); crb_close(&x); return; }
 
 /* expected result of GetPaletteEntries for a layout */
@@ -32,7 +34,7 @@ static void check_layout(crb *x, const unsigned *start, unsigned npal, unsigned 
         if (hr == S_OK) {
             for (i = 0; i < cnt; i++) {
                 uint32_t v = rec[start[p] + first + i];
-                CHECKF(c[i].r == b2f((v >> 16) & 255) && c[i].g == b2f((v >> 8) & 255) && c[i].b == b2f(v & 255) && c[i].a == b2f(v >> 24), "%s: palette %u entry %u: (%g %g %g %g)", what, p, first + i, c[i].r, c[i].g, c[i].b, c[i].a);
+                CHECKF(feq(c[i].r, b2f((v >> 16) & 255)) && feq(c[i].g, b2f((v >> 8) & 255)) && feq(c[i].b, b2f(v & 255)) && feq(c[i].a, b2f(v >> 24)), "%s: palette %u entry %u: (%g %g %g %g)", what, p, first + i, c[i].r, c[i].g, c[i].b, c[i].a);
             }
             CHECKF(c[cnt].r == -7.0f && c[cnt].a == -7.0f, "%s: wrote beyond entryCount (palette %u first %u count %u)", what, p, first, cnt);
         } else {
@@ -70,7 +72,7 @@ T(palette_wide_palettes) {
       { UINT32 first, cnt; for (first = 0; first <= 40; first += 3) for (cnt = 0; cnt <= 40; cnt += 5) {
             DWRITE_COLOR_F c[41]; HRESULT hr = gpe(&x, 1, first, cnt, c); HRESULT want = expect_hr(1, first, cnt, 2, 40);
             CHECKF(hr == want, "first %u count %u: %s", first, cnt, dw_hr_name(hr));
-            if (hr == S_OK && cnt) { uint32_t v = rec[40 + first + cnt - 1]; CHECK(c[cnt - 1].r == b2f((v >> 16) & 255) && c[cnt - 1].a == b2f(v >> 24)); } } }
+            if (hr == S_OK && cnt) { uint32_t v = rec[40 + first + cnt - 1]; CHECK(feq(c[cnt - 1].r, b2f((v >> 16) & 255)) && feq(c[cnt - 1].a, b2f(v >> 24))); } } }
       crb_close(&x); }
 }
 T(palette_channel_conversion_all_byte_values) {
@@ -80,10 +82,10 @@ T(palette_channel_conversion_all_byte_values) {
       EXPECT_EQ(IDWriteFontFace2_GetPaletteEntryCount(x.f2), 256);
       { static DWRITE_COLOR_F c[256]; CHECK_HR_OK(gpe(&x, 0, 0, 256, c));
         for (i = 0; i < 256; i++) {
-            /* ByteToFloat: exactly byte / 255 for every channel (CPAL stores BGRA, DWRITE_COLOR_F is RGBA) */
-            CHECKF(c[i].a == b2f((unsigned)i) && c[i].r == b2f((unsigned)(255 - i)) && c[i].g == b2f((unsigned)((i * 7) & 255)) && c[i].b == b2f((unsigned)(i ^ 0x5A)), "entry %d: (%.9g %.9g %.9g %.9g)", i, c[i].r, c[i].g, c[i].b, c[i].a);
+            /* byte / 255 for every channel (within 1e-6) (CPAL stores BGRA, DWRITE_COLOR_F is RGBA) */
+            CHECKF(feq(c[i].a, b2f((unsigned)i)) && feq(c[i].r, b2f((unsigned)(255 - i))) && feq(c[i].g, b2f((unsigned)((i * 7) & 255))) && feq(c[i].b, b2f((unsigned)(i ^ 0x5A))), "entry %d: (%.9g %.9g %.9g %.9g)", i, c[i].r, c[i].g, c[i].b, c[i].a);
         }
-        CHECK(c[0].a == 0.0f && c[255].a == 1.0f); }
+        CHECK(c[0].a == 0.0f && feq(c[255].a, 1.0f)); }
       crb_close(&x); }
 }
 T(palette_failed_calls_leave_the_buffer_alone_and_validation_order) {
@@ -100,14 +102,16 @@ T(palette_failed_calls_leave_the_buffer_alone_and_validation_order) {
     crb_close(&x);
 }
 T(palette_zero_entry_palettes) {
+    /* Win10 rejects a CPAL with zero entries per palette when the font is opened */
     static const uint32_t rec[1] = { 0xFF0000FFu }; static const unsigned st[2] = { 0, 0 };
-    size_t n; uint8_t *b = font_cpal(0, 0, 2, st, 0, rec, 0, &n); CRB_NEED(x, b, n); NEED_FACE2();
-    t_note("CPAL with 0 entries and 2 palettes: IsColorFont=%d palettes=%u entries=%u", IDWriteFontFace2_IsColorFont(x.f2), IDWriteFontFace2_GetColorPaletteCount(x.f2), IDWriteFontFace2_GetPaletteEntryCount(x.f2));
-    if (IDWriteFontFace2_GetColorPaletteCount(x.f2) == 2) {
-        DWRITE_COLOR_F c[1];
-        CHECK_HR_OK(gpe(&x, 0, 0, 0, c)); CHECK_HR(gpe(&x, 0, 0, 1, c), E_INVALIDARG_); CHECK_HR(gpe(&x, 0, 1, 0, c), E_INVALIDARG_); CHECK_HR(gpe(&x, 2, 0, 0, c), E_NOCOLOR_);
-    }
-    crb_close(&x);
+    size_t n; uint8_t *b = font_cpal(0, 0, 2, st, 0, rec, 0, &n); dwx_font h; HRESULT hr;
+    if (!b) { t_skip("ttf_build failed"); return; }
+    if (!dw_shared()) { free(b); t_skip("DWriteCreateFactory unavailable"); return; }
+    hr = dwx_font_open(&h, dw_shared(), b, n, 0, DWRITE_FONT_SIMULATIONS_NONE);
+    t_note("CPAL with 0 entries and 2 palettes: font open %s", dw_hr_name(hr));
+    CHECKF(FAILED(hr) && h.face == NULL, "font with an empty CPAL palette opened: %s", dw_hr_name(hr));
+    if (SUCCEEDED(hr)) dwx_font_close(&h);
+    free(b);
 }
 T(palette_cpal_version_one_header_note) {
     /* CPAL version 1 appends three offsets (palette types, labels, entry labels) after the record indices */

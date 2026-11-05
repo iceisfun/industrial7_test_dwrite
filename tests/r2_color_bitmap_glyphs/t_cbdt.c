@@ -1,14 +1,16 @@
 /* Colour bitmap strikes (CBLC / CBDT) seen through IDWriteFontFace4::GetGlyphImageFormats and GetGlyphImageData.
  *
- * EmbeddedBitmapTableReader::EnumerateGlyphData (dwrite.dll!0x11ce48) only accepts BitmapSize strikes with ppemX == ppemY and bitDepth 32;
- * FillGlyphGraphicDataEntry (!0x11d66c) takes the image dimensions and bearings from the SmallGlyphMetrics / BigGlyphMetrics, the entry
- * ppem from the strike and the data offset from the (absolute) file position of the PNG bytes.  FontFace::GetGlyphImageData (!0xfb340)
+ * EmbeddedBitmapTableReader::EnumerateGlyphData only accepts BitmapSize strikes with ppemX == ppemY and bitDepth 32;
+ * FillGlyphGraphicDataEntry takes the image dimensions and bearings from the SmallGlyphMetrics / BigGlyphMetrics, the entry
+ * ppem from the strike and the data offset from the (absolute) file position of the PNG bytes.  FontFace::GetGlyphImageData
  * picks the entry with the smallest ppem >= the requested ppem. */
 #include "crb.h"
 
 static const crb_cbexp *oracle(unsigned gid, unsigned req, int *any) {
     int n, i; const crb_cbexp *e = crb_cb_entries(&n), *best = NULL;
     for (i = 0; i < n; i++) if (e[i].gid == gid && e[i].ppem >= req && (!best || e[i].ppem < best->ppem)) best = &e[i];
+    /* Win10: a request above every strike gets the largest strike */
+    if (!best) for (i = 0; i < n; i++) if (e[i].gid == gid && (!best || e[i].ppem > best->ppem)) best = &e[i];
     if (any) *any = best != NULL;
     return best;
 }
@@ -138,24 +140,36 @@ T(cbdt_data_fields_for_every_entry) {
     }
     crb_close(&x);
 }
-T(cbdt_big_metrics_give_exact_vertical_origins) {
+T(cbdt_big_metrics_vertical_origins) {
+    /* Win10: only metrics stored once in the index subtable (image format 19) give exact vertical origins (-vertBearingX, vertBearingY) and
+     * (-vertBearingX, vertAdvance + vertBearingY).  Strikes whose glyphs carry their own big metrics (image format 18) get vertical origins derived
+     * from the design metrics: x = advanceWidth/2 scaled to the strike, y = horizontal bearingY minus the scaled vertical origin. */
     size_t n; uint8_t *b = font(&n); CRB_NEED(x, b, n);
-    int k, i, seen = 0; const crb_cbexp *e = crb_cb_entries(&k);
+    int k, i, exact = 0, derived = 0; const crb_cbexp *e = crb_cb_entries(&k);
+    DWRITE_FONT_METRICS fm; IDWriteFontFace_GetMetrics(x.h.face, &fm);
     for (i = 0; i < k; i++) {
         DWRITE_GLYPH_IMAGE_DATA d; void *ctx = NULL;
         if (e[i].imgfmt != 18 && e[i].imgfmt != 19) continue;
-        seen++;
         CHECK_HR_OK(crb_gid(&x, (UINT16)e[i].gid, e[i].ppem, F_PNG, &d, &ctx));
-        /* vertical top origin = (-vertBearingX, vertBearingY); bottom origin = (-vertBearingX, vertAdvance + vertBearingY) */
-        CHECKF(d.verticalTopOrigin.x == -e[i].m.vbx && d.verticalTopOrigin.y == e[i].m.vby, "glyph %u fmt %d: top (%d,%d) want (%d,%d)", e[i].gid, e[i].imgfmt, d.verticalTopOrigin.x, d.verticalTopOrigin.y, -e[i].m.vbx, e[i].m.vby);
-        CHECKF(d.verticalBottomOrigin.x == -e[i].m.vbx && d.verticalBottomOrigin.y == e[i].m.vadv + e[i].m.vby, "glyph %u fmt %d: bottom (%d,%d) want (%d,%d)", e[i].gid, e[i].imgfmt, d.verticalBottomOrigin.x, d.verticalBottomOrigin.y, -e[i].m.vbx, e[i].m.vadv + e[i].m.vby);
+        if (e[i].imgfmt == 19) {
+            exact++;
+            CHECKF(d.verticalTopOrigin.x == -e[i].m.vbx && d.verticalTopOrigin.y == e[i].m.vby, "glyph %u fmt %d: top (%d,%d) want (%d,%d)", e[i].gid, e[i].imgfmt, d.verticalTopOrigin.x, d.verticalTopOrigin.y, -e[i].m.vbx, e[i].m.vby);
+            CHECKF(d.verticalBottomOrigin.x == -e[i].m.vbx && d.verticalBottomOrigin.y == e[i].m.vadv + e[i].m.vby, "glyph %u fmt %d: bottom (%d,%d) want (%d,%d)", e[i].gid, e[i].imgfmt, d.verticalBottomOrigin.x, d.verticalBottomOrigin.y, -e[i].m.vbx, e[i].m.vadv + e[i].m.vby);
+        } else {
+            DWRITE_GLYPH_METRICS gm; UINT16 gi = (UINT16)e[i].gid; double s = (double)e[i].ppem / fm.designUnitsPerEm;
+            derived++;
+            CHECK_HR_OK(IDWriteFontFace_GetDesignGlyphMetrics(x.h.face, &gi, 1, &gm, FALSE));
+            CHECKF(fabs(d.verticalTopOrigin.x - (gm.advanceWidth / 2) * s) <= 1.0 && d.verticalTopOrigin.x == d.verticalBottomOrigin.x, "glyph %u fmt 18: vertical x %d/%d", gi, d.verticalTopOrigin.x, d.verticalBottomOrigin.x);
+            CHECKF(fabs(d.verticalTopOrigin.y - (e[i].m.by - gm.verticalOriginY * s)) <= 1.0, "glyph %u fmt 18: top y %d want ~%g", gi, d.verticalTopOrigin.y, e[i].m.by - gm.verticalOriginY * s);
+            CHECKF(fabs((d.verticalBottomOrigin.y - d.verticalTopOrigin.y) - gm.advanceHeight * s) <= 1.0, "glyph %u fmt 18: vertical advance %d want ~%g", gi, d.verticalBottomOrigin.y - d.verticalTopOrigin.y, gm.advanceHeight * s);
+        }
         if (ctx) IDWriteFontFace4_ReleaseGlyphImageData(x.f4, ctx);
     }
-    EXPECT_EQ(seen, 5);
+    EXPECT_EQ(exact, 2); EXPECT_EQ(derived, 3);
     crb_close(&x);
 }
 T(cbdt_small_metrics_vertical_origins_are_derived_from_hmtx) {
-    /* SmallGlyphMetrics carry no vertical metrics: GlyphGraphicDataBuilder::SetEntry (!0x10ffe0) fills them from the font's design metrics
+    /* SmallGlyphMetrics carry no vertical metrics: GlyphGraphicDataBuilder::SetEntry fills them from the font's design metrics
      * scaled by ppem / unitsPerEm.  Both vertical origins share their x coordinate (one field). */
     size_t n; uint8_t *b = font(&n); CRB_NEED(x, b, n);
     int k, i; const crb_cbexp *e = crb_cb_entries(&k);
@@ -335,7 +349,7 @@ T(cbdt_cblc_without_cbdt_is_not_a_bitmap_font_note) {
 }
 
 T(cbdt_image_data_struct_layout_and_constants) {
-    /* offsets used by FontFace::GetGlyphImageData (!0xfb340) and the 0x40 byte clear in DWriteFontFace::GetGlyphImageData (!0xdc780) */
+    /* offsets used by FontFace::GetGlyphImageData and the 0x40 byte clear in DWriteFontFace::GetGlyphImageData */
     EXPECT_EQ(sizeof(DWRITE_GLYPH_IMAGE_DATA), 64);
     EXPECT_EQ(offsetof(DWRITE_GLYPH_IMAGE_DATA, imageData), 0); EXPECT_EQ(offsetof(DWRITE_GLYPH_IMAGE_DATA, imageDataSize), 8); EXPECT_EQ(offsetof(DWRITE_GLYPH_IMAGE_DATA, uniqueDataId), 0xC);
     EXPECT_EQ(offsetof(DWRITE_GLYPH_IMAGE_DATA, pixelsPerEm), 0x10); EXPECT_EQ(offsetof(DWRITE_GLYPH_IMAGE_DATA, pixelSize), 0x14); EXPECT_EQ(offsetof(DWRITE_GLYPH_IMAGE_DATA, horizontalLeftOrigin), 0x1C);

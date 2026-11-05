@@ -1,16 +1,16 @@
 /* sbix strikes seen through GetGlyphImageFormats / GetGlyphImageData.
  *
- * SbixTableReader::EnumerateGlyphData (dwrite.dll!0x11fa00): a version 0 table yields nothing; per strike and glyph the record
- * [originOffsetX, originOffsetY, graphicType, data] is accepted when its length is >= 8 and the type is 'png ' (PNG), 'jpg ' (JPEG),
+ * SbixTableReader::EnumerateGlyphData: a version 0 table yields nothing; per strike and glyph the record
+ * [originOffsetX, originOffsetY, graphicType, data] is accepted when its length is >= 8 and the type is 'png ' (PNG), 'jpeg' (JPEG; Win10 does not recognise the sbix 'jpg ' tag),
  * 'tiff' (TIFF), or 'dupe' (the data of the glyph named by the next u16 when that glyph is < numGlyphs and itself one of the three image
- * types; a dupe of a dupe is dropped).  The dimensions come from the image header (GetImageDimensions, !0x10fbb0, clamped to 65535); the entry
+ * types; a dupe of a dupe is dropped).  The dimensions come from the image header (clamped to 65535); the entry
  * origin is (-originOffsetX, originOffsetY + height); the remaining metrics are completed by GlyphGraphicDataBuilder::SetEntry. */
 #include "crb.h"
 
 typedef struct { unsigned gid, ppem; uint32_t fmt; int16_t ox, oy; const uint8_t *data; size_t len; unsigned w, h; } sbexp;
 static sbexp g_exp[32]; static int g_nexp; static uint8_t *g_cache; static size_t g_cachen;
 #define TY_PNG CRB_TAG('p','n','g',' ')
-#define TY_JPG CRB_TAG('j','p','g',' ')
+#define TY_JPG CRB_TAG('j','p','e','g')
 #define TY_TIF CRB_TAG('t','i','f','f')
 #define TY_DUPE CRB_TAG('d','u','p','e')
 
@@ -60,6 +60,8 @@ static uint8_t *font(size_t *n) { uint8_t *p; build(); p = (uint8_t *)malloc(g_c
 static const sbexp *pick(unsigned gid, uint32_t fmt, unsigned req) {
     int i; const sbexp *best = NULL; build();
     for (i = 0; i < g_nexp; i++) if (g_exp[i].gid == gid && (g_exp[i].fmt & fmt) && g_exp[i].ppem >= req && (!best || g_exp[i].ppem < best->ppem)) best = &g_exp[i];
+    /* Win10: a request above every strike gets the largest strike of that format */
+    if (!best) for (i = 0; i < g_nexp; i++) if (g_exp[i].gid == gid && (g_exp[i].fmt & fmt) && (!best || g_exp[i].ppem > best->ppem)) best = &g_exp[i];
     return best;
 }
 static UINT32 range_formats(unsigned gid, unsigned a, unsigned b) {
@@ -94,8 +96,8 @@ T(sbix_ppem_zero_strike_matches_every_range) {
     /* a strike with ppem 0 is "size independent": GetGlyphImageFormats includes it even for an empty (first > last) range */
     CHECK_HR_OK(crb_gif(&x, 21, 500, 600, &f)); EXPECT_EQ(f, F_PNG);
     CHECK_HR_OK(crb_gif(&x, 21, 600, 500, &f)); EXPECT_EQ(f, F_PNG);
-    /* but GetGlyphImageData(ppem >= 1) cannot select it: it needs entry ppem >= requested */
-    { DWRITE_GLYPH_IMAGE_DATA d; void *ctx = NULL; CHECK_HR_OK(crb_gid(&x, 21, 1, F_PNG, &d, &ctx)); CHECK(d.imageData == NULL && ctx == NULL);
+    /* GetGlyphImageData(ppem >= 1) still finds it: with no strike large enough the largest one (here the only one) is returned */
+    { DWRITE_GLYPH_IMAGE_DATA d; void *ctx = NULL; CHECK_HR_OK(crb_gid(&x, 21, 1, F_PNG, &d, &ctx)); CHECK(d.imageData != NULL && d.pixelsPerEm == 0); if (ctx) IDWriteFontFace4_ReleaseGlyphImageData(x.f4, ctx);
       CHECK_HR_OK(crb_gid(&x, 21, 0, F_PNG, &d, &ctx)); CHECK(d.imageData != NULL && d.pixelsPerEm == 0); if (ctx) IDWriteFontFace4_ReleaseGlyphImageData(x.f4, ctx); }
     crb_close(&x);
 }
@@ -170,7 +172,7 @@ T(sbix_one_glyph_several_formats_by_strike) {
     CHECK_HR_OK(crb_gif(&x, 2, 0, 30, &f)); EXPECT_EQ(f, F_PNG);
     CHECK_HR_OK(crb_gif(&x, 2, 41, 79, &f)); EXPECT_EQ(f, 0);
     { DWRITE_GLYPH_IMAGE_DATA d; void *ctx = NULL;
-      CHECK_HR_OK(crb_gid(&x, 2, 41, F_PNG, &d, &ctx)); CHECK(d.imageData == NULL);   /* the PNG strikes are 20 and 40: nothing >= 41 */
+      CHECK_HR_OK(crb_gid(&x, 2, 41, F_PNG, &d, &ctx)); CHECK(d.imageData != NULL && d.pixelsPerEm == 40); if (ctx) IDWriteFontFace4_ReleaseGlyphImageData(x.f4, ctx);   /* the PNG strikes are 20 and 40: nothing >= 41, the largest is used */
       CHECK_HR_OK(crb_gid(&x, 2, 41, F_TIFF, &d, &ctx)); CHECK(d.imageData != NULL && d.pixelsPerEm == 80); if (ctx) IDWriteFontFace4_ReleaseGlyphImageData(x.f4, ctx);
       CHECK_HR_OK(crb_gid(&x, 2, 21, F_PNG, &d, &ctx)); CHECK(d.imageData != NULL && d.pixelsPerEm == 40); if (ctx) IDWriteFontFace4_ReleaseGlyphImageData(x.f4, ctx); }
     crb_close(&x);
@@ -249,6 +251,7 @@ T(sbix_tiff_dimensions_by_byte_order_and_field_type) {
     for (i = 0; i < 14; i++) {
         c[i].p = crb_tiff(t[i].w, t[i].h, t[i].be, t[i].wt, t[i].ht, t[i].extra, 0x700 + (unsigned)i, &c[i].n); c[i].ty = TY_TIF; c[i].w = t[i].w; c[i].h = t[i].h; c[i].what = "tiff";
         if (t[i].wt == 1 || t[i].wt == 6 || t[i].ht == 1 || t[i].ht == 6) { if (t[i].w > 255 || t[i].h > 255) c[i].w = c[i].h = 0; }
+        else { if (c[i].w > 65535) c[i].w = 65535; if (c[i].h > 65535) c[i].h = 65535; }   /* clamped like PNG */
     }
     dims_run(c, 14);
     for (i = 0; i < 14; i++) free(c[i].p);
@@ -292,7 +295,7 @@ T(sbix_and_cbdt_in_one_font_merge_by_ppem) {
         CHECK_HR_OK(crb_gif(&x, 2, 0, 100, &f)); EXPECT_EQ(f, F_PNG);
         CHECK_HR_OK(crb_gid(&x, 2, 10, F_PNG, &d, &ctx)); EXPECT_EQ(d.pixelsPerEm, 24); if (ctx) IDWriteFontFace4_ReleaseGlyphImageData(x.f4, ctx);
         CHECK_HR_OK(crb_gid(&x, 2, 25, F_PNG, &d, &ctx)); EXPECT_EQ(d.pixelsPerEm, 40); if (ctx) IDWriteFontFace4_ReleaseGlyphImageData(x.f4, ctx);
-        CHECK_HR_OK(crb_gid(&x, 2, 41, F_PNG, &d, &ctx)); CHECK(d.imageData == NULL);
+        CHECK_HR_OK(crb_gid(&x, 2, 41, F_PNG, &d, &ctx)); CHECK(d.imageData != NULL && d.pixelsPerEm == 40); if (ctx) IDWriteFontFace4_ReleaseGlyphImageData(x.f4, ctx);   /* nothing >= 41: the largest strike is used */
         crb_close(&x);
     } else crb_close(&x); }
     free((void *)raw[0].data); free(lc); free(dt); free(spng); free(cpng);

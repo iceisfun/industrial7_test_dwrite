@@ -1,6 +1,6 @@
-/* IDWriteFactory2::TranslateColorGlyphRun is IDWriteFactory4's with the image formats fixed to TRUETYPE | CFF | COLR (dwrite.dll!0x25240 forwards with formats 7),
+/* IDWriteFactory2::TranslateColorGlyphRun is IDWriteFactory4's with the image formats fixed to TRUETYPE | CFF | COLR (forwards with formats 7),
  * so bitmap and SVG glyphs never take part, and its enumerator is the same object as the IDWriteColorGlyphRunEnumerator1 one (GetCurrentRun of the v0 interface,
- * !0xe1120, forwards to the v1 implementation which returns the address of one record inside the enumerator). */
+ *, forwards to the v1 implementation which returns the address of one record inside the enumerator). */
 #include "crb.h"
 
 static int run_all(IDWriteColorGlyphRunEnumerator *e, UINT32 *fmts, UINT16 *first, int max) {

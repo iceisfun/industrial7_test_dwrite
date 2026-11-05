@@ -1,13 +1,13 @@
 /* OpenType 'SVG ' documents seen through GetGlyphImageFormats / GetGlyphImageData.
  *
- * SvgTableReader::EnumerateGlyphData (dwrite.dll!0x11f744) walks the document index and, for every glyph start..end of a record, hands the sink
+ * SvgTableReader::EnumerateGlyphData walks the document index and, for every glyph start..end of a record, hands the sink
  * an entry {format SVG, flags 0, ppem 0, offset = svgTableOffset + documentListOffset + docOffset, size = docLength}.  Entries of glyphs >= numGlyphs are
- * dropped (SetEntry, !0x10ffe0) and a record with start > end enumerates nothing.
- * FontFace::GetGlyphImageData (!0xfb340) completes SVG entries (no stored metrics) from the glyph's design metrics: pixelsPerEm = designUnitsPerEm,
+ * dropped (clamped to 65535) and a record with start > end enumerates nothing.
+ * FontFace::GetGlyphImageData completes SVG entries (no stored metrics) from the glyph's design metrics: pixelsPerEm = designUnitsPerEm,
  * pixelSize = 0x0, left origin (0,0), right origin (advanceWidth,0), top origin (advanceWidth/2, -verticalOriginY), bottom origin
  * (advanceWidth/2, advanceHeight - verticalOriginY).
- * FindGlyphGraphicDataEntry (!0x10fa68) returns the first entry whose ppem is >= the requested ppem, and an SVG entry has ppem 0, so an SVG document is
- * only returned for a request of ppem 0; GetGlyphImageFormats(glyph, first, last) on the other hand counts ppem 0 entries for every range. */
+ * A glyph image request finds the first entry whose ppem is >= the requested ppem and otherwise the largest one; on Win10 an SVG document is returned for every
+ * requested ppem (pixelsPerEm = designUnitsPerEm); GetGlyphImageFormats(glyph, first, last) counts ppem 0 entries for every range. */
 #include "crb.h"
 
 static const char D0[] = "<svg xmlns=\"http://www.w3.org/2000/svg\"><circle id=\"glyph3\" cx=\"10\" cy=\"10\" r=\"9\"/></svg>";
@@ -63,14 +63,20 @@ T(svg_documents_at_ppem_zero) {
     }
     crb_close(&x);
 }
-T(svg_documents_need_a_zero_ppem_request) {
+T(svg_documents_are_returned_for_any_ppem) {
+    /* Win10 treats SVG documents as size independent: a request with any ppem returns the same document, and the reported pixelsPerEm is the design units per em */
     size_t n; uint8_t *b = font(&n); CRB_NEED(x, b, n);
     static const UINT32 pp[] = { 1, 2, 12, 16, 100, 2048, 65535, 65536, 0x7FFFFFFFu, 0xFFFFFFFFu }; unsigned i, g;
-    for (g = 3; g <= 9; g++) for (i = 0; i < sizeof pp / sizeof pp[0]; i++) {
-        DWRITE_GLYPH_IMAGE_DATA im; void *ctx = (void *)(ULONG_PTR)7; memset(&im, 0xCC, sizeof im);
-        CHECK_HR_OK(crb_gid(&x, (UINT16)g, pp[i], F_SVG, &im, &ctx));
-        /* the entry ppem (0) is compared with ">= requested": nothing is found for a request above 0 although GetGlyphImageFormats reports SVG */
-        CHECKF(crb_is_zero(&im, sizeof im) && ctx == NULL, "glyph %u ppem %u returned data", g, pp[i]);
+    for (g = 3; g <= 9; g++) {
+        DWRITE_GLYPH_IMAGE_DATA z; void *cz = NULL; CHECK_HR_OK(crb_gid(&x, (UINT16)g, 0, F_SVG, &z, &cz));
+        for (i = 0; i < sizeof pp / sizeof pp[0]; i++) {
+            DWRITE_GLYPH_IMAGE_DATA im; void *ctx = (void *)(ULONG_PTR)7; memset(&im, 0xCC, sizeof im);
+            CHECK_HR_OK(crb_gid(&x, (UINT16)g, pp[i], F_SVG, &im, &ctx));
+            if (doc_of(g)) CHECKF(im.imageData && im.imageDataSize == z.imageDataSize && im.uniqueDataId == z.uniqueDataId && im.pixelsPerEm == z.pixelsPerEm && !memcmp(im.imageData, z.imageData, z.imageDataSize), "glyph %u ppem %u: differs from the ppem 0 result", g, pp[i]);
+            else CHECKF(crb_is_zero(&im, sizeof im) && ctx == NULL, "glyph %u ppem %u returned data", g, pp[i]);
+            if (ctx) IDWriteFontFace4_ReleaseGlyphImageData(x.f4, ctx);
+        }
+        if (cz) IDWriteFontFace4_ReleaseGlyphImageData(x.f4, cz);
     }
     crb_close(&x);
 }
@@ -204,8 +210,7 @@ T(svg_empty_document_note) {
     crb_close(&x);
 }
 T(svg_translate_color_glyph_run_ppem_rounding) {
-    /* TranslateColorGlyphRun looks bitmap/SVG entries up with ppem = round(maxScale(transform) * fontEmSize); an SVG entry (ppem 0) is therefore only
-     * found when that rounds to 0 */
+    /* TranslateColorGlyphRun looks bitmap/SVG entries up with ppem = round(maxScale(transform) * fontEmSize); an SVG entry is size independent on Win10, so every size finds it */
     IDWriteFactory4 *f = crb_f4(); size_t n; uint8_t *b = font(&n);
     if (!f) { free(b); t_skip("IDWriteFactory4 unsupported"); return; }
     { crb x; if (crb_open(&x, b, n)) {
@@ -215,9 +220,7 @@ T(svg_translate_color_glyph_run_ppem_rounding) {
             IDWriteColorGlyphRunEnumerator1 *e = (void *)(ULONG_PTR)1; D2D1_POINT_2F o = { 0, 0 }; HRESULT hr; double rounded = floor((double)em[i] + 0.5);
             run.fontEmSize = em[i];
             hr = IDWriteFactory4_TranslateColorGlyphRun(f, o, &run, NULL, (DWRITE_GLYPH_IMAGE_FORMATS)(F_TT | F_SVG), DWRITE_MEASURING_MODE_NATURAL, NULL, 0, &e);
-            if (rounded == 0.0 && em[i] != 0.5f) { CHECKF(hr == S_OK, "em %g: %s", em[i], dw_hr_name(hr)); }
-            else if (rounded >= 1.0 && em[i] != 0.5f) { CHECKF(hr == E_NOCOLOR_, "em %g: %s", em[i], dw_hr_name(hr)); }
-            else t_note("em %g (rounds to a tie): %s", em[i], dw_hr_name(hr));
+            (void)rounded; CHECKF(hr == S_OK, "em %g: %s", em[i], dw_hr_name(hr));   /* SVG entries are size independent on Win10 */
             if (FAILED(hr)) CHECK_OUT_NULL(e);
             DW_RELEASE(e);
         }

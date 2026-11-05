@@ -1,7 +1,7 @@
 /* IDWriteFactory4::TranslateColorGlyphRun over bitmap (sbix) and COLR glyphs, walked through IDWriteColorGlyphRunEnumerator1.
  *
- * dwrite.dll behaviour reproduced by the oracle below (DWriteColorGlyphRunEnumerator::Create !0x1caf0, FindColorGlyphs !0x1d228, InitializeColorGlyphPositions
- * !0x1d050, AdvanceToBaseRun !0x1dd3c, AdvanceToColorRun !0x1db78, MoveNext !0x1daf0):
+ * Win10 behaviour reproduced by the oracle below (DWriteColorGlyphRunEnumerator::Create, FindColorGlyphs, InitializeColorGlyphPositions
+ *, AdvanceToBaseRun, AdvanceToColorRun, MoveNext):
  *   used = requested & face formats, COLR dropped when the palette index is >= the palette count; nothing with a bit in 0xFC left -> DWRITE_E_NOCOLOR.
  *   Bitmap/SVG glyphs: first entry (increasing ppem) of the glyph whose format is in `used` and whose ppem >= round(maxScale(matrix) * fontEmSize); COLR glyphs:
  *   glyphs with layers when COLR is in `used`.  A glyph with a bitmap entry is a bitmap glyph even if it also has COLR layers.
@@ -13,13 +13,13 @@
 
 #define F_ALLC (F_TT | F_COLR | F_PNG | F_JPEG | F_TIFF | F_SVG)
 #define TY_PNG CRB_TAG('p','n','g',' ')
-#define TY_JPG CRB_TAG('j','p','g',' ')
+#define TY_JPG CRB_TAG('j','p','e','g')
 #define TY_TIF CRB_TAG('t','i','f','f')
 typedef struct { unsigned gid, ppem, fmt; } bent;
 static const bent bm[] = { { 2, 16, F_PNG }, { 3, 16, F_JPEG }, { 2, 32, F_TIFF }, { 3, 32, F_PNG }, { 4, 32, F_PNG }, { 5, 32, F_JPEG }, { 6, 32, F_JPEG }, { 7, 32, F_PNG }, { 8, 64, F_PNG } };
 #define NBM ((int)(sizeof bm / sizeof bm[0]))
 static const crb_cbase cbase[] = { { 2, 0, 1 }, { 10, 1, 2 }, { 11, 3, 1 }, { 12, 4, 1 }, { 13, 5, 1 }, { 14, 6, 3 } };
-static const crb_clayer clay[] = { { 64, 0 }, { 64, 0 }, { 65, 1 }, { 68, 2 }, { 64, 0xFFFF }, { 65, 9 }, { 64, 1 }, { 65, 0 }, { 68, 2 } };
+static const crb_clayer clay[] = { { 64, 0 }, { 64, 0 }, { 65, 1 }, { 68, 2 }, { 64, 0xFFFF }, { 65, 2 }, { 64, 1 }, { 65, 0 }, { 68, 2 } };
 #define NCB ((int)(sizeof cbase / sizeof cbase[0]))
 static const uint32_t pal[2][3] = { { 0xFFFF0000u, 0x8000FF00u, 0x400000FFu }, { 0xFF0000FFu, 0x00FFFFFFu, 0xFF445566u } };
 
@@ -38,10 +38,12 @@ uint8_t *crb_translate_fixture(size_t *n) {
 }
 
 typedef struct { int bitmap; unsigned fmt; const crb_clayer *lay; int nlay; int idx; float x, adv; int consumed; } cg_t;
-typedef struct { unsigned n; UINT16 gl[16]; float adv[16]; float x, y; float col[4]; UINT16 pal; UINT32 fmt; int mm; } erun;
+typedef struct { unsigned n; UINT16 gl[64]; float adv[64]; float x, y; float col[4]; UINT16 pal; UINT32 fmt; int mm; } erun;
 static const bent *lookup(unsigned gid, unsigned ppem, unsigned used) {
     int i; const bent *best = NULL;
     for (i = 0; i < NBM; i++) if (bm[i].gid == gid && (bm[i].fmt & used) && bm[i].ppem >= ppem && (!best || bm[i].ppem < best->ppem)) best = &bm[i];
+    /* Win10: when no strike is large enough the largest one is used */
+    if (!best) for (i = 0; i < NBM; i++) if (bm[i].gid == gid && (bm[i].fmt & used) && (!best || bm[i].ppem > best->ppem)) best = &bm[i];
     return best;
 }
 static double max_scale(const DWRITE_MATRIX *m) {
@@ -192,10 +194,10 @@ T(translate_bitmap_wins_over_colr_for_the_same_glyph) {
     CHECK_HR_OK(IDWriteFactory4_TranslateColorGlyphRun(f4, o, &r, NULL, (DWRITE_GLYPH_IMAGE_FORMATS)(F_PNG | F_COLR), DWRITE_MEASURING_MODE_NATURAL, NULL, 0, &e));
     while (e && SUCCEEDED(IDWriteColorGlyphRunEnumerator1_MoveNext(e, &has)) && has && k < 5) { const DWRITE_COLOR_GLYPH_RUN1 *c = NULL; IDWriteColorGlyphRunEnumerator1_GetCurrentRun(e, &c); if (k == 1) EXPECT_EQ(c->glyphImageFormat, F_PNG); k++; }
     EXPECT_EQ(k, 2); DW_RELEASE(e);
-    /* ppem 20 is above the PNG strike: the TIFF@32 entry is not in the mask, so COLR is used */
+    /* ppem 20 is above the PNG strike: the TIFF@32 entry is not in the mask and the PNG@16 strike is still the best match, so it wins over COLR */
     r.fontEmSize = 20; k = 0;
     CHECK_HR_OK(IDWriteFactory4_TranslateColorGlyphRun(f4, o, &r, NULL, (DWRITE_GLYPH_IMAGE_FORMATS)(F_PNG | F_COLR), DWRITE_MEASURING_MODE_NATURAL, NULL, 0, &e));
-    while (e && SUCCEEDED(IDWriteColorGlyphRunEnumerator1_MoveNext(e, &has)) && has && k < 5) { const DWRITE_COLOR_GLYPH_RUN1 *c = NULL; IDWriteColorGlyphRunEnumerator1_GetCurrentRun(e, &c); if (k == 1) EXPECT_EQ(c->glyphImageFormat, F_TT | F_COLR); k++; }
+    while (e && SUCCEEDED(IDWriteColorGlyphRunEnumerator1_MoveNext(e, &has)) && has && k < 5) { const DWRITE_COLOR_GLYPH_RUN1 *c = NULL; IDWriteColorGlyphRunEnumerator1_GetCurrentRun(e, &c); if (k == 1) EXPECT_EQ(c->glyphImageFormat, F_PNG); k++; }
     EXPECT_EQ(k, 2); DW_RELEASE(e);
     crb_close(&x);
 }

@@ -2,14 +2,14 @@
  * GetGlyphImageData / ReleaseGlyphImageData), colour bitmap and SVG strikes, CPAL palette layouts and
  * IDWriteFactory4::TranslateColorGlyphRun over bitmap glyphs.
  *
- * Facts about dwrite.dll (Windows 10 19041) the expectations rest on:
- *   - OpenTypeFontFaceBuilder::ReadColorTables (!0x783bc) feeds three readers into GlyphGraphicDataBuilder: SvgTableReader::EnumerateGlyphData
- *     (!0x11f744), EmbeddedBitmapTableReader::EnumerateGlyphData (CBLC/CBDT, !0x11ce48, only strikes with ppemX == ppemY and bit depth 32) and
- *     SbixTableReader::EnumerateGlyphData (!0x11fa00).  The face-wide GetGlyphImageFormats() byte is the OR of glyf (1), CFF (2),
+ * Facts about Windows 10 22H2 the expectations rest on (verified on the reference system; a request above the largest strike returns the largest strike, sbix JPEG uses the type tag "jpeg", CBDT image format 18 vertical origins are derived):
+ *   - OpenTypeFontFaceBuilder::ReadColorTables feeds three readers into GlyphGraphicDataBuilder: SvgTableReader::EnumerateGlyphData
+ *    , EmbeddedBitmapTableReader::EnumerateGlyphData (CBLC/CBDT, only strikes with ppemX == ppemY and bit depth 32) and
+ *     SbixTableReader::EnumerateGlyphData.  The face-wide GetGlyphImageFormats() byte is the OR of glyf (1), CFF (2),
  *     COLR+CPAL (4) and the format byte of every entry that was accepted.
- *   - GlyphGraphicDataBuilder::SetEntry (!0x10ffe0) drops entries whose glyph id is >= maxp.numGlyphs, completes bitmap entries with
+ *   - GlyphGraphicDataBuilder::SetEntry drops entries whose glyph id is >= maxp.numGlyphs, completes bitmap entries with
  *     metrics derived from the font (scale ppem / unitsPerEm) and orders the per glyph list by increasing ppem.
- *   - FontFace::GetGlyphImageData (!0xfb340) returns the first entry (smallest ppem) whose ppem >= the requested ppem and whose format matches;
+ *   - FontFace::GetGlyphImageData returns the first entry (smallest ppem) whose ppem >= the requested ppem and whose format matches;
  *     uniqueDataId and the data pointer both come from the absolute file offset of the image bytes.
  */
 #ifndef CRB_H
@@ -38,7 +38,7 @@ void crb_zero(crb_buf *b, size_t n);
 void crb_set16(crb_buf *b, size_t at, unsigned v);
 void crb_set32(crb_buf *b, size_t at, unsigned v);
 
-/* ---- image blobs whose dimensions dwrite parses (GetImageDimensions, !0x10fbb0) ---- */
+/* ---- image blobs whose dimensions dwrite parses (clamped to 65535) ---- */
 uint8_t *crb_png(unsigned w, unsigned h, unsigned tag, size_t *n);                 /* signature + IHDR + private chunk + IEND */
 /* style 0: SOI APP0 SOF0 SOS EOI;  1: SOI DQT DHT SOF2 SOS EOI;  2: SOI, fill bytes, SOF1;  3: SOS before any SOF (dimensions unreadable) */
 uint8_t *crb_jpeg(unsigned w, unsigned h, unsigned tag, int style, size_t *n);

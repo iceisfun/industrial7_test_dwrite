@@ -1,7 +1,7 @@
 /* QueryInterface expectation matrix around the colour/bitmap glyph objects.  Interfaces introduced after Windows 10 19041 (IDWriteFontFace6/7, IDWritePaintReader,
  * IDWriteFontSet4, IDWriteBitmapRenderTarget2/3, IDWriteFactory8) are only recorded with t_note; the structure of the answers (NULL out pointer on failure, one COM identity,
  * balanced reference counts, one failure code for every unknown IID) is checked for every object.
- * DWriteFontFace::QueryInterface (dwrite.dll!0x75620) answers IUnknown and IDWriteFontFace..5 with the object itself and falls through to *ppv = NULL and one fixed failure code for
+ * DWriteFontFace::QueryInterface answers IUnknown and IDWriteFontFace..5 with the object itself and falls through to *ppv = NULL and one fixed failure code for
  * everything else. */
 #include "crb.h"
 

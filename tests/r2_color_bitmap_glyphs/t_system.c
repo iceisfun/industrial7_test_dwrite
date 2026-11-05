@@ -99,7 +99,7 @@ static void named_face(const WCHAR *fam, const char *label) {
         t_note("%s: face formats 0x%x, glyph for U+%04X = %u (%s), IsColorFont=%d palettes=%u", label, ff, cp, g, dw_hr_name(hr), f2 ? IDWriteFontFace2_IsColorFont(f2) : -1, f2 ? IDWriteFontFace2_GetColorPaletteCount(f2) : 0);
         CHECKF((ff & F_TT) != 0 || (ff & F_CFF) != 0, "%s: no outline format in 0x%x", label, ff);
         if (g) { CHECK_HR_OK(f4->lpVtbl->GetGlyphImageFormats_(f4, g, 0, 0xFFFFFFFFu, (DWRITE_GLYPH_IMAGE_FORMATS *)&gf)); t_note("%s: glyph %u image formats 0x%x", label, g, gf); CHECK((gf & ~ff) == 0); }
-        if (f2) { EXPECT_EQ(IDWriteFontFace2_IsColorFont(f2) != 0, (ff & F_COLR) != 0 || IDWriteFontFace2_GetColorPaletteCount(f2) > 0 || 1); IDWriteFontFace2_Release(f2); }
+        if (f2) { EXPECT_EQ(IDWriteFontFace2_IsColorFont(f2) != 0, (ff & F_COLR) != 0); IDWriteFontFace2_Release(f2); }
         IDWriteFontFace4_Release(f4);
     }
     IDWriteFontFace_Release(face);
