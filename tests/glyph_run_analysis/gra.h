@@ -18,7 +18,7 @@
 
 #define GRA_X0(em) ((em) * 100 / 2048)
 #define GRA_X1(em) ((em) * 900 / 2048)
-#define GRA_H(em)  ((em) * 1400 / 2048)
+#define GRA_HT(em)  ((em) * 1400 / 2048)
 #define GRA_ADV(em) ((em) * 1000 / 2048)
 
 typedef struct gra_fx {
@@ -30,6 +30,8 @@ typedef struct gra_fx {
 int gra_open(gra_fx *fx);
 void gra_close(gra_fx *fx);
 #define GRA_FIX(fx) gra_fx fx; if (!gra_open(&fx)) { t_skip("synthetic font unavailable"); gra_close(&fx); return; }
+/* Skip (after closing the fixture) when a prerequisite call fails. */
+#define GRA_REQ(expr) do { HRESULT hr_ = (expr); if (FAILED(hr_)) { t_skip("prerequisite failed: %s -> %s", #expr, dw_hr_name(hr_)); gra_close(&fx); return; } } while (0)
 /* Run of the given ASCII characters at em size; no advances / offsets (font advances). */
 void gra_run(gra_fx *fx, const char *chars, float em);
 /* Same run but with explicit advances (n values). */

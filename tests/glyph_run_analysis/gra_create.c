@@ -276,7 +276,7 @@ TEST(gra_create_qi_and_identity) {
     GRA_FIX(fx);
     gra_run(&fx, "A", 24.0f);
     IDWriteGlyphRunAnalysis *a = NULL;
-    DW_REQUIRE_OK(gra_make_al(&fx, &a, 0, 0));
+    GRA_REQ(gra_make_al(&fx, &a, 0, 0));
     EXPECT_REFS(a, 1);
     dw_qi_row rows[] = { DW_QI_ROW(IDWriteGlyphRunAnalysis, 1), DW_QI_ROW(IDWriteFontFace, 0), DW_QI_ROW(IDWriteFactory, 0),
         DW_QI_ROW(IDWriteTextFormat, 0), DW_QI_ROW(IDWriteTextLayout, 0), DW_QI_ROW(IDWriteRenderingParams, 0),
@@ -295,7 +295,7 @@ TEST(gra_create_qi_failure_zeroes_out) {
     GRA_FIX(fx);
     gra_run(&fx, "A", 24.0f);
     IDWriteGlyphRunAnalysis *a = NULL;
-    DW_REQUIRE_OK(gra_make_al(&fx, &a, 0, 0));
+    GRA_REQ(gra_make_al(&fx, &a, 0, 0));
     void *p = GRA_SENTINEL;
     CHECK_HR(IDWriteGlyphRunAnalysis_QueryInterface(a, &IID_IDWriteFont, &p), E_NOINTERFACE);
     CHECK_OUT_NULL(p);
@@ -311,7 +311,7 @@ TEST(gra_create_refcount_balance) {
     GRA_FIX(fx);
     gra_run(&fx, "A", 24.0f);
     IDWriteGlyphRunAnalysis *a = NULL;
-    DW_REQUIRE_OK(gra_make_al(&fx, &a, 0, 0));
+    GRA_REQ(gra_make_al(&fx, &a, 0, 0));
     int i;
     for (i = 0; i < 10; i++) IDWriteGlyphRunAnalysis_AddRef(a);
     EXPECT_REFS(a, 11);
@@ -332,7 +332,7 @@ TEST(gra_create_font_stream_balance_note) {
     GRA_FIX(fx);
     gra_run(&fx, "ABC", 32.0f);
     IDWriteGlyphRunAnalysis *a = NULL;
-    DW_REQUIRE_OK(gra_make_al(&fx, &a, 0, 0));
+    GRA_REQ(gra_make_al(&fx, &a, 0, 0));
     RECT rc;
     CHECK_HR_OK(gra_bounds(a, DWRITE_TEXTURE_ALIASED_1x1, &rc));
     LONG before = dwx_loader_total_outstanding(fx.h.ld);
@@ -348,15 +348,15 @@ TEST(gra_create_two_objects_independent) {
     GRA_FIX(fx);
     gra_run(&fx, "A", 512.0f);
     IDWriteGlyphRunAnalysis *a = NULL, *b = NULL;
-    DW_REQUIRE_OK(gra_make_al(&fx, &a, 0, 0));
-    DW_REQUIRE_OK(gra_make_al(&fx, &b, 10, 20));
+    GRA_REQ(gra_make_al(&fx, &a, 0, 0));
+    GRA_REQ(gra_make_al(&fx, &b, 10, 20));
     CHECK(a != b);
     EXPECT_REFS(a, 1);
     EXPECT_REFS(b, 1);
     RECT ra, rb;
     IDWriteGlyphRunAnalysis_Release(a);
     CHECK_HR_OK(gra_bounds(b, DWRITE_TEXTURE_ALIASED_1x1, &rb));
-    CHECK_RECT(rb, GRA_X0(512) + 10, -GRA_H(512) + 20, GRA_X1(512) + 10, 20);
+    CHECK_RECT(rb, GRA_X0(512) + 10, -GRA_HT(512) + 20, GRA_X1(512) + 10, 20);
     IDWriteGlyphRunAnalysis_Release(b);
     gra_close(&fx);
 }
@@ -405,7 +405,7 @@ TEST(gra_create_survives_run_struct_destruction) {
     if (a) {
         RECT rc;
         CHECK_HR_OK(gra_bounds(a, DWRITE_TEXTURE_ALIASED_1x1, &rc));
-        CHECK_RECT(rc, GRA_X0(512), -GRA_H(512), GRA_X1(512), 0);
+        CHECK_RECT(rc, GRA_X0(512), -GRA_HT(512), GRA_X1(512), 0);
         IDWriteGlyphRunAnalysis_Release(a);
     }
     gra_close(&fx);
@@ -416,7 +416,7 @@ TEST(gra_create_survives_matrix_modification) {
     gra_run(&fx, "A", 512.0f);
     DWRITE_MATRIX m = { 0, 1, -1, 0, 0, 0 };
     IDWriteGlyphRunAnalysis *a = NULL;
-    DW_REQUIRE_OK(gra_make(&fx, &a, 1.0f, &m, DWRITE_RENDERING_MODE_ALIASED, DWRITE_MEASURING_MODE_NATURAL, 0, 0));
+    GRA_REQ(gra_make(&fx, &a, 1.0f, &m, DWRITE_RENDERING_MODE_ALIASED, DWRITE_MEASURING_MODE_NATURAL, 0, 0));
     RECT r0, r1;
     CHECK_HR_OK(gra_bounds(a, DWRITE_TEXTURE_ALIASED_1x1, &r0));
     m.m11 = 9; m.m12 = 9; m.m21 = 9; m.m22 = 9; m.dx = 99; m.dy = 99;
@@ -443,7 +443,7 @@ TEST(gra_create_after_factory_release) {
     if (a) {
         RECT rc;
         CHECK_HR_OK(gra_bounds(a, DWRITE_TEXTURE_ALIASED_1x1, &rc));
-        CHECK_RECT(rc, GRA_X0(512), -GRA_H(512), GRA_X1(512), 0);
+        CHECK_RECT(rc, GRA_X0(512), -GRA_HT(512), GRA_X1(512), 0);
         gra_tex t;
         if (gra_tex_get(a, DWRITE_TEXTURE_ALIASED_1x1, &t)) { CHECK(gra_count_eq(&t, 255) == t.n); gra_tex_free(&t); }
         IDWriteGlyphRunAnalysis_Release(a);
@@ -482,7 +482,7 @@ TEST(gra_create_face_from_other_factory_ok) {
     IDWriteGlyphRunAnalysis *a = (IDWriteGlyphRunAnalysis *)GRA_SENTINEL;
     HRESULT hr = IDWriteFactory_CreateGlyphRunAnalysis(iso, &fx.run, 1.0f, NULL, DWRITE_RENDERING_MODE_ALIASED, DWRITE_MEASURING_MODE_NATURAL, 0, 0, &a);
     t_note("face of the shared factory through an isolated factory -> %s", dw_hr_name(hr));
-    if (SUCCEEDED(hr)) { RECT rc; CHECK_HR_OK(gra_bounds(a, DWRITE_TEXTURE_ALIASED_1x1, &rc)); CHECK_RECT(rc, GRA_X0(512), -GRA_H(512), GRA_X1(512), 0); IDWriteGlyphRunAnalysis_Release(a); }
+    if (SUCCEEDED(hr)) { RECT rc; CHECK_HR_OK(gra_bounds(a, DWRITE_TEXTURE_ALIASED_1x1, &rc)); CHECK_RECT(rc, GRA_X0(512), -GRA_HT(512), GRA_X1(512), 0); IDWriteGlyphRunAnalysis_Release(a); }
     else CHECK_OUT_NULL(a);
     IDWriteFactory_Release(iso);
     gra_close(&fx);
@@ -512,7 +512,7 @@ TEST(gra_create_sideways_bool_any_nonzero) {
         gra_run(&fx, "AB", 512.0f);
         fx.run.isSideways = TRUE;
         IDWriteGlyphRunAnalysis *a = NULL, *b = NULL;
-        DW_REQUIRE_OK(gra_make_al(&fx, &a, 0, 0));
+        GRA_REQ(gra_make_al(&fx, &a, 0, 0));
         fx.run.isSideways = vals[i];
         CHECK_HR_OK(gra_make_al(&fx, &b, 0, 0));
         if (a && b) {
@@ -602,13 +602,13 @@ TEST(gra_create_f2_matches_f1_bounds) {
     GRA_FIX(fx); GRA_NEED_F(fx, 2);
     gra_run(&fx, "AB", 512.0f);
     IDWriteGlyphRunAnalysis *a = NULL, *b = NULL;
-    DW_REQUIRE_OK(gra_make(&fx, &a, 1.0f, NULL, DWRITE_RENDERING_MODE_ALIASED, DWRITE_MEASURING_MODE_NATURAL, 7, 9));
-    DW_REQUIRE_OK(gra_make2(&fx, &b, NULL, DWRITE_RENDERING_MODE_ALIASED, DWRITE_MEASURING_MODE_NATURAL, DWRITE_GRID_FIT_MODE_DEFAULT, DWRITE_TEXT_ANTIALIAS_MODE_CLEARTYPE, 7, 9));
+    GRA_REQ(gra_make(&fx, &a, 1.0f, NULL, DWRITE_RENDERING_MODE_ALIASED, DWRITE_MEASURING_MODE_NATURAL, 7, 9));
+    GRA_REQ(gra_make2(&fx, &b, NULL, DWRITE_RENDERING_MODE_ALIASED, DWRITE_MEASURING_MODE_NATURAL, DWRITE_GRID_FIT_MODE_DEFAULT, DWRITE_TEXT_ANTIALIAS_MODE_CLEARTYPE, 7, 9));
     RECT ra, rb;
     CHECK_HR_OK(gra_bounds(a, DWRITE_TEXTURE_ALIASED_1x1, &ra));
     CHECK_HR_OK(gra_bounds(b, DWRITE_TEXTURE_ALIASED_1x1, &rb));
     CHECK_RECT_EQ(ra, rb);
-    CHECK_RECT(ra, GRA_X0(512) + 7, -GRA_H(512) + 9, GRA_ADV(512) + GRA_X1(512) + 7, 9);
+    CHECK_RECT(ra, GRA_X0(512) + 7, -GRA_HT(512) + 9, GRA_ADV(512) + GRA_X1(512) + 7, 9);
     DW_RELEASE(a); DW_RELEASE(b);
     gra_close(&fx);
 }
@@ -650,7 +650,7 @@ TEST(gra_create_f3_downsampled_mode_usable) {
     GRA_FIX(fx); GRA_NEED_F(fx, 3);
     gra_run(&fx, "A", 40.0f);
     IDWriteGlyphRunAnalysis *a = NULL;
-    DW_REQUIRE_OK(gra_make3(&fx, &a, NULL, DWRITE_RENDERING_MODE1_NATURAL_SYMMETRIC_DOWNSAMPLED, DWRITE_MEASURING_MODE_NATURAL, DWRITE_GRID_FIT_MODE_DEFAULT, DWRITE_TEXT_ANTIALIAS_MODE_GRAYSCALE, 0, 0));
+    GRA_REQ(gra_make3(&fx, &a, NULL, DWRITE_RENDERING_MODE1_NATURAL_SYMMETRIC_DOWNSAMPLED, DWRITE_MEASURING_MODE_NATURAL, DWRITE_GRID_FIT_MODE_DEFAULT, DWRITE_TEXT_ANTIALIAS_MODE_GRAYSCALE, 0, 0));
     RECT r0, r1;
     CHECK_HR_OK(gra_bounds(a, DWRITE_TEXTURE_ALIASED_1x1, &r0));
     CHECK_HR_OK(gra_bounds(a, DWRITE_TEXTURE_CLEARTYPE_3x1, &r1));
