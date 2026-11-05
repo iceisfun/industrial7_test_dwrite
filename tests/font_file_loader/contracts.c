@@ -427,11 +427,11 @@ static void slow_stream_run(int mode, int *maxin) {
 }
 TEST(slow_stream_concurrent_analyze_overlaps) {
     int m; slow_stream_run(0, &m);
-    t_note("analyze: max simultaneous ReadFileFragment calls on the one stream = %d", m);
-    CHECKF(m >= 2, "reads never overlapped (max %d)", m);                 /* dwrite does not serialise the stream for the application */
+    t_note("analyze: max simultaneous ReadFileFragment calls into the loader's streams = %d (each Analyze makes its own stream, so this is concurrency across the loader, not on one stream)", m);
+    CHECKF(m >= 2, "reads into the loader never overlapped (max %d)", m);                 /* dwrite does not serialise the stream for the application */
 }
 TEST(slow_stream_concurrent_table_reads_overlap) {
     int m; slow_stream_run(1, &m);
     t_note("TryGetFontTable: max simultaneous ReadFileFragment calls on the one stream = %d", m);
-    CHECKF(m >= 2, "reads never overlapped (max %d)", m);
+    CHECKF(m >= 2, "reads into the loader never overlapped (max %d)", m);
 }
