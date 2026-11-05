@@ -4,6 +4,9 @@
 static ttf_map g_map[256]; static int g_nmap;
 static ttf_cmap g_cm[2];
 static ttf_glyph g_bold[TTF_DEF_NGLYPHS];
+static const ttf_sub4 g_lig[] = { { { 2, 3 }, 2, 68 } };                  /* 'A' 'B' -> ring glyph */
+static const ttf_feature g_gsub[] = { { "liga", TTF_LK_LIGATURE, 1, g_lig } };
+static const ttf_kernpair g_kern[] = { { 4, 5, -200 } };                  /* 'C' followed by 'D': first advance -200 */
 
 static void build_map(void)
 {
@@ -27,7 +30,11 @@ static uint8_t *build_font(int which, size_t *sz)
     ttf_spec s;
     build_map();
     if (which == 1) ttf_style_spec(&s, "DwDraw", 700, 5, 0);
-    else {
+    else if (which == 3) {
+        ttf_default_spec(&s);
+        ttf_set_names(&s, "DwShape", "Regular", "DwShape", "DwShape-Regular");
+        s.gsub = g_gsub; s.ngsub = 1; s.gpos_kern = g_kern; s.ngpos_kern = 1;
+    } else {
         ttf_default_spec(&s);
         if (which == 0) ttf_set_names(&s, "DwDraw", "Regular", "DwDraw", "DwDraw-Regular");
         else {
@@ -56,14 +63,14 @@ int td_open(td_fx *x)
     x->f = dw_new_factory(DWRITE_FACTORY_TYPE_ISOLATED);
     if (!x->f) return 0;
     x->fl = dwx_loader_new();
-    for (i = 0; i < 3; i++) {
+    for (i = 0; i < 4; i++) {
         b = build_font(i, &sz);
         if (!b) return 0;
         x->key[i] = dwx_loader_add(x->fl, b, sz); free(b);
     }
     if (FAILED(dwx_loader_register(x->fl, x->f))) return 0;
     x->cl = dwx_coll_new(x->fl);
-    for (i = 0; i < 3; i++) dwx_coll_add_key(x->cl, x->key[i]);
+    for (i = 0; i < 4; i++) dwx_coll_add_key(x->cl, x->key[i]);
     if (FAILED(dwx_coll_register(x->cl, x->f))) return 0;
     if (FAILED(dwx_coll_create(x->cl, x->f, &x->coll)) || !x->coll) return 0;
     return 1;

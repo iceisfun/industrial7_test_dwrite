@@ -24,6 +24,7 @@
 
 #define TD_FAM    L"DwDraw"
 #define TD_TALL   L"DwTall"
+#define TD_SHAPE  L"DwShape"   /* GSUB liga: A B -> glyph 68; GPOS kern: C D -> -200 units */
 #define TD_LOC    L"en-us"
 #define TD_UPM    2048.0f
 #define TD_ADV(units, size)  ((float)(units) * (float)(size) / 2048.0f)
@@ -36,7 +37,7 @@
 #define CJK      L"一丁丂"        /* -> glyphs 2,3,4 */
 
 typedef struct td_fx {
-    IDWriteFactory *f; dwx_mem_loader *fl; dwx_coll_loader *cl; IDWriteFontCollection *coll; UINT32 key[3];
+    IDWriteFactory *f; dwx_mem_loader *fl; dwx_coll_loader *cl; IDWriteFontCollection *coll; UINT32 key[4];
 } td_fx;
 int  td_open(td_fx *x);
 void td_close(td_fx *x);
