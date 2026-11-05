@@ -53,7 +53,7 @@ IDWriteFontFaceReference1 *frr_ref1(IDWriteFontFaceReference *r) {
 static void put16(uint8_t *p, unsigned v) { p[0] = (uint8_t)(v >> 8); p[1] = (uint8_t)v; }
 static void put32(uint8_t *p, uint32_t v) { p[0] = (uint8_t)(v >> 24); p[1] = (uint8_t)(v >> 16); p[2] = (uint8_t)(v >> 8); p[3] = (uint8_t)v; }
 uint8_t *frr_build_var(const frr_axis *ax, int n, size_t *size) {
-    ttf_spec s; ttf_rawtable raw; uint8_t *fv; unsigned len = 16 + 20 * (unsigned)n; int i; uint8_t *blob;
+    ttf_spec s; ttf_rawtable raw[2]; uint8_t *fv, *gv; unsigned gv_len; unsigned len = 16 + 20 * (unsigned)n; int i; uint8_t *blob;
     ttf_style_spec(&s, "FrrVar", 400, 5, 0);
     fv = (uint8_t *)calloc(1, len ? len : 1);
     put16(fv, 1); put16(fv + 2, 0); put16(fv + 4, 16); put16(fv + 6, 2); put16(fv + 8, (unsigned)n); put16(fv + 10, 20);
@@ -65,10 +65,17 @@ uint8_t *frr_build_var(const frr_axis *ax, int n, size_t *size) {
         put16(a + 16, ax[i].flags); put16(a + 18, ax[i].nameid);
         if (ax[i].name && ax[i].nameid) ttf_add_name(&s, 3, 1, 0x409, ax[i].nameid, ax[i].name);
     }
-    memset(&raw, 0, sizeof raw); memcpy(raw.tag, "fvar", 5); raw.data = fv; raw.len = len;
-    s.raw = &raw; s.nraw = 1;
+    memset(raw, 0, sizeof raw); memcpy(raw[0].tag, "fvar", 5); raw[0].data = fv; raw[0].len = len;
+    /* A well-formed 'gvar' without any glyph variation data (every glyph has an empty variation record) so the font is a complete,
+     * if flat, variable font. */
+    gv_len = 20 + 2 * (unsigned)(TTF_DEF_NGLYPHS + 1);
+    gv = (uint8_t *)calloc(1, gv_len);
+    put16(gv, 1); put16(gv + 2, 0); put16(gv + 4, (unsigned)n); put16(gv + 6, 0);
+    put32(gv + 8, gv_len); put16(gv + 12, TTF_DEF_NGLYPHS); put16(gv + 14, 0); put32(gv + 16, gv_len);
+    memcpy(raw[1].tag, "gvar", 5); raw[1].data = gv; raw[1].len = gv_len;
+    s.raw = raw; s.nraw = 2;
     blob = ttf_build(&s, size);
-    free(fv);
+    free(fv); free(gv);
     return blob;
 }
 uint8_t *frr_build_var2(size_t *size) {
