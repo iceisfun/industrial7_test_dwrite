@@ -137,6 +137,38 @@ UINT32 td_total_glyphs(dwx_renderer *r)
     return n;
 }
 
+void td_get_lines(IDWriteTextLayout *l, td_lines_t *o)
+{
+    UINT32 i; memset(o, 0, sizeof *o);
+    IDWriteTextLayout_GetLineMetrics(l, o->lm, 32, &o->n);
+    if (o->n > 32) o->n = 32;
+    for (i = 0; i < o->n; i++) o->top[i + 1] = o->top[i] + o->lm[i].height;
+}
+int td_line_of(const td_lines_t *o, UINT32 pos)
+{
+    UINT32 i, s = 0;
+    for (i = 0; i < o->n; i++) { if (pos >= s && pos < s + o->lm[i].length) return (int)i; s += o->lm[i].length; }
+    return -1;
+}
+float td_snap(float v, float scale, float offset)
+{
+    return (floorf(scale * v + offset + 0.5f) - offset) / scale;
+}
+const dwx_draw *td_run_at(dwx_renderer *r, UINT32 pos)
+{
+    int i;
+    for (i = 0; i < r->ncalls; i++) if (r->calls[i].kind == DWX_DRAW_GLYPHRUN && r->calls[i].has_desc && r->calls[i].text_pos == pos) return &r->calls[i];
+    return NULL;
+}
+void td_check_indices(const dwx_draw *d, const WCHAR *src, const char *what)
+{
+    UINT32 cp[256], i; UINT16 want[256];
+    if (!d || !d->face || d->nglyphs > 256 || d->nglyphs != d->text_len) { t_check(0, __FILE__, __LINE__, what, "run shape unsuitable for index check"); return; }
+    for (i = 0; i < d->nglyphs; i++) cp[i] = src[d->text_pos + i];
+    if (FAILED(IDWriteFontFace_GetGlyphIndices(d->face, cp, d->nglyphs, want))) { t_check(0, __FILE__, __LINE__, what, "GetGlyphIndices failed"); return; }
+    for (i = 0; i < d->nglyphs; i++) t_check(d->indices[i] == want[i], __FILE__, __LINE__, what, "glyph %u: run has %u, GetGlyphIndices says %u", i, d->indices[i], want[i]);
+}
+
 /* ---- order-recording renderer ------------------------------------------------------------------------------ */
 static void lg(td_rd *r, int type, const IID *iid, HRESULT hr, void *ctx)
 {

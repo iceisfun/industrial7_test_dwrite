@@ -74,6 +74,17 @@ static __inline int td_fbits(float a, float b) { return memcmp(&a, &b, sizeof a)
 #define CHECK_WEQ(a, b) do { const WCHAR *a_ = (a), *b_ = (b); t_check(a_ && b_ && !wcscmp(a_, b_), __FILE__, __LINE__, #a " == " #b, "wide string mismatch: got \"%ls\" want \"%ls\"", a_ ? a_ : L"(null)", b_ ? b_ : L"(null)"); } while (0)
 #define CHECK_NEARF(a, b) CHECK_NEAR((a), (b), 0.0001)
 
+/* Layout line helpers. */
+typedef struct td_lines_t { DWRITE_LINE_METRICS lm[32]; UINT32 n; float top[33]; } td_lines_t;
+void td_get_lines(IDWriteTextLayout *l, td_lines_t *o);          /* top[i] = sum of heights of the lines before i */
+int  td_line_of(const td_lines_t *o, UINT32 textpos);            /* line containing the text position, -1 if none */
+/* Expected snapped value of a baseline coordinate: round half up on the device grid (scale = ppd * m22, offset = dy). */
+float td_snap(float v, float scale, float offset);
+/* Glyph run starting exactly at text position `pos` (nth of that kind with the position), NULL if none. */
+const dwx_draw *td_run_at(dwx_renderer *r, UINT32 pos);
+/* Check the run's glyph indices against IDWriteFontFace::GetGlyphIndices of the run's own face (LTR order). */
+void td_check_indices(const dwx_draw *d, const WCHAR *src, const char *what);
+
 /* ---- order-recording renderer ---------------------------------------------------------------------------
  * Wraps a dwx_renderer (which records the arguments) and additionally logs every callback in order, including
  * QueryInterface requests and the pixel snapping callbacks. */
