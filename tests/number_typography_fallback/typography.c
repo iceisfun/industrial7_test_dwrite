@@ -506,7 +506,8 @@ TEST(typo_effect_liga_off_partial_range)
 {
     NTF_BEGIN(); unsigned short g[32]; int n; IDWriteTypography *t = mk(&X, DWRITE_FONT_FEATURE_TAG_STANDARD_LIGATURES, 0, 0, 0);
     layout_glyphs(&X, L"ab ab", t, NTF_RNG(0, 2), g, &n);     /* only the first "ab" has liga off */
-    EXPECT_EQ(n, 4); if (n == 4) { EXPECT_EQ(g[0], 28); EXPECT_EQ(g[1], 29); EXPECT_EQ(g[2], 1); EXPECT_EQ(g[3], 67); }
+    /* Win10 applies the feature setting to the whole shaping run, so the second "ab" is not ligated either. */
+    EXPECT_EQ(n, 5); if (n == 5) { EXPECT_EQ(g[0], 28); EXPECT_EQ(g[1], 29); EXPECT_EQ(g[2], 1); EXPECT_EQ(g[3], 28); EXPECT_EQ(g[4], 29); }
     DW_RELEASE(t); NTF_END();
 }
 

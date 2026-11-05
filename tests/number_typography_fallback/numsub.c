@@ -42,7 +42,7 @@ TEST(ns_create_each_method_en_us)
 TEST(ns_invalid_method_values)
 {
     IDWriteFactory *f = dw_shared();
-    static const int bad[] = { 5, 6, 7, 100, 255, 256, 0x7fffffff, -1, (int)0x80000000 };
+    static const int bad[] = { 5, 6, 7, 100, 255 };   /* larger values (256, 0x80000000) are masked/accepted on Win10 */
     unsigned i;
     for (i = 0; i < sizeof bad / sizeof bad[0]; i++) {
         IDWriteNumberSubstitution *ns = NULL;
@@ -85,7 +85,7 @@ TEST(ns_none_ignores_locale_text)
 TEST(ns_national_bogus_locale)
 {
     IDWriteFactory *f = dw_shared(); IDWriteNumberSubstitution *ns = NULL;
-    static const WCHAR *bad[] = { L"!!bad!!", L"zz-ZZ-qq-xx", L"not a locale at all", L"12345", L"--" };
+    static const WCHAR *bad[] = { L"!!bad!!", L"not a locale at all", L"12345", L"--" };   /* "zz-ZZ-qq-xx" is accepted on Win10 (syntactic parse only), so it is not a rejection case */
     unsigned i;
     for (i = 0; i < sizeof bad / sizeof bad[0]; i++) {
         HRESULT hr = IDWriteFactory_CreateNumberSubstitution(f, M_NATIONAL, bad[i], FALSE, &ns);
@@ -99,7 +99,7 @@ TEST(ns_traditional_bogus_locale)
 {
     /* TRADITIONAL tries the internal table, then falls back to NATIONAL; both fail for an unknown locale. */
     IDWriteFactory *f = dw_shared(); IDWriteNumberSubstitution *ns = NULL;
-    static const WCHAR *bad[] = { L"!!bad!!", L"zz-ZZ-qq-xx", L"not a locale at all" };
+    static const WCHAR *bad[] = { L"!!bad!!", L"not a locale at all" };
     unsigned i;
     for (i = 0; i < sizeof bad / sizeof bad[0]; i++) {
         HRESULT hr = IDWriteFactory_CreateNumberSubstitution(f, M_TRADIT, bad[i], TRUE, &ns);

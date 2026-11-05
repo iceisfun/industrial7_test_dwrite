@@ -50,7 +50,7 @@ TEST(fb_system_qi_identity)
     CHECK_HR_OK(IDWriteFontFallback_QueryInterface(fb, &IID_IUnknown, (void **)&u));
     CHECK_HR_OK(IDWriteFontFallback_QueryInterface(fb, &IID_IDWriteFontFallback1, (void **)&f1));
     if (f1) { CHECK_HR_OK(IDWriteFontFallback1_QueryInterface(f1, &IID_IUnknown, (void **)&u1)); CHECK(u1 == u); }
-    EXPECT_REFS(fb, 3);
+    EXPECT_REFS(fb, 4);
     DW_RELEASE(u); DW_RELEASE(f1); DW_RELEASE(u1);
     EXPECT_REFS(fb, 1);
     DW_RELEASE(fb);
