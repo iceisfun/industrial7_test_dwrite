@@ -35,6 +35,10 @@ void     sf_replace_table(sf_blob *b, const char *tag, const void *data, size_t 
 void     sf_drop_record(sf_blob *b, const char *tag);
 /* Append a new directory record at the end of the directory (shifts nothing: records are rewritten, bodies re-appended). */
 void     sf_fix_all_checksums(sf_blob *b);
+/* Insert a directory record at index `pos` whose body (`data`, n bytes) is appended to the end of the file; other records are shifted by 16 bytes. */
+void     sf_insert_record(sf_blob *b, int pos, const char *tag, const void *data, size_t n);
+/* Insert a record that points at an existing byte range (offset/len are absolute file offsets AFTER the insertion shift of 16 is applied by the caller). */
+void     sf_insert_record_raw(sf_blob *b, int pos, const char *tag, uint32_t off, uint32_t len);
 
 /* Outcome of every stage of "load this blob as a font". */
 typedef struct sf_probe {
@@ -58,6 +62,9 @@ void sf_pred(int ok, const char *label, const char *expr);
 #define PRED(label, cond) sf_pred(!!(cond), label, #cond)
 /* Print one NOTE line with the outcome of each stage. */
 void sf_note(const char *label, const sf_probe *p);
+/* One NOTE line with everything observable about the probe: HRESULTs, glyph count, design metrics, a few glyph lookups, and TryGetFontTable for the ten common tags. */
+void sf_survey(const char *label, sf_probe *p);
+extern int sf_survey_light;
 /* Glyph lookup through the face: returns glyph for a code point (0 when unmapped or on failure). */
 UINT16 sf_gid(IDWriteFontFace *face, UINT32 cp);
 

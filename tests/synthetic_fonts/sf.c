@@ -158,3 +158,51 @@ sf_buf sf_cmap12(const sf_grp *g, int n, int fmt) {
     for (i = 0; i < n; i++) { sf_b32(&o, g[i].start); sf_b32(&o, g[i].end); sf_b32(&o, g[i].gid); }
     return o;
 }
+
+void sf_insert_record_raw(sf_blob *b, int pos, const char *tag, uint32_t off, uint32_t len) {
+    int n = sf_ntables(b), i; size_t hdr = 12 + 16 * (size_t)n; uint8_t *nb = (uint8_t *)calloc(b->n + 16 + 4, 1); uint8_t *e;
+    memcpy(nb, b->p, 12);
+    sf_w16(nb + 4, n + 1);
+    for (i = 0; i < n; i++) {
+        uint8_t *dst = nb + 12 + 16 * (size_t)(i < pos ? i : i + 1);
+        memcpy(dst, b->p + 12 + 16 * (size_t)i, 16); sf_w32(dst + 8, sf_r32(dst + 8) + 16);
+    }
+    e = nb + 12 + 16 * (size_t)pos; memcpy(e, tag, 4); sf_w32(e + 4, 0); sf_w32(e + 8, off); sf_w32(e + 12, len);
+    memcpy(nb + hdr + 16, b->p + hdr, b->n - hdr);
+    free(b->p); b->p = nb; b->n += 16;
+}
+void sf_insert_record(sf_blob *b, int pos, const char *tag, const void *data, size_t n) {
+    size_t pad, off;
+    sf_insert_record_raw(b, pos, tag, 0, 0);
+    pad = (4 - (b->n & 3)) & 3; off = b->n + pad;
+    b->p = (uint8_t *)realloc(b->p, off + n + 4);
+    memset(b->p + b->n, 0, pad); if (n) memcpy(b->p + off, data, n); b->n = off + n;
+    sf_w32(sf_dirent(b, pos) + 8, (uint32_t)off); sf_w32(sf_dirent(b, pos) + 12, (uint32_t)n);
+    sf_w32(sf_dirent(b, pos) + 4, csum((const uint8_t *)data, n));
+}
+
+static const char *const g_survey_tags[10] = { "head", "hhea", "maxp", "OS/2", "hmtx", "cmap", "loca", "glyf", "name", "post" };
+int sf_survey_light;   /* set by tests that survey damaged fonts: under an emulator skip the calls that dereference unparsed tables */
+void sf_survey(const char *label, sf_probe *p) {
+    char line[900]; int len = 0, i;
+    len += snprintf(line + len, sizeof line - len, "%s: analyze=%s sup=%d ft=%d fc=%d nf=%u face=%s", label, dw_hr_name(p->hr_analyze), (int)p->supported, (int)p->ftype, (int)p->fctype, (unsigned)p->nfaces, dw_hr_name(p->hr_face));
+    if (p->face && sf_survey_light && t_is_wine()) {
+        len += snprintf(line + len, sizeof line - len, " | (face object created; metrics skipped under Wine)");
+    } else if (p->face) {
+        DWRITE_FONT_METRICS m; memset(&m, 0, sizeof m);
+        IDWriteFontFace_GetMetrics(p->face, &m);
+        len += snprintf(line + len, sizeof line - len, " | glyphs=%u upem=%u asc=%u desc=%u gap=%d cap=%u xh=%u ul=%d/%u st=%d/%u | A=%u space=%u z=%u |",
+                        (unsigned)IDWriteFontFace_GetGlyphCount(p->face), (unsigned)m.designUnitsPerEm, (unsigned)m.ascent, (unsigned)m.descent, (int)m.lineGap, (unsigned)m.capHeight,
+                        (unsigned)m.xHeight, (int)m.underlinePosition, (unsigned)m.underlineThickness, (int)m.strikethroughPosition, (unsigned)m.strikethroughThickness,
+                        (unsigned)sf_gid(p->face, 'A'), (unsigned)sf_gid(p->face, ' '), (unsigned)sf_gid(p->face, 'z'));
+        for (i = 0; i < 10; i++) {
+            const void *d = NULL; UINT32 n = 0; void *ctx = NULL; BOOL ex = FALSE; HRESULT hr;
+            UINT32 tag = (UINT32)g_survey_tags[i][0] | ((UINT32)g_survey_tags[i][1] << 8) | ((UINT32)g_survey_tags[i][2] << 16) | ((UINT32)g_survey_tags[i][3] << 24);
+            hr = IDWriteFontFace_TryGetFontTable(p->face, tag, &d, &n, &ctx, &ex);
+            if (FAILED(hr)) len += snprintf(line + len, sizeof line - len, " %s:ERR(%s)", g_survey_tags[i], dw_hr_name(hr));
+            else if (!ex) len += snprintf(line + len, sizeof line - len, " %s:absent", g_survey_tags[i]);
+            else { len += snprintf(line + len, sizeof line - len, " %s:%u", g_survey_tags[i], (unsigned)n); IDWriteFontFace_ReleaseFontTable(p->face, ctx); }
+        }
+    }
+    t_note("%s", line);
+}
