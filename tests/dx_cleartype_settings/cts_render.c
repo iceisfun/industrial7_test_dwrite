@@ -1,6 +1,6 @@
 /* GetRecommendedRenderingMode and other DirectWrite services as a function of the system smoothing state.
  *
- * Decompilation facts (cts.h): with DWRITE_MEASURING_MODE_GDI_CLASSIC and a rendering-params object whose mode is DEFAULT (or a NULL
+ * Behaviour (see cts.h): with DWRITE_MEASURING_MODE_GDI_CLASSIC and a rendering-params object whose mode is DEFAULT (or a NULL
  * object), the result is
  *     smoothing off (SPI 0x4A == 0)           -> ALIASED
  *     smoothing on, type STANDARD (1)         -> ALIASED or GDI_CLASSIC (depends on the font size/gasp)
@@ -219,8 +219,14 @@ TEST(rec_face_versions_agree_in_every_state) {
     for (st = 0; st < ST_N; st++) {
         DWRITE_RENDERING_MODE m0 = (DWRITE_RENDERING_MODE)-1; DWRITE_RENDERING_MODE1 m1 = (DWRITE_RENDERING_MODE1)-1; DWRITE_GRID_FIT_MODE gf = (DWRITE_GRID_FIT_MODE)-1;
         CTS_SET_OR_SKIP(st_apply(st));
-        CHECK_HR_OK(IDWriteFontFace_GetRecommendedRenderingMode(x.face, 12.0f, 1.0f, DWRITE_MEASURING_MODE_GDI_CLASSIC, NULL, &m0));
-        CHECK_HR_OK(IDWriteFontFace3_GetRecommendedRenderingMode(f3, 12.0f, 96.0f, 96.0f, NULL, FALSE, DWRITE_OUTLINE_THRESHOLD_ANTIALIASED, DWRITE_MEASURING_MODE_GDI_CLASSIC, NULL, &m1, &gf));
+        IDWriteRenderingParams *rp = NULL;
+        CHECK_HR_OK(IDWriteFactory_CreateRenderingParams(dw_shared(), &rp));
+        /* the original interface rejects a NULL params object; the newer one accepts it */
+        CHECK_HR(IDWriteFontFace_GetRecommendedRenderingMode(x.face, 12.0f, 1.0f, DWRITE_MEASURING_MODE_GDI_CLASSIC, NULL, &m0), E_INVALIDARG);
+        m0 = (DWRITE_RENDERING_MODE)-1;
+        if (rp) CHECK_HR_OK(IDWriteFontFace_GetRecommendedRenderingMode(x.face, 12.0f, 1.0f, DWRITE_MEASURING_MODE_GDI_CLASSIC, rp, &m0));
+        CHECK_HR_OK(IDWriteFontFace3_GetRecommendedRenderingMode(f3, 12.0f, 96.0f, 96.0f, NULL, FALSE, DWRITE_OUTLINE_THRESHOLD_ANTIALIASED, DWRITE_MEASURING_MODE_GDI_CLASSIC, rp, &m1, &gf));
+        if (rp) IDWriteRenderingParams_Release(rp);
         CHECKF((int)m0 == (int)m1, "%s: v0 %d vs v3 %d", st_name[st], (int)m0, (int)m1);
         CHECKF((unsigned)gf <= 2, "grid fit %d", (int)gf);
     }

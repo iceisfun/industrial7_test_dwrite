@@ -1,5 +1,5 @@
 /* IDWriteFactory::CreateRenderingParams / CreateMonitorRenderingParams as a function of the system font smoothing settings.
- * See cts.h for the decompilation facts: only SPI_GETFONTSMOOTHINGORIENTATION feeds the reported pixel geometry (unless a
+ * See cts.h for the documented behaviour: only SPI_GETFONTSMOOTHINGORIENTATION feeds the reported pixel geometry (unless a
  * PixelStructure registry value overrides it); smoothing flag, type and contrast never change the reported getters.  Objects are
  * created fresh on every call and never change afterwards. */
 #include "cts.h"

@@ -4,7 +4,7 @@
  *    not exist yet) and removes again.  The key of the display device DirectWrite looks at is used:
  *      default params  -> first display device attached to the desktop
  *      monitor params  -> the device name of the HMONITOR (GetMonitorInfo szDevice)
- *    Value rules (decompilation): GammaLevel 1000..2200 x0.001; ClearTypeLevel 0..100, EnhancedContrastLevel 0..400,
+ *    Value rules: GammaLevel 1000..2200 x0.001; ClearTypeLevel 0..100, EnhancedContrastLevel 0..400,
  *    GrayscaleEnhancedContrastLevel 0..400 all x0.01; PixelStructure 0..2; out-of-range values are ignored and the previous
  *    default stays; TextContrastLevel is not consulted. */
 #include "cts.h"

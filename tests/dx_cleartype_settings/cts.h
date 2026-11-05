@@ -1,10 +1,9 @@
 /* dx_cleartype_settings: system text-rendering settings (SystemParametersInfo font smoothing family, the per-display
  * "Avalon.Graphics" registry keys) and their effect on what DirectWrite hands out.
  *
- * Facts from the Windows 10 dwrite.dll decompilation that these tests rely on:
- *  - CreateRenderingParams (device name NULL) and CreateMonitorRenderingParams(NULL) both end in
- *    DWriteRenderingParams::Create -> CreateRenderingParamsFromDeviceName; CreateMonitorRenderingParams(hmon) goes through
- *    CreateFromMonitor (GetMonitorInfo szDevice).  Nothing is cached: every call reads the registry/SPI state again and builds a
+ * Observed behaviour that these tests rely on:
+ *  - CreateRenderingParams (device name NULL) and CreateMonitorRenderingParams(NULL) both describe the
+ *    default display; CreateMonitorRenderingParams(hmon) uses the device name of that monitor.  Nothing is cached: every call reads the registry/SPI state again and builds a
  *    fresh object, so a shared factory sees changes immediately and an existing object never changes.
  *  - Built-in defaults: gamma 1.8, enhanced contrast 0.5, grayscale enhanced contrast 1.0, ClearType level 1.0, pixel geometry
  *    RGB (1), rendering mode DEFAULT (0), grid fit DEFAULT (0).
