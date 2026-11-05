@@ -434,7 +434,7 @@ TEST(font_simulated_oblique_metrics_shift_glyph_box) {
     if (o) IDWriteFont_QueryInterface(o, &IID_IDWriteFont1, (void **)&o1);
     if (b1 && o1) {
         memset(&mb, 0, sizeof mb); memset(&mo, 0, sizeof mo);
-        IDWriteFont1_GetMetrics(b1, &mb); IDWriteFont1_GetMetrics(o1, &mo);
+        FO_GETM1(b1, &mb); FO_GETM1(o1, &mo);
         EXPECT_EQ(mo.designUnitsPerEm, mb.designUnitsPerEm); EXPECT_EQ(mo.ascent, mb.ascent); EXPECT_EQ(mo.descent, mb.descent);
         EXPECT_EQ(mo.glyphBoxTop, mb.glyphBoxTop); EXPECT_EQ(mo.glyphBoxBottom, mb.glyphBoxBottom);
         EXPECT_EQ((UINT16)mo.glyphBoxRight, (UINT16)(mb.glyphBoxRight + ((mb.glyphBoxTop * 0x5700) >> 16)));

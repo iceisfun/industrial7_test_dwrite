@@ -3,6 +3,16 @@
 #define FO_H
 #include "dwx.h"
 
+/* The SDK C macros IDWriteFont{1,2,3}_GetMetrics / IDWriteFont3_CreateFontFace / IDWriteFont3_HasCharacter expand to vtable members that are
+ * themselves macro names; use these call macros (vtable member names are the real ones) instead. */
+#undef IDWriteFont1_GetMetrics
+#undef IDWriteFont2_GetMetrics
+#undef IDWriteFont3_GetMetrics
+#undef IDWriteFont3_CreateFontFace
+#undef IDWriteFont3_HasCharacter
+#define FO_GETM1(p, m)      ((p)->lpVtbl->IDWriteFont1_GetMetrics((p), (m)))
+#define FO_F3_CREATEFACE(p, o) ((p)->lpVtbl->IDWriteFont3_CreateFontFace((p), (o)))
+#define FO_F3_HASCHAR(p, c) ((p)->lpVtbl->IDWriteFont3_HasCharacter((p), (c)))
 #define FO_MAX 12
 /* A private (isolated) factory with a custom collection built from synthetic fonts.  font[i] is the IDWriteFont whose
  * file is blob i (identified through its font file reference key), independent of how families are grouped. */

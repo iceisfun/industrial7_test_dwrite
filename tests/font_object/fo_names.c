@@ -176,7 +176,7 @@ TEST(font_info_non_ascii_strings) {
     CHECK_HR_OK(IDWriteFont_GetInformationalStrings(x.font[0], DWRITE_INFORMATIONAL_STRING_COPYRIGHT_NOTICE, &ls, &ex));
     if (ls && ex) {
         n = fo_ls_w(ls, 0, w, 64);
-        EXPECT_EQ(n, 7); CHECK(!lstrcmpW(w, L"é中文\xD83D\xDE00z"));
+        EXPECT_EQ(n, 6); CHECK(!lstrcmpW(w, L"é中文\xD83D\xDE00z"));
         { UINT32 len = 0; CHECK_HR_OK(IDWriteLocalizedStrings_GetStringLength(ls, 0, &len)); EXPECT_EQ(len, 6); }
     } else CHECK(0);
     DW_RELEASE(ls); fo_close(&x);
