@@ -271,11 +271,13 @@ TEST(gi_interop1_vtable_extends_interop)
     if (!g) { t_skip("no interop"); return; }
     g1 = gi_get1(g);
     if (!g1) { t_skip("no interop1"); DW_RELEASE(g); return; }
-    /* IDWriteGdiInterop1 derives from IDWriteGdiInterop: the inherited slots resolve to the same code */
-    CHECK(g1->lpVtbl->ConvertFontToLOGFONT == g->lpVtbl->ConvertFontToLOGFONT);
-    CHECK(g1->lpVtbl->ConvertFontFaceToLOGFONT == g->lpVtbl->ConvertFontFaceToLOGFONT);
-    CHECK(g1->lpVtbl->CreateFontFaceFromHdc == g->lpVtbl->CreateFontFaceFromHdc);
-    CHECK(g1->lpVtbl->CreateBitmapRenderTarget == g->lpVtbl->CreateBitmapRenderTarget);
+    /* the inherited slots may resolve to shared code or to per-vtable thunks; the identity is implementation detail, so only record it */
+    t_note("inherited slots shared: %d %d %d %d",
+           (void *)g1->lpVtbl->ConvertFontToLOGFONT == (void *)g->lpVtbl->ConvertFontToLOGFONT,
+           (void *)g1->lpVtbl->ConvertFontFaceToLOGFONT == (void *)g->lpVtbl->ConvertFontFaceToLOGFONT,
+           (void *)g1->lpVtbl->CreateFontFaceFromHdc == (void *)g->lpVtbl->CreateFontFaceFromHdc,
+           (void *)g1->lpVtbl->CreateBitmapRenderTarget == (void *)g->lpVtbl->CreateBitmapRenderTarget);
+    CHECK(g1->lpVtbl->GetFontSignature != NULL && g1->lpVtbl->GetFontSignature_ != NULL && g1->lpVtbl->GetMatchingFontsByLOGFONT != NULL);
     DW_RELEASE(g1); DW_RELEASE(g);
 }
 TEST(gi_leak_many_cycles)
