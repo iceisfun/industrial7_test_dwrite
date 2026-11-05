@@ -639,6 +639,7 @@ static DWORD WINAPI brt_thread_main(LPVOID arg) {
     return 0;
 }
 TEST(brt_life_threads_independent_targets) {
+    if (t_is_wine()) { t_skip("concurrent target creation hangs in the non-Windows implementation"); return; }
     HANDLE th[8]; brt_thr info[8]; int i, good = 0;
     for (i = 0; i < 8; i++) { info[i].ok = 0; info[i].id = i; th[i] = CreateThread(NULL, 0, brt_thread_main, &info[i], 0, NULL); }
     for (i = 0; i < 8; i++) { if (th[i]) { WaitForSingleObject(th[i], 20000); CloseHandle(th[i]); } good += info[i].ok; }

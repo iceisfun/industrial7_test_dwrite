@@ -178,4 +178,28 @@ static float brt_quad_depth(const float q[4][2], float px, float py) {
     }
     return best;
 }
+/* Expected pixel quad of the box glyph: see brt_modes.c header for the convention. */
+static void brt_quad(const DWRITE_MATRIX *m, float ppd, float ox, float oy, float em, int sideways, float q[4][2]) {
+    float lx[4] = { BRT_BX0(em), BRT_BX1(em), BRT_BX1(em), BRT_BX0(em) }, ly[4] = { 0, 0, -BRT_BY1(em), -BRT_BY1(em) };
+    int i;
+    for (i = 0; i < 4; i++) {
+        float x = lx[i], y = ly[i], t;
+        if (sideways) { t = x; x = y; y = -t; }
+        x += ox; y += oy;
+        q[i][0] = ppd * (m->m11 * x + m->m21 * y + m->dx);
+        q[i][1] = ppd * (m->m12 * x + m->m22 * y + m->dy);
+    }
+}
+/* pixels with centre at least `margin` inside the quad must be fg; pixels at least `margin` outside must be bg */
+static void brt_quad_check(brt_ctx *c, const float q[4][2], float margin, uint32_t fg, uint32_t bg, int tol, int *in_bad, int *out_bad, int *in_n) {
+    int w = 0, h = 0, x, y; uint32_t *b = brt_bits(c, &w, &h);
+    *in_bad = *out_bad = *in_n = 0;
+    if (!b) { *in_bad = *out_bad = -1; return; }
+    for (y = 0; y < h; y++) for (x = 0; x < w; x++) {
+        float d = brt_quad_depth(q, x + 0.5f, y + 0.5f); uint32_t v = b[y * w + x] & 0xFFFFFF;
+        if (d >= margin) { (*in_n)++; if (!brt_near(v, fg, tol)) (*in_bad)++; }
+        else if (d <= -margin) { if (v != bg) (*out_bad)++; }
+    }
+}
+
 #endif
