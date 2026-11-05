@@ -22,6 +22,7 @@
 #include <xmmintrin.h>
 
 #define R2_FAM  L"R2Font"
+#define R2_SHAPE L"R2Shape"   /* GSUB liga: A B -> glyph 68 */
 #define R2_LOC  L"en-us"
 #define R2_ADV(units, size) ((float)(units) * (float)(size) / 2048.0f)
 #define R2_NAME(n) r2_text_render_callbacks_##n
@@ -34,6 +35,7 @@ void r2_close(r2_fx *x);
 #define R2_END()   r2_close(&X)
 
 IDWriteTextFormat *r2_format(r2_fx *x, float size, DWRITE_FONT_WEIGHT weight);
+IDWriteTextLayout *r2_layout_fam(r2_fx *x, const WCHAR *family, const WCHAR *text, float size, float w, float h);
 IDWriteTextLayout *r2_layout_w(r2_fx *x, const WCHAR *text, float size, float w, float h, DWRITE_FONT_WEIGHT weight);
 #define R2_LAYOUT(var, text, size, w, h) IDWriteTextLayout *var = r2_layout_w(&X, text, size, w, h, DWRITE_FONT_WEIGHT_NORMAL); \
     if (!var) { R2_END(); t_skip("CreateTextLayout prerequisite failed"); return; }

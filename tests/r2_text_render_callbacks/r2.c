@@ -4,6 +4,8 @@
 static ttf_map g_map[256]; static int g_nmap;
 static ttf_cmap g_cm[2];
 static ttf_glyph g_bold[TTF_DEF_NGLYPHS];
+static const ttf_sub4 g_lig[] = { { { 2, 3 }, 2, 68 } };                  /* 'A' 'B' -> ring glyph */
+static const ttf_feature g_gsub[] = { { "liga", TTF_LK_LIGATURE, 1, g_lig } };
 
 static void build_map(void)
 {
@@ -20,11 +22,11 @@ static void build_map(void)
     g_cm[0].format = 4;  g_cm[0].plat = 3; g_cm[0].enc = 1;  g_cm[0].n = n; g_cm[0].map = g_map;
     g_cm[1].format = 12; g_cm[1].plat = 3; g_cm[1].enc = 10; g_cm[1].n = n; g_cm[1].map = g_map;
 }
-static uint8_t *build_font(int bold, size_t *sz)
+static uint8_t *build_font(int which, size_t *sz)
 {
     ttf_spec s;
     build_map();
-    if (bold) {
+    if (which == 1) {
         int n = 0, i; const ttf_glyph *g = ttf_default_glyphs(&n);
         ttf_style_spec(&s, "R2Font", 700, 5, 0);
         if (n > TTF_DEF_NGLYPHS) n = TTF_DEF_NGLYPHS;
@@ -34,26 +36,27 @@ static uint8_t *build_font(int bold, size_t *sz)
         s.glyphs = g_bold; s.nglyphs = n;
     } else {
         ttf_default_spec(&s);
-        ttf_set_names(&s, "R2Font", "Regular", "R2Font", "R2Font-Regular");
+        if (which == 2) { ttf_set_names(&s, "R2Shape", "Regular", "R2Shape", "R2Shape-Regular"); s.gsub = g_gsub; s.ngsub = 1; }
+        else ttf_set_names(&s, "R2Font", "Regular", "R2Font", "R2Font-Regular");
     }
     s.cmaps = g_cm; s.ncmaps = 2;
     return ttf_build(&s, sz);
 }
 int r2_open(r2_fx *x)
 {
-    size_t sz; uint8_t *b; int i; UINT32 key[2];
+    size_t sz; uint8_t *b; int i; UINT32 key[3];
     memset(x, 0, sizeof *x);
     x->f = dw_new_factory(DWRITE_FACTORY_TYPE_ISOLATED);
     if (!x->f) return 0;
     x->fl = dwx_loader_new();
-    for (i = 0; i < 2; i++) {
+    for (i = 0; i < 3; i++) {
         b = build_font(i, &sz);
         if (!b) return 0;
         key[i] = dwx_loader_add(x->fl, b, sz); free(b);
     }
     if (FAILED(dwx_loader_register(x->fl, x->f))) return 0;
     x->cl = dwx_coll_new(x->fl);
-    for (i = 0; i < 2; i++) dwx_coll_add_key(x->cl, key[i]);
+    for (i = 0; i < 3; i++) dwx_coll_add_key(x->cl, key[i]);
     if (FAILED(dwx_coll_register(x->cl, x->f))) return 0;
     if (FAILED(dwx_coll_create(x->cl, x->f, &x->coll)) || !x->coll) return 0;
     return 1;
@@ -219,3 +222,11 @@ int rh_last(const rh *r, int type) { int i; for (i = r->nev - 1; i >= 0; i--) if
 int rh_qi_asked(const rh *r, const IID *iid) { int i, n = 0; for (i = 0; i < r->nev; i++) if (r->ev[i].type == RH_QI && IsEqualIID(&r->ev[i].iid, iid)) n++; return n; }
 UINT32 rh_total_glyphs(const rh *r) { int i; UINT32 n = 0; for (i = 0; i < r->nev; i++) if (r->ev[i].type == RH_GLYPH) n += r->ev[i].n; return n; }
 float rh_run_width(const rh_ev *e) { UINT32 i, n = e->n > RH_MAXG ? RH_MAXG : e->n; float w = 0; for (i = 0; i < n; i++) w += e->adv[i]; return w; }
+IDWriteTextLayout *r2_layout_fam(r2_fx *x, const WCHAR *family, const WCHAR *text, float size, float w, float h)
+{
+    IDWriteTextFormat *t = NULL; IDWriteTextLayout *l = NULL;
+    if (FAILED(IDWriteFactory_CreateTextFormat(x->f, family, x->coll, DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, size, R2_LOC, &t))) return NULL;
+    if (FAILED(IDWriteFactory_CreateTextLayout(x->f, text, (UINT32)wcslen(text), t, w, h, &l))) l = NULL;
+    IDWriteTextFormat_Release(t);
+    return l;
+}
