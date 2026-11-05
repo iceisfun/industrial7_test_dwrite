@@ -1,6 +1,6 @@
 /* Lifetime: who holds what after CreateCustomFontCollection has returned.
  *
- * Win10 decomp: the collection stores only the loader's numeric registration id (never the loader pointer) and the
+ * Win10 observed: the collection stores only the loader's numeric registration id (never the loader pointer) and the
  * enumeration is finished before the call returns; the registration map owns one reference on the loader until
  * Unregister or factory destruction.  Destroyed test objects here are replaced by a tripwire vtable (r2_uaf).
  */

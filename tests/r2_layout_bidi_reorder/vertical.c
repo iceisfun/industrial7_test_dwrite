@@ -1,6 +1,6 @@
 /* Flow direction, vertical reading directions and glyph orientation.
  *
- * Facts: SetReadingDirection / SetFlowDirection accept all four enum values independently (DWriteTextLayout setters);
+ * Facts: SetReadingDirection / SetFlowDirection accept all four enum values independently (IDWriteTextLayout setters);
  * documented valid pairings are horizontal reading (LTR/RTL) with a vertical flow (TOP_TO_BOTTOM/BOTTOM_TO_TOP) and vertical
  * reading (TOP_TO_BOTTOM/BOTTOM_TO_TOP) with a horizontal flow (LEFT_TO_RIGHT/RIGHT_TO_LEFT). In a vertical layout
  * DrawGlyphRun reports isSideways for glyphs that are rotated 90 degrees; DWRITE_VERTICAL_GLYPH_ORIENTATION_STACKED keeps

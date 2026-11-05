@@ -1,12 +1,12 @@
 /* Reading direction x flow direction, DWRITE_E_FLOWDIRECTIONCONFLICTS, vertical layouts and the last line wrapping option.
  *
- * Facts from the Windows 10 decompilation:
+ * Facts from the Windows 10 probing:
  *  - SetReadingDirection / SetFlowDirection (layout and format) only range-check (0..3) and never look at each other.
- *  - The conflict is detected when the layout is first needed (TextLayout::TextLayout, reached from MutableTextLayout::DoLayout):
+ *  - The conflict is detected when the layout is first needed (TextLayout, reached from DoLayout):
  *    bit 1 of the flow direction and bit 1 of the reading direction must be equal, i.e. horizontal reading (LEFT_TO_RIGHT,
  *    RIGHT_TO_LEFT) goes with TOP_TO_BOTTOM / BOTTOM_TO_TOP flow and vertical reading (TOP_TO_BOTTOM, BOTTOM_TO_TOP) with
  *    LEFT_TO_RIGHT / RIGHT_TO_LEFT flow. Otherwise the call that triggered the layout fails with DWRITE_E_FLOWDIRECTIONCONFLICTS (0x8898500B).
- *  - TextLayout::GetLayoutWidth returns maxHeight for vertical reading directions: the line length limit is the other dimension.
+ *  - GetLayoutWidth returns maxHeight for vertical reading directions: the line length limit is the other dimension.
  *  - AlignmentHelperVertical reverses the paragraph axis for flow BOTTOM_TO_TOP and LEFT_TO_RIGHT: NEAR then means the far side
  *    and lines stack towards the origin.
  *  - IDWriteTextFormat1::SetLastLineWrapping(FALSE): the line that crosses maxHeight takes all remaining text of its paragraph. */

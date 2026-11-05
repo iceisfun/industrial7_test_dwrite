@@ -1,6 +1,6 @@
 /* IDWriteTextAnalyzer1::GetBaseline.
  *
- * Windows 10 (DWriteTextAnalyzer::GetBaseline + BaseTable::GetBaseline):
+ * Windows 10 (IDWriteTextAnalyzer::GetBaseline + BaseTable::GetBaseline):
  *   - *baselineCoordinate and *exists are cleared first (the pointers must be valid); fontFace == NULL or baseline > 8
  *     (DWRITE_BASELINE_MAXIMUM) -> E_INVALIDARG with both outputs left cleared.
  *   - DEFAULT is vertical ? CENTRAL : ROMAN. The locale is ignored for kinds 0..6 (NULL is treated as "").

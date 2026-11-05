@@ -1,6 +1,6 @@
 /* Hit testing of right-to-left and mixed-direction text.
  *
- * Facts (TextLayout::HitTestPointInSpan / HitTestTextPosition, bidi level in the span record):
+ * Facts (HitTestPointInSpan / HitTestTextPosition, bidi level in the span record):
  *  - a span of odd bidi level lays its clusters out from the span's right edge going left;
  *  - HitTestTextPosition: leading hit of a right-to-left cluster is at its RIGHT edge (metrics.left + width), trailing hit at metrics.left;
  *    the end-of-text position of a right-to-left last span is the span's left edge;

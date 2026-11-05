@@ -1,7 +1,7 @@
 /* Creation of IDWriteFontFaceReference objects: IDWriteFactory3::CreateFontFaceReference_ (file overload) and CreateFontFaceReference
  * (path + last-write-time overload), argument validation, QueryInterface matrix, refcounts and object lifetime.
  *
- * Win10 dwrite.dll (DWriteFactory::CreateFontFaceReference, thunks at !0xd6e80 / !0xd7150, workers !0x2af10 / !0xd6ec0):
+ * Win10 dwrite.dll (IDWriteFactory::CreateFontFaceReference):
  *   - *reference is zeroed first;
  *   - NULL file / NULL path, simulations & ~3 != 0 -> E_INVALIDARG (0x80070057);
  *   - nothing else is validated: the face index, the font file contents and the path are only stored in the reference key and

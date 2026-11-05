@@ -1,8 +1,8 @@
 /* GetRecommendedRenderingMode of IDWriteFontFace1 / IDWriteFontFace2 / IDWriteFontFace3.
- *   FontFace1 (dwrite.dll!0xdce80): no argument validation, *mode zeroed first, RENDERING_MODE1_NATURAL_SYMMETRIC_DOWNSAMPLED(7) reported as NATURAL_SYMMETRIC(5).
- *   FontFace2 (!0xdcd40) and FontFace3 (!0x71520): outputs (mode, gridfit) zeroed first; threshold > 1 or measuringMode > 2 -> E_INVALIDARG.
+ *   FontFace1: no argument validation, *mode zeroed first, RENDERING_MODE1_NATURAL_SYMMETRIC_DOWNSAMPLED(7) reported as NATURAL_SYMMETRIC(5).
+ *   FontFace2 and FontFace3: outputs (mode, gridfit) zeroed first; threshold > 1 or measuringMode > 2 -> E_INVALIDARG.
  *   Both outputs are written unconditionally: the mode and gridfit pointers must not be NULL.
- *   ResolveRenderingMode (!0x95b60): ppem >= outline threshold -> OUTLINE; GDI_NATURAL measuring -> GDI_NATURAL; GDI_CLASSIC measuring -> ALIASED or
+ *   ResolveRenderingMode: ppem >= outline threshold -> OUTLINE; GDI_NATURAL measuring -> GDI_NATURAL; GDI_CLASSIC measuring -> ALIASED or
  *   GDI_CLASSIC; NATURAL measuring -> a natural mode (or ALIASED from gasp) for small sizes. The ALIASED threshold is 350 ppem. */
 #include "ffx.h"
 

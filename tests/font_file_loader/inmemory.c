@@ -1,8 +1,8 @@
 /* IDWriteFactory5 loaders: IDWriteInMemoryFontFileLoader (MemoryFontFileLoader) and the HTTP / IDWriteRemoteFontFileLoader (NetFontLoader).
- * Basis: DWriteFactory::CreateInMemoryFontFileLoader (object is NOT registered), MemoryFontFileLoader::CreateInMemoryFontFileReference
+ * Basis: IDWriteFactory::CreateInMemoryFontFileLoader (object is NOT registered), CreateInMemoryFontFileReference
  * (NULL/0 -> E_INVALIDARG before anything else; entry pushed before the factory is asked; key = 4 byte entry index; copies the data
- * unless an owner object is supplied), MemoryFontFileLoader::CreateStreamFromKey (key size 4, index < count), the memory stream
- * (out-of-range read -> E_INVALIDARG, GetLastWriteTime -> E_NOTIMPL), NetFontLoader::CreateFontFileReferenceFromUrl. */
+ * unless an owner object is supplied), CreateStreamFromKey (key size 4, index < count), the memory stream
+ * (out-of-range read -> E_INVALIDARG, GetLastWriteTime -> E_NOTIMPL), CreateFontFileReferenceFromUrl. */
 #include "fl.h"
 
 #define NEED_F5() IDWriteFactory *f = fl_factory(); IDWriteFactory5 *f5; IDWriteInMemoryFontFileLoader *m = NULL; \

@@ -3,7 +3,7 @@
  * For every pair of line-break classes (one representative character each) the text "X Y", "X SP Y" and "X CM Y" is analysed and
  * the boundary conditions are compared with the expectation derived from the UAX 14 rules in rule order (LB4..LB31).  The condition
  * after a character and the condition before the next one describe the same boundary and must agree (verified in the
- * decomp: ClassPairsToBreakpoints copies the "after" bits of position i into the "before" bits of position i + 1).
+ * observed: ClassPairsToBreakpoints copies the "after" bits of position i into the "before" bits of position i + 1).
  * Expectation letters: x = no break (MAY_NOT_BREAK), / = break allowed (CAN_BREAK), ! = mandatory (MUST_BREAK).
  * Table cells end in H (hard check) or S (soft: rules whose exact form varies with the Unicode version, or contextual CM rules;
  * a mismatch is recorded with t_note only).  Generated from the rule order, see the header comment of each table. */

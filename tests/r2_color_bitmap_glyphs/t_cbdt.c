@@ -2,7 +2,7 @@
  *
  * EmbeddedBitmapTableReader::EnumerateGlyphData only accepts BitmapSize strikes with ppemX == ppemY and bitDepth 32;
  * FillGlyphGraphicDataEntry takes the image dimensions and bearings from the SmallGlyphMetrics / BigGlyphMetrics, the entry
- * ppem from the strike and the data offset from the (absolute) file position of the PNG bytes.  FontFace::GetGlyphImageData
+ * ppem from the strike and the data offset from the (absolute) file position of the PNG bytes.  GetGlyphImageData
  * picks the entry with the smallest ppem >= the requested ppem. */
 #include "crb.h"
 
@@ -349,7 +349,7 @@ T(cbdt_cblc_without_cbdt_is_not_a_bitmap_font_note) {
 }
 
 T(cbdt_image_data_struct_layout_and_constants) {
-    /* offsets used by FontFace::GetGlyphImageData and the 0x40 byte clear in DWriteFontFace::GetGlyphImageData */
+    /* offsets used by GetGlyphImageData and the 0x40 byte clear in IDWriteFontFace::GetGlyphImageData */
     EXPECT_EQ(sizeof(DWRITE_GLYPH_IMAGE_DATA), 64);
     EXPECT_EQ(offsetof(DWRITE_GLYPH_IMAGE_DATA, imageData), 0); EXPECT_EQ(offsetof(DWRITE_GLYPH_IMAGE_DATA, imageDataSize), 8); EXPECT_EQ(offsetof(DWRITE_GLYPH_IMAGE_DATA, uniqueDataId), 0xC);
     EXPECT_EQ(offsetof(DWRITE_GLYPH_IMAGE_DATA, pixelsPerEm), 0x10); EXPECT_EQ(offsetof(DWRITE_GLYPH_IMAGE_DATA, pixelSize), 0x14); EXPECT_EQ(offsetof(DWRITE_GLYPH_IMAGE_DATA, horizontalLeftOrigin), 0x1C);

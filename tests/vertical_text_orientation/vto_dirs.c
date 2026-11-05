@@ -1,8 +1,8 @@
 /* Flow / reading direction pairing, vertical glyph orientation setters, and who reports a conflicting pair.
  *
- * DWriteTextFormat::SetFlowDirection / DWriteTextLayout::SetFlowDirection reject values above 3 with E_INVALIDARG, SetReadingDirection likewise,
+ * IDWriteTextFormat::SetFlowDirection / IDWriteTextLayout::SetFlowDirection reject values above 3 with E_INVALIDARG, SetReadingDirection likewise,
  * SetVerticalGlyphOrientation accepts 0 and 1 only. A pair whose bit 1 differs (reading 2/3 is vertical, flow 2/3 is vertical) throws
- * DWRITE_E_FLOWDIRECTIONCONFLICTS when the layout is materialised (TextLayout::TextLayout), i.e. from the first call that needs the laid-out text.
+ * DWRITE_E_FLOWDIRECTIONCONFLICTS when the layout is materialised (TextLayout), i.e. from the first call that needs the laid-out text.
  * The layout setters mark the layout dirty so a repaired pair works again without recreating the object.
  */
 #include "vto.h"
@@ -130,7 +130,7 @@ TEST(layout2_orientation_roundtrip_and_invalid)
 }
 TEST(layout_exposes_format1_orientation_on_the_same_state)
 {
-    /* DWriteTextLayout implements IDWriteTextFormat1 itself: setting through one face is visible through the other. */
+    /* IDWriteTextLayout implements IDWriteTextFormat1 itself: setting through one face is visible through the other. */
     VT_BEGIN(); VT_VL(l, VT_FAM, L"AB", 16.0f, 100, 100); IDWriteTextLayout2 *l2 = NULL; IDWriteTextFormat1 *t1 = NULL;
     DW_REQUIRE_OK(IDWriteTextLayout_QueryInterface(l, &IID_IDWriteTextLayout2, (void **)&l2));
     DW_REQUIRE_OK(IDWriteTextLayout_QueryInterface(l, &IID_IDWriteTextFormat1, (void **)&t1));
@@ -236,7 +236,7 @@ TEST(conflict_from_format_pair_surfaces_at_layout_use)
 }
 TEST(conflict_ellipsis_trimming_sign_factory)
 {
-    /* DWriteFactory::CreateEllipsisTrimmingSign builds a layout from the format and lays it out immediately. */
+    /* IDWriteFactory::CreateEllipsisTrimmingSign builds a layout from the format and lays it out immediately. */
     VT_BEGIN(); IDWriteTextFormat *t = vt_format(&X, VT_FAM, 16.0f); IDWriteInlineObject *sign = (IDWriteInlineObject *)(ULONG_PTR)1;
     if (!t) { VT_END(); t_skip("format"); return; }
     CHECK_HR_OK(IDWriteTextFormat_SetFlowDirection(t, FD_LTR));

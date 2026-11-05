@@ -1,6 +1,6 @@
 /* IDWriteGdiInterop::CreateFontFromLOGFONT / ConvertFontToLOGFONT against the system font collection.
  *
- * Lookup (DWriteGdiInterop::CreateFontFromLOGFONT -> FontSet::FindNearestMatchingWin32Font): candidates are the fonts whose
+ * Lookup (DWriteGdiInterop::CreateFontFromLOGFONT -> FindNearestMatchingWin32Font): candidates are the fonts whose
  * WIN32_FAMILY_NAME property equals lfFaceName; when none do, the fonts whose FULL_NAME equals it; when none, DWRITE_E_NOFONT.
  * Among the candidates the lowest Win32ComputePenalty wins (see gi_score() in gi.h).  Only lfFaceName, lfWeight, lfItalic and lfCharSet
  * are read; every other LOGFONT field is ignored.  There is no GDI font substitution and no bitmap-font support. */

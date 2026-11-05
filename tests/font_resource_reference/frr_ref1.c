@@ -1,8 +1,8 @@
 /* IDWriteFontFaceReference1 (GetFontAxisValueCount, GetFontAxisValues, CreateFontFace returning IDWriteFontFace5) and references that carry
  * font axis values (IDWriteFactory6::CreateFontFaceReference with axes, IDWriteFontResource::CreateFontFaceReference).
  *
- * Win10 dwrite.dll (DWriteFontFaceReferenceBase !0x928e0 GetFontAxisValueCount, !0xe43b0 GetFontAxisValues, !0x2a210 CreateFontFace;
- * DWriteFactory::CreateFontFaceReference with axes !0x2bb50 -> !0x2af10):
+ * Win10 dwrite.dll (IDWriteFontFaceReference: GetFontAxisValueCount, GetFontAxisValues, CreateFontFace;
+ * IDWriteFactory::CreateFontFaceReference with axes):
  *   - the axis values are stored as 16.16 fixed point in the reference key (float -> fixed on the way in, fixed -> float on the way out);
  *   - GetFontAxisValues zeroes the whole caller buffer first, then fails with E_NOT_SUFFICIENT_BUFFER (0x8007007A) when the buffer holds fewer
  *     values than the reference carries; a larger buffer is accepted and its tail stays zero;

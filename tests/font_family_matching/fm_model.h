@@ -5,7 +5,7 @@
 /* st: DWRITE_FONT_STYLE_NORMAL 0, OBLIQUE 1, ITALIC 2 */
 typedef struct { int w, wd, st; } fm_face;
 typedef struct { int idx; int sims; } fm_pick;
-/* Straight transcription of FontSet::FindNearestMatchingWwsFont, ApplySimulationsForWwsFallback, MatchingFont::MatchingFont and
+/* Straight transcription of FindNearestMatchingWwsFont, ApplySimulationsForWwsFallback, MatchingFont::MatchingFont and
  * MatchingStyle::IsBetterMatch. faces[] in family index order. sims: 1 = DWRITE_FONT_SIMULATIONS_BOLD, 2 = OBLIQUE. */
 fm_pick fm_oracle_first(const fm_face *faces, int n, int rw, int rwd, int rst);
 int     fm_oracle_list(const fm_face *faces, int n, int rw, int rwd, int rst, fm_pick *out);

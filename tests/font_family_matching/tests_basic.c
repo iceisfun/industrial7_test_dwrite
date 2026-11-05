@@ -65,7 +65,7 @@ TEST(fam_getfont_every_index_succeeds) {
 
 TEST(fam_getfont_index_out_of_range) {
     FM_OPEN(m, "FmOob", F_RIBBI);
-    /* DWriteFontFamily::GetFont(index): the face key lookup throws IndexOutOfRangeException (HRESULT E_FAIL 0x80004005);
+    /* IDWriteFontFamily::GetFont(index): the face key lookup throws IndexOutOfRangeException (HRESULT E_FAIL 0x80004005);
      * *font is zeroed first. */
     const UINT32 bad[] = { m.count, m.count + 1, 0xFF, 0xFFFF, 0x10000, 0x7FFFFFFF, 0x80000000u, 0xFFFFFFFEu, 0xFFFFFFFFu };
     size_t i;
@@ -95,7 +95,7 @@ TEST(fam_getfont_creates_new_object_each_call) {
     IDWriteFont *a = NULL, *b = NULL;
     CHECK_HR_OK(IDWriteFontFamily_GetFont(m.fam, 0, &a));
     CHECK_HR_OK(IDWriteFontFamily_GetFont(m.fam, 0, &b));
-    /* DWriteFont::Create allocates a new COM object per call */
+    /* IDWriteFont::Create allocates a new COM object per call */
     CHECK(a && b && a != b);
     if (a && b) CHECK(!dw_same_identity((IUnknown *)a, (IUnknown *)b));
     DW_RELEASE(a); DW_RELEASE(b);
@@ -133,7 +133,7 @@ TEST(fam_font_refcounts_balance) {
         EXPECT_EQ(r1, base + 1); EXPECT_EQ(r2, base + 2);
         r3 = IDWriteFont_Release(font); EXPECT_EQ(r3, base + 1);
         r3 = IDWriteFont_Release(font); EXPECT_EQ(r3, base);
-        EXPECT_EQ(base, 1);   /* DWriteFont::Create AddRefs the new object exactly once */
+        EXPECT_EQ(base, 1);   /* IDWriteFont::Create AddRefs the new object exactly once */
         IDWriteFont_Release(font);
     }
     fm_close(&m);
@@ -144,7 +144,7 @@ TEST(fam_font_keeps_family_alive) {
     IDWriteFont *font = NULL;
     CHECK_HR_OK(IDWriteFontFamily_GetFont(m.fam, 1, &font));
     fm_face want = m.obs[1];
-    DW_RELEASE(m.fam);   /* the font holds its family (DWriteFont stores a counted family reference) */
+    DW_RELEASE(m.fam);   /* the font holds its family (IDWriteFont stores a counted family reference) */
     if (font) {
         fm_face got; int s;
         fm_read_font(font, &got, &s);
@@ -169,7 +169,7 @@ TEST(fam_font_getfontfamily_is_same_object) {
     if (font) {
         ULONG before = dw_refcount((IUnknown *)m.fam);
         CHECK_HR_OK(IDWriteFont_GetFontFamily(font, &ff));
-        /* DWriteFont::GetFontFamily AddRefs the stored family pointer: the very object the font was created from */
+        /* IDWriteFont::GetFontFamily AddRefs the stored family pointer: the very object the font was created from */
         CHECK(ff != NULL);
         if (ff) {
             CHECK(dw_same_identity((IUnknown *)ff, (IUnknown *)m.fam));
@@ -272,7 +272,7 @@ TEST(fam_collection_is_the_creating_collection) {
     CHECK_HR_OK(IDWriteFontFamily_GetFontCollection(m.fam, &c));
     CHECK(c != NULL);
     if (c) {
-        /* DWriteFontFamily::GetFontCollection AddRefs the stored collection pointer */
+        /* IDWriteFontFamily::GetFontCollection AddRefs the stored collection pointer */
         CHECK(dw_same_identity((IUnknown *)c, (IUnknown *)m.coll));
         EXPECT_REFS(m.coll, before + 1);
         IDWriteFontCollection_Release(c);
@@ -304,7 +304,7 @@ TEST(fam_family_from_collection_matches_count) {
 /* ---- QueryInterface ------------------------------------------------------------------------------- */
 TEST(fam_qi_matrix) {
     FM_OPEN(m, "FmQi", F_RIBBI);
-    /* ComObject<DWriteFontFamily>::QueryInterface: IDWriteFontFamily2 (the 3ed49e77 comparison), IDWriteFontFamily1, IDWriteFontFamily,
+    /* ComObject<IDWriteFontFamily>::QueryInterface: IDWriteFontFamily2 (the 3ed49e77 comparison), IDWriteFontFamily1, IDWriteFontFamily,
      * IDWriteFontList2, IDWriteFontList1, IDWriteFontList and IUnknown; anything else is E_NOINTERFACE with *ppv NULL. */
     dw_qi_row rows[] = {
         DW_QI_ROW(IDWriteFontFamily, 1), DW_QI_ROW(IDWriteFontFamily1, 1), DW_QI_ROW(IDWriteFontFamily2, 1),
@@ -547,7 +547,7 @@ TEST(fam_list_fonts_report_the_source_family) {
         for (i = 0; i < c; i++) {
             IDWriteFont *font = NULL; IDWriteFontFamily *ff = NULL;
             if (SUCCEEDED(IDWriteFontList_GetFont(l, i, &font)) && font && SUCCEEDED(IDWriteFont_GetFontFamily(font, &ff)) && ff) {
-                /* DWriteMatchingFontList::GetFont creates fonts with the family it was created from */
+                /* IDWriteFontList::GetFont creates fonts with the family it was created from */
                 CHECKF(dw_same_identity((IUnknown *)ff, (IUnknown *)m.fam), "list font %u family differs", i);
             } else CHECK(0);
             DW_RELEASE(ff); DW_RELEASE(font);
@@ -562,7 +562,7 @@ TEST(fam_list_holds_family_reference) {
     ULONG before = dw_refcount((IUnknown *)m.fam);
     IDWriteFontList *l = NULL;
     CHECK_HR_OK(IDWriteFontFamily_GetMatchingFonts(m.fam, 400, 5, 0, &l));
-    /* DWriteMatchingFontList's constructor AddRefs the family */
+    /* IDWriteFontList's constructor AddRefs the family */
     EXPECT_REFS(m.fam, before + 1);
     if (l) IDWriteFontList_Release(l);
     EXPECT_REFS(m.fam, before);
@@ -649,7 +649,7 @@ TEST(fam_font_holds_family_reference) {
     ULONG before = dw_refcount((IUnknown *)m.fam);
     IDWriteFont *a = NULL, *b = NULL;
     CHECK_HR_OK(IDWriteFontFamily_GetFont(m.fam, 0, &a));
-    /* DWriteFont::Create stores the family and AddRefs it */
+    /* IDWriteFont::Create stores the family and AddRefs it */
     EXPECT_REFS(m.fam, before + 1);
     CHECK_HR_OK(IDWriteFontFamily_GetFont(m.fam, 1, &b));
     EXPECT_REFS(m.fam, before + 2);

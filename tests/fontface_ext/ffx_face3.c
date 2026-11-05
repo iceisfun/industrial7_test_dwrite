@@ -1,10 +1,10 @@
 /* IDWriteFontFace3: GetFontFaceReference, GetPanose, GetWeight/GetStretch/GetStyle, GetFamilyNames, GetFaceNames, GetInformationalStrings,
  * HasCharacter, IsCharacterLocal, IsGlyphLocal, AreCharactersLocal, AreGlyphsLocal.
- *   GetFontFaceReference (dwrite.dll!0xdc2d0): *ref = (IDWriteFontFaceReference *)(this + 0x18); AddRef(this); S_OK.
- *   GetFamilyNames / GetFaceNames (!0x267b0 / !0xdbe90): *names zeroed, always S_OK.
- *   GetInformationalStrings (!0x28a10): *strings = NULL, *exists = FALSE first; exists TRUE only when the name table has the id.
- *   HasCharacter (!0xdd1a0): cmap lookup, non-zero glyph.
- *   AreCharactersLocal / AreGlyphsLocal (!0xdb800 / !0xdb8e0): *are_local = 0; NULL array with count != 0 -> E_INVALIDARG. */
+ *   GetFontFaceReference: *ref = the face's own IDWriteFontFaceReference; AddRef(this); S_OK.
+ *   GetFamilyNames / GetFaceNames: *names zeroed, always S_OK.
+ *   GetInformationalStrings: *strings = NULL, *exists = FALSE first; exists TRUE only when the name table has the id.
+ *   HasCharacter: cmap lookup, non-zero glyph.
+ *   AreCharactersLocal / AreGlyphsLocal: *are_local = 0; NULL array with count != 0 -> E_INVALIDARG. */
 #include "ffx.h"
 
 #define EINVAL ((HRESULT)0x80070057)

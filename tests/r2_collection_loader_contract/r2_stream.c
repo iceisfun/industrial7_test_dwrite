@@ -1,12 +1,12 @@
 /* IDWriteFontFileLoader / IDWriteFontFileStream traffic caused by building a custom collection.
  *
- * Win10 decomp facts:
- *  - Every enumerated file is analysed inside the enumeration loop: FontFileAnalyzer::Analyze calls
- *    FontFileReference::GetFileSize first (GetStreamInternal -> CreateStreamFromKey(key, 4), then stream->GetFileSize;
- *    both through CallbackException::ThrowIfFailed), then probes the header with FontFragmentPtr reads starting at offset 0
- *    (IsPfm reads 0x75 bytes, IsPfb 7 bytes, IsOpenType 16 bytes).  Each FontFragmentPtr releases its fragment with
+ * Win10 observed facts:
+ *  - Every enumerated file is analysed inside the enumeration loop: Analyze calls
+ *    GetFileSize first (CreateStreamFromKey(key, 4), then stream->GetFileSize;
+ *    both raising on failure), then probes the header with fragment reads starting at offset 0
+ *    (IsPfm reads 0x75 bytes, IsPfb 7 bytes, IsOpenType 16 bytes).  Each fragment guard releases its fragment with
  *    ReleaseFileFragment(context) in its destructor.
- *  - An analyzed type that is not a supported font makes AddFontFileInternal return DWRITE_E_FILEFORMAT, which AddFontFiles
+ *  - An analyzed type that is not a supported font makes the per-file add return DWRITE_E_FILEFORMAT, which AddFontFiles
  *    ignores: the file is silently left out.
  */
 #include "r2.h"
@@ -358,7 +358,7 @@ RT(non_font_text_file)
 }
 RT(non_font_mz_header_note)
 {
-    /* FontFileAnalyzer::IsFon parses the NE/PE resource directory of an 'MZ' file and may reject it with an exception */
+    /* IsFon parses the NE/PE resource directory of an 'MZ' file and may reject it with an exception */
     uint8_t b[300]; memset(b, 0, sizeof b); b[0] = 'M'; b[1] = 'Z';
     junk_case(b, sizeof b, 0);
 }

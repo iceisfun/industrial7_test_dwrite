@@ -1,7 +1,7 @@
-/* IDWriteFontFace1::GetUnicodeRanges.  DWriteFontFace::GetUnicodeRanges (dwrite.dll!0xdd0b0):
+/* IDWriteFontFace1::GetUnicodeRanges.  IDWriteFontFace::GetUnicodeRanges:
  *   *count = 0; if (ranges) memset(ranges, 0, max_count * 8);
  *   raw CFF -> DWRITE_E_UNSUPPORTEDOPERATION; if (max_count != 0 && ranges == NULL) -> E_INVALIDARG;
- *   else enumerate maximal runs of code points with a non-zero glyph in the cmap (CmapBase::GetUnicodeRanges, !0x10d66c),
+ *   else enumerate maximal runs of code points with a non-zero glyph in the cmap (GetUnicodeRanges),
  *   store the first max_count of them, *count = total; total > max_count -> HRESULT_FROM_WIN32(ERROR_INSUFFICIENT_BUFFER). */
 #include "ffx.h"
 

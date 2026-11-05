@@ -1,5 +1,5 @@
 /* IDWriteFactory4::ComputeGlyphOrigins (both overloads).
- *   5-argument form (dwrite.dll!DWriteFactory::ComputeGlyphOrigins 0xd6350): run == NULL -> E_INVALIDARG (nothing written); otherwise
+ *   5-argument form (IDWriteFactory::ComputeGlyphOrigins): run == NULL -> E_INVALIDARG (nothing written); otherwise
  *   origins[0..glyphCount) are zeroed, then ComputeGlyphOrigins (0x8f4fc) fills them; the transform is NOT applied to the origins (only
  *   the InDIPs variant of IDWriteFactory5.. applies it) and only matters for GDI measuring modes.
  *   3-argument form (0xd6310) = the 5-argument form with DWRITE_MEASURING_MODE_NATURAL and a NULL transform.

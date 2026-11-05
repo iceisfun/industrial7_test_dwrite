@@ -1,10 +1,10 @@
 /* IDWriteTextAnalyzer::GetGdiCompatibleGlyphPlacements and IDWriteTextAnalyzer1::GetJustificationOpportunities: additional depth.
  *
  * Win10 dwrite.dll:
- *   DWriteTextAnalyzer::GetGdiCompatibleGlyphPlacements (!0xe7ab0): fontFace NULL -> E_INVALIDARG; glyphCount 0 -> S_OK; textLength 0 -> E_INVALIDARG;
+ *   IDWriteTextAnalyzer::GetGdiCompatibleGlyphPlacements: fontFace NULL -> E_INVALIDARG; glyphCount 0 -> S_OK; textLength 0 -> E_INVALIDARG;
  *     fontEmSize <= 0, pixelsPerDip <= 0 (a NaN fails the comparison too) or any of the six matrix members NaN -> E_INVALIDARG; localeName NULL is
  *     replaced by "". All of that happens before any output is written. A raw CFF face (type 7) -> DWRITE_E_UNSUPPORTEDOPERATION (0x88985009).
- *   DWriteTextAnalyzer::GetJustificationOpportunities (!0x1ddb0 -> TextAnalyzer !0x1de90): fontEmSize < 0 or NaN -> E_INVALIDARG; glyphCount 0 -> S_OK; the
+ *   IDWriteTextAnalyzer::GetJustificationOpportunities ( -> TextAnalyzer): fontEmSize < 0 or NaN -> E_INVALIDARG; glyphCount 0 -> S_OK; the
  *     entry of every glyph in [0, glyphCount) is written and nothing else; float members are constants or products of fontEmSize with per-script constants (or
  *     a width read from the face), hence they scale linearly with the em size.
  */

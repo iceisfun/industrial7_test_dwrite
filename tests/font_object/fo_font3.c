@@ -1,8 +1,8 @@
 /* IDWriteFont::CreateFontFace, IDWriteFont3: CreateFontFace(IDWriteFontFace3**), Equals, GetFontFaceReference, HasCharacter (BOOL), GetLocality.
- * Decomp: DWriteFont::CreateFontFace(IDWriteFontFace**) is a thunk into the IDWriteFont3 variant (vtable slot 19), which zeroes *out, builds a
- * FontFaceElementKey from the font's FontFaceKey and calls DWriteFontFace::Create.  DWriteFont::Equals compares FontFaceKey (file reference,
+ * Observed: IDWriteFont::CreateFontFace(IDWriteFontFace**) is a thunk into the IDWriteFont3 variant (vtable slot 19), which zeroes *out, builds a
+ * FontFaceElementKey from the font's FontFaceKey and calls IDWriteFontFace::Create.  IDWriteFont::Equals compares FontFaceKey (file reference,
  * face index, simulations) and falls back to the canonical keys; Equals(NULL) is FALSE.  GetLocality is LOCAL (2) unless the file loader
- * answers QueryInterface(IDWriteRemoteFontFileLoader) (FontFileReference::GetLocality). */
+ * answers QueryInterface(IDWriteRemoteFontFileLoader) (GetLocality). */
 #include "fo.h"
 
 static IDWriteFont3 *as3(IDWriteFont *f) { IDWriteFont3 *p = NULL; IDWriteFont_QueryInterface(f, &IID_IDWriteFont3, (void **)&p); return p; }

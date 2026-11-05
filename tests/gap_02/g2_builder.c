@@ -1,7 +1,7 @@
 /* IDWriteFactory3/5/6/7::CreateFontSetBuilder.
- * Win10 decompilation: all four vtable entries (IDWriteFactory3 !0xd7410 returning IDWriteFontSetBuilder**, IDWriteFactory5/6 !0xd7400
+ * Win10 probing: all four vtable entries (IDWriteFactory3 returning IDWriteFontSetBuilder**, IDWriteFactory5/6
  * returning IDWriteFontSetBuilder1**; the Factory7 slot is the Factory6 one) share one body: *out = NULL, operator new
- * DWriteFontSetBuilder(factory), AddRef, S_OK. Every call creates a NEW builder with a reference count of 1; builders are
+ * IDWriteFontSetBuilder(factory), AddRef, S_OK. Every call creates a NEW builder with a reference count of 1; builders are
  * independent of each other and never cached. The out pointer is not validated (NULL crashes). */
 #include "g2.h"
 

@@ -1,5 +1,5 @@
 /* IDWriteFont::GetFaceNames and GetInformationalStrings.
- * Decomp: DWriteFont::GetInformationalStrings zeroes *strings and *exists first, maps ids 1..21 (0x15) onto name dictionaries and
+ * Observed: IDWriteFont::GetInformationalStrings zeroes *strings and *exists first, maps ids 1..21 (0x15) onto name dictionaries and
  * reports exists=TRUE only for a non-empty dictionary; any id outside [1,21] yields exists=FALSE with S_OK. */
 #include "fo.h"
 

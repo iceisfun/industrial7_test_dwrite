@@ -1,6 +1,6 @@
 #include "r2fs.h"
 
-/* IDWriteFontFallback1::MapCharacters (DWriteFontFallback::MapCharacters with axis values on Windows 10): same lookup as the v0 method
+/* IDWriteFontFallback1::MapCharacters (IDWriteFontFallback::MapCharacters with axis values on Windows 10): same lookup as the v0 method
  * (the base family first, then the mappings) but takes variable-font axis values instead of weight/style/stretch and returns an
  * IDWriteFontFace5 (the font object QueryInterface'd for IID_IDWriteFontFace5; a failing QI is returned as the HRESULT).
  * Outputs are zeroed first; validation is described in args.c. */

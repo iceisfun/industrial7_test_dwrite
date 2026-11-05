@@ -50,7 +50,7 @@ static const char *const l_coll_q[]    = { "IDWriteFontCollection", "?IDWriteFon
 static const char *const l_family[]    = { FFAMS, FLISTS, NULL };
 static const char *const l_flist[]     = { FLISTS, "?IDWriteFontFamily", "?IDWriteFontFamily1", "?IDWriteFontFamily2", NULL };
 static const char *const l_font[]      = { FONTS, NULL };
-/* DWriteFontFace::QueryInterface (decomp 0x180075620) also answers IDWriteFontFaceReference from the same object. */
+/* IDWriteFontFace::QueryInterface also answers IDWriteFontFaceReference from the same object. */
 static const char *const l_face[]      = { FACES, "IDWriteFontFaceReference", NULL };
 static const char *const l_file[]      = { "IDWriteFontFile", NULL };
 static const char *const l_faceref[]   = { "IDWriteFontFaceReference", "IDWriteFontFaceReference1", NULL };

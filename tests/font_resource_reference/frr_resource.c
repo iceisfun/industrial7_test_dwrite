@@ -2,10 +2,10 @@
  * interface (GetFontFile, GetFontFaceIndex, GetFontAxisCount, GetDefaultFontAxisValues, GetFontAxisRanges, GetFontAxisAttributes, GetAxisNames,
  * GetAxisValueNameCount, GetAxisValueNames, HasVariations, CreateFontFace, CreateFontFaceReference).
  *
- * Win10 dwrite.dll (DWriteFactory::CreateFontResource !0xd7280, DWriteFontResource::Create !0xd280, DWriteFontFace::GetFontResource !0xd190, methods
- * !0xe1c60 GetFontFile, !0x92800 GetFontFaceIndex, !0x927f0 GetFontAxisCount, !0xe1b00 GetDefaultFontAxisValues, !0x25c40 GetFontAxisRanges,
- * !0xe1bc0 GetFontAxisAttributes, !0xe1860 GetAxisNames, !0xe1950 GetAxisValueNameCount, !0xe19f0 GetAxisValueNames, !0xe1cc0 HasVariations,
- * !0xe1270 CreateFontFace, !0xe1560 CreateFontFaceReference):
+ * Win10 dwrite.dll (IDWriteFactory::CreateFontResource, IDWriteFontFace::GetFontResource, methods
+ * GetFontFile, GetFontFaceIndex, GetFontAxisCount, GetDefaultFontAxisValues, GetFontAxisRanges,
+ * GetFontAxisAttributes, GetAxisNames, GetAxisValueNameCount, GetAxisValueNames, HasVariations,
+ * CreateFontFace, CreateFontFaceReference):
  *   - CreateFontResource zeroes *resource, rejects a NULL file with E_INVALIDARG, does not read the font; the resource AddRefs the file it was
  *     created from and GetFontFile hands that same object back (AddRef'd). A resource made by GetFontResource builds its IDWriteFontFile on
  *     the first GetFontFile call and keeps returning that one object.

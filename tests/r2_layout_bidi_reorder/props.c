@@ -1,6 +1,6 @@
 /* Layout-wide property setters that steer bidi / flow behaviour: argument validation and round trips.
  *
- * Facts (DWriteTextLayout:: setters in dwrite.dll):
+ * Facts (IDWriteTextLayout:: setters in dwrite.dll):
  *  - SetReadingDirection accepts 0..3 (LTR, RTL, TTB, BTT), SetFlowDirection 0..3, SetTextAlignment 0..3, SetOpticalAlignment 0..1,
  *    SetVerticalGlyphOrientation 0..1; anything else returns E_INVALIDARG and stores nothing;
  *  - SetIncrementalTabStop rejects values <= 0 and NaN (also -0.0), accepts everything else;

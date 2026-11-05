@@ -1,5 +1,5 @@
 /* DWRITE_FACTORY_TYPE validation and out-parameter protocol of DWriteCreateFactory.
- * The export zeroes *ppFactory first, then: type 1 builds a new DWriteFactory, type 0 returns the process-wide one,
+ * The export zeroes *ppFactory first, then: type 1 builds a new IDWriteFactory, type 0 returns the process-wide one,
  * anything else throws an ArgumentException("factoryType") whose HRESULT is E_INVALIDARG (0x80070057). */
 #include "fc.h"
 

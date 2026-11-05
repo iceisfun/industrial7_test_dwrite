@@ -1,5 +1,5 @@
 /* E_INVALIDARG catalogue for the factory family (IDWriteFactory .. IDWriteFactory6), the in-memory loader and GlyphRunAnalysis creation.
- * Every row is a branch visible in the dwrite.dll decompilation: argument predicate -> ArgumentException/-0x7ff8ffa9, with the out
+ * Every row is a branch visible in the dwrite.dll probing: argument predicate -> ArgumentException/-0x7ff8ffa9, with the out
  * parameter written to NULL before the check. */
 #include "eh.h"
 
@@ -324,7 +324,7 @@ TEST(factory3_fontdownloadqueue_listener_arguments) {
         CHECK_HR(IDWriteFontDownloadQueue_AddListener(q, (IDWriteFontDownloadListener *)l, &tok), S_OK);
         t_note("listener token = %u", tok);
         CHECK_HR(IDWriteFontDownloadQueue_RemoveListener(q, tok), S_OK);
-        CHECK_HR(IDWriteFontDownloadQueue_RemoveListener(q, tok), E_INVALIDARG);          /* RemoveListenerInternal reports "not found" */
+        CHECK_HR(IDWriteFontDownloadQueue_RemoveListener(q, tok), E_INVALIDARG);          /* RemoveListener reports "not found" */
         CHECK_HR(IDWriteFontDownloadQueue_RemoveListener(q, 0xDEADBEEF), E_INVALIDARG);
         CHECK_HR(IDWriteFontDownloadQueue_RemoveListener(q, 0), E_INVALIDARG);
         CHECK(IDWriteFontDownloadQueue_IsEmpty(q));

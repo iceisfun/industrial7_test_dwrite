@@ -1,6 +1,6 @@
 /* Shared fixtures for the vertical_text_orientation area: vertical / sideways text in DirectWrite.
  *
- * How Windows 10 builds a vertical layout (TextLayout / MutableTextLayout / DWriteTextLayout, dwrite.dll 10.0.19041):
+ * How Windows 10 builds a vertical layout (TextLayout / MutableTextLayout / IDWriteTextLayout, dwrite.dll 10.0.19041):
  *   - "vertical" is bit 1 of the READING direction (TOP_TO_BOTTOM = 2, BOTTOM_TO_TOP = 3); "vertical flow" is bit 1 of the FLOW direction
  *     (LEFT_TO_RIGHT = 2, RIGHT_TO_LEFT = 3). Reading and flow must agree on that bit, otherwise the first operation that needs the laid-out
  *     text fails with DWRITE_E_FLOWDIRECTIONCONFLICTS (0x8898500B); the setters and CreateTextLayout accept every combination.

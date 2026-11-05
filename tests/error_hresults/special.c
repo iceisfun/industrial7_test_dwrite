@@ -240,7 +240,7 @@ TEST(flowdirection_createtextlayout_with_conflicting_format) {
 }
 TEST(textrenderer_incompatible_matrix) {
     NEED_FACTORY(); int rd, fd;
-    /* TextLayout::Draw queries the renderer for IDWriteTextRenderer1 ({d3e0e934-22a0-427e-aae4-7d9574b59db1}); vertical reading needs it. */
+    /* Draw queries the renderer for IDWriteTextRenderer1 ({d3e0e934-22a0-427e-aae4-7d9574b59db1}); vertical reading needs it. */
     for (rd = 0; rd < 4; rd++) for (fd = 0; fd < 4; fd++) {
         if (vertical_axis(rd) != vertical_axis(fd)) continue;
         IDWriteTextLayout *l = dir_layout(f, (DWRITE_READING_DIRECTION)rd, (DWRITE_FLOW_DIRECTION)fd); dwx_renderer *r = dwx_renderer_new();
@@ -288,7 +288,7 @@ TEST(draw_pixel_snapping_callback_failure_passes_through) {
     for (i = 0; i < 5; i++) {
         IDWriteTextLayout *l = eh_layout(f, L"Hello", 100, 100, NULL); dwx_renderer *r = dwx_renderer_new();
         if (l) {
-            r->fail_snapping = rpass[i];       /* IsPixelSnappingDisabled -> CallbackException::ThrowIfFailed */
+            r->fail_snapping = rpass[i];       /* IsPixelSnappingDisabled -> ThrowIfFailed */
             HRESULT hr = IDWriteTextLayout_Draw(l, NULL, (IDWriteTextRenderer *)r, 0.f, 0.f);
             CHECKF(hr == rpass[i], "IsPixelSnappingDisabled injected %s got %s", dw_hr_name(rpass[i]), dw_hr_name(hr)); EXPECT_EQ(r->ncalls, 0);
             r->fail_snapping = S_OK; r->fail_transform = rpass[i];

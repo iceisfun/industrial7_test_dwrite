@@ -1,6 +1,6 @@
 /* IDWriteTextLayout::Draw on bidirectional text: what the recording IDWriteTextRenderer observes.
  *
- * Facts (TextLayout::DrawGlyphRuns): the layout walks its spans and calls DrawGlyphRun once per drawable span with
+ * Facts (DrawGlyphRuns): the layout walks its spans and calls DrawGlyphRun once per drawable span with
  * DWRITE_GLYPH_RUN {fontFace, fontEmSize, glyphCount, glyphIndices, glyphAdvances, glyphOffsets, isSideways, bidiLevel} and a
  * DWRITE_GLYPH_RUN_DESCRIPTION {locale, string, stringLength, clusterMap, textPosition}; the spans partition the text.
  * The origin of a right-to-left run is documented to be on the right; where exactly it falls is recorded, not asserted.
@@ -137,7 +137,7 @@ TEST(r2_layout_bidi_reorder_draw_context_passthrough)
     dwx_release(r); BX_DONE(l);
 }
 
-/* A failing DrawGlyphRun callback: TextLayout::DrawGlyphRuns discards the callback's HRESULT, so the remaining spans are still
+/* A failing DrawGlyphRun callback: DrawGlyphRuns discards the callback's HRESULT, so the remaining spans are still
  * drawn; whether Draw itself reports the failure is recorded. */
 TEST(r2_layout_bidi_reorder_draw_renderer_failure_behaviour)
 {

@@ -1,6 +1,6 @@
 /* IDWriteFontFace1::GetMetrics (DWRITE_FONT_METRICS1), GetGdiCompatibleMetrics, GetCaretMetrics, IsMonospacedFont.
- * Derivations come from InitializeDefaultFontMetrics (dwrite.dll!0xdba0), FontFaceLight::GetFontMetrics (!0x74b9c),
- * DWriteFontFace::GetCaretMetrics (!0xdbe30) and FontFace::GetGdiCompatibleMetrics (!0x6f454). */
+ * Derivations come from the default font metrics, GetFontMetrics,
+ * IDWriteFontFace::GetCaretMetrics and GetGdiCompatibleMetrics. */
 #include "ffx.h"
 #include <math.h>
 
@@ -65,7 +65,7 @@ TEST(m1_equals_base_metrics_prefix) {
     DWRITE_FONT_METRICS b, e; DWRITE_FONT_METRICS1 m;
     IDWriteFontFace_GetMetrics(x.f0, &b);
     ffx_metrics1(&x, &m);
-    /* both entry points copy from the same FontFaceLight::GetFontMetrics blob */
+    /* both entry points copy from the same GetFontMetrics blob */
     CHECK(!memcmp(&b, &m, sizeof b));
     (void)e;
     ffx_close(&x);
@@ -265,7 +265,7 @@ TEST(m1_sub_super_follow_os2_table) {
 static short obl(int v) { return (short)((unsigned)(v * 0x5700) >> 16); }
 static void expect_oblique_adjusted(const DWRITE_FONT_METRICS1 *base, const DWRITE_FONT_METRICS1 *m) {
     DWRITE_FONT_METRICS1 e = *base;
-    /* FontFaceLight::GetFontMetrics: with the oblique simulation x-extents grow by y * 0x5700 / 65536 (~0.34) */
+    /* GetFontMetrics: with the oblique simulation x-extents grow by y * 0x5700 / 65536 (~0.34) */
     e.glyphBoxRight = (INT16)(base->glyphBoxRight + obl(base->glyphBoxTop));
     e.glyphBoxLeft = (INT16)(base->glyphBoxLeft + obl(base->glyphBoxBottom));
     e.subscriptPositionX = (INT16)(base->subscriptPositionX + obl(base->subscriptPositionY));

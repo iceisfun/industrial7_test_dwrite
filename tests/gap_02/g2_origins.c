@@ -1,7 +1,7 @@
 /* IDWriteFactory4::ComputeGlyphOrigins, both overloads.
- * Win10 decompilation: the 3-argument form (dwrite.dll!0xd6310) forwards to the 5-argument form with measuring mode NATURAL and no
- * matrix. The 5-argument form (!0xd6350): run == NULL -> E_INVALIDARG; else origins[0..glyphCount) are zeroed and the internal
- * ComputeGlyphOrigins (!0x8f4fc) runs with pixelsPerDip 1, isSideways = run.isSideways != 0, rtl = bidiLevel & 1; the matrix is never
+ * Win10 probing: the 3-argument form forwards to the 5-argument form with measuring mode NATURAL and no
+ * matrix. The 5-argument form: run == NULL -> E_INVALIDARG; else origins[0..glyphCount) are zeroed and the internal
+ * ComputeGlyphOrigins runs with pixelsPerDip 1, isSideways = run.isSideways != 0, rtl = bidiLevel & 1; the matrix is never
  * applied to the output points. Internal behaviour:
  *   - LTR, advances supplied, not sideways: pure accumulation, x_i = ox + sum(adv_j, j < i), y_i = oy; no font access at all
  *     (matrix and measuring mode are ignored).

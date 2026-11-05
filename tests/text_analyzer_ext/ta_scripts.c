@@ -1,6 +1,6 @@
 /* IDWriteTextAnalyzer1::GetScriptProperties.
  *
- * Windows 10 (DWriteTextAnalyzer::GetScriptProperties): the 16-bit DWRITE_SCRIPT_ANALYSIS.script is an index into a table of
+ * Windows 10 (IDWriteTextAnalyzer::GetScriptProperties): the 16-bit DWRITE_SCRIPT_ANALYSIS.script is an index into a table of
  * 0x99 (153) 32-byte entries. Index >= 153 returns E_INVALIDARG but the output has still been filled with entry 0
  * (the lookup index is masked to 0 for out of range values). DWRITE_SCRIPT_ANALYSIS.shapes is ignored.
  * The first 20 bytes of the entry are DWRITE_SCRIPT_PROPERTIES; isoScriptCode packs the four characters little-endian

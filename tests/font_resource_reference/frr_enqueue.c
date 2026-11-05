@@ -1,9 +1,9 @@
 /* IDWriteFontFaceReference::Enqueue{Font,Character,Glyph,FileFragment}DownloadRequest on references that are not remote.
  *
- * Win10 dwrite.dll (!0xe4030, !0xe3e10, !0xe4130, !0xe3f20): each method asks the reference's loader for IDWriteRemoteFontFileLoader
- * (via TryGetRemoteFileLoader, !0xe4594). When the loader does not implement it the method returns S_OK immediately: the arguments are
+ * Win10 dwrite.dll: each method asks the reference's loader for IDWriteRemoteFontFileLoader
+ * (via the remote loader query). When the loader does not implement it the method returns S_OK immediately: the arguments are
  * never read, the download queue is not touched (not even created) and no listener is invoked. Only a remote loader leads to
- * FontDownloadQueue::Add*DownloadRequest; that path needs a real network font provider and is outside this corpus.
+ * Add*DownloadRequest; that path needs a real network font provider and is outside this corpus.
  */
 #include "frr.h"
 

@@ -62,7 +62,7 @@ TEST(f12_font3_locality_local) {
     for (i = 0; i < m.count; i++) {
         IDWriteFont3 *f3 = NULL;
         if (SUCCEEDED(IDWriteFontFamily1_GetFont(f1, i, &f3)) && f3) {
-            /* FontFileReference::GetLocality: loaders that do not implement IDWriteRemoteFontFileLoader are LOCAL (2) */
+            /* GetLocality: loaders that do not implement IDWriteRemoteFontFileLoader are LOCAL (2) */
             EXPECT_EQ(IDWriteFont3_GetLocality(f3), DWRITE_LOCALITY_LOCAL);
         } else CHECK(0);
         DW_RELEASE(f3);
@@ -134,7 +134,7 @@ TEST(f12_locality_queries_loader_for_remote_interface) {
     LONG before = dwx_qi_calls(m.fl);
     DWRITE_LOCALITY l = IDWriteFontFamily1_GetFontLocality(f1, 0);
     EXPECT_EQ(l, DWRITE_LOCALITY_LOCAL);
-    /* FontFileReference::GetLocality asks the loader for IDWriteRemoteFontFileLoader (68648c83-...), which our loader refuses */
+    /* GetLocality asks the loader for IDWriteRemoteFontFileLoader (68648c83-...), which our loader refuses */
     t_note("loader QueryInterface calls during GetFontLocality: %ld", (long)(dwx_qi_calls(m.fl) - before));
     IDWriteFontFamily1_Release(f1);
     fm_close(&m);
@@ -442,7 +442,7 @@ TEST(f12_family2_matching_argument_validation) {
     NEED_F2(m, f2);
     DWRITE_FONT_AXIS_VALUE v = { DWRITE_FONT_AXIS_TAG_WEIGHT, 700.0f };
     IDWriteFontList2 *l;
-    /* DWriteFontFamily::GetMatchingFonts(axis): the count must be < 0x10000 and the array non-NULL unless the count is 0, else E_INVALIDARG;
+    /* IDWriteFontFamily::GetMatchingFonts(axis): the count must be < 0x10000 and the array non-NULL unless the count is 0, else E_INVALIDARG;
      * the out parameter is zeroed first and nothing is read on the error paths. */
     struct { const DWRITE_FONT_AXIS_VALUE *p; UINT32 n; } bad[] = { { NULL, 1 }, { NULL, 2 }, { NULL, 100 }, { NULL, 0xFFFF }, { NULL, 0x10000 }, { &v, 0x10000 }, { &v, 0x10001 }, { &v, 0x7FFFFFFF }, { &v, 0xFFFFFFFFu }, { NULL, 0xFFFFFFFFu } };
     size_t i;

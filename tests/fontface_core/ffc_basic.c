@@ -1,7 +1,7 @@
 /* IDWriteFontFace identity: GetType / GetFiles / GetIndex / GetSimulations / IsSymbolFont / GetGlyphCount,
  * factory CreateFontFace argument validation, refcount and QueryInterface behaviour.
  *
- * Facts from the Windows 10 decompilation (DWriteFactory::CreateFontFace, DWriteFontFace::GetFiles/GetType/GetIndex/GetSimulations):
+ * Facts from the Windows 10 probing (IDWriteFactory::CreateFontFace, IDWriteFontFace::GetFiles/GetType/GetIndex/GetSimulations):
  *  - *fontFace is zeroed first; faceType must be CFF(0), TRUETYPE(1), OPENTYPE_COLLECTION(2), UNKNOWN(6) or RAW_CFF(7), otherwise E_INVALIDARG;
  *  - faceIndex must be 0 unless faceType is OPENTYPE_COLLECTION; numberOfFiles must be exactly 1; fontFiles and fontFiles[0] non-NULL;
  *  - simulations may only carry BOLD|OBLIQUE (bits 0 and 1), anything else is E_INVALIDARG;
@@ -267,7 +267,7 @@ FTEST(ffc_getfiles_cached_pointer_and_refs) {
     r1 = dw_refcount((IUnknown *)a);
     CHECK_HR_OK(IDWriteFontFace_GetFiles(face, &n, &b));
     r2 = dw_refcount((IUnknown *)a);
-    CHECK(a == b);                 /* DWriteFontFace::CreateLazily stores the file once; every call hands out that pointer */
+    CHECK(a == b);                 /* IDWriteFontFace::CreateLazily stores the file once; every call hands out that pointer */
     EXPECT_EQ(r2, r1 + 1);         /* AddRef per call */
     IDWriteFontFile_Release(b);
     r3 = dw_refcount((IUnknown *)a);

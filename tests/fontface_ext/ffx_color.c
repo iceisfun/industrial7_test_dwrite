@@ -1,6 +1,6 @@
 /* IDWriteFontFace2: IsColorFont, GetColorPaletteCount, GetPaletteEntryCount, GetPaletteEntries.
- *   IsColorFont (dwrite.dll!0x208b0), GetColorPaletteCount (!0x924c0), GetPaletteEntryCount (!0x92510) read cached face data.
- *   GetPaletteEntries (!0xdcbe0): first the palette is looked up (unknown index or no CPAL -> DWRITE_E_NOCOLOR 0x8898500C), then
+ *   IsColorFont, GetColorPaletteCount, GetPaletteEntryCount read cached face data.
+ *   GetPaletteEntries: first the palette is looked up (unknown index or no CPAL -> DWRITE_E_NOCOLOR 0x8898500C), then
  *   firstEntry > count or entryCount > count - firstEntry -> E_INVALIDARG; the output is not touched on failure.
  *   Colors are converted as byte / 255 into DWRITE_COLOR_F (r, g, b, a) from the CPAL BGRA records. */
 #include "ffx.h"

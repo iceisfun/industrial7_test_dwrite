@@ -4,7 +4,7 @@
  * 'a'..'z' 28..53, '0'..'9' 54..63, space 1, notdef 0) with GSUB 'liga' f+i -> gid 65 and GPOS 'kern' A+V, V+A -100, T+o -150, A+Y -80.
  * At em 16 one advance is 1000 * 16 / 2048 = 7.8125 DIPs.
  *
- * Decomp facts: GetGlyphs zeroes *actualGlyphCount first; fontFace NULL => E_INVALIDARG; textLength 0 => S_OK (nothing written);
+ * Observed facts: GetGlyphs zeroes *actualGlyphCount first; fontFace NULL => E_INVALIDARG; textLength 0 => S_OK (nothing written);
  * maxGlyphCount 0 (with text) or too small => E_NOT_SUFFICIENT_BUFFER (0x8007007A).  GetGlyphPlacements / GetGdiCompatibleGlyphPlacements:
  * fontFace NULL or textLength 0 => E_INVALIDARG, glyphCount 0 => S_OK; the GDI variant also needs fontEmSize > 0, pixelsPerDip > 0 and
  * no NaN in the transform. */

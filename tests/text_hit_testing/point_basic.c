@@ -1,6 +1,6 @@
 /* IDWriteTextLayout::HitTestPoint on plain left-to-right text.
  *
- * Facts (DWriteTextLayout::HitTestPoint -> TextLayout::HitTestPoint / HitTestPointInSpan):
+ * Facts (IDWriteTextLayout::HitTestPoint -> HitTestPoint / HitTestPointInSpan):
  *  - the method never fails: it zeroes the three outputs, lays the text out, fills them and returns S_OK;
  *  - the line is the first one whose bottom edge is strictly greater than y (last line when y is below everything);
  *  - inside a line the cluster is the first whose right edge is strictly greater than x, so a point exactly on a cluster boundary

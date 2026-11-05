@@ -1,13 +1,13 @@
 /* Vertical glyph support of IDWriteFontFace / IDWriteFontFace1: GetVerticalGlyphVariants, HasVerticalGlyphVariants, vertical design metrics
  * and vertical advances.
  *
- * DWriteFontFace::GetVerticalGlyphVariants: count 0 returns S_OK without touching the buffers; otherwise a NULL nominal array zeroes the output
+ * IDWriteFontFace::GetVerticalGlyphVariants: count 0 returns S_OK without touching the buffers; otherwise a NULL nominal array zeroes the output
  * array and returns E_INVALIDARG. The variants come from the GSUB 'vert' feature of the DFLT script's default language system, single substitution lookups
  * only (type 1, directly or via an extension subtable); a glyph without an entry (or whose variant is glyph 0) keeps its index; nominal == variants is allowed.
  * HasVerticalGlyphVariants is TRUE exactly when such a substitution map was found.
- * DWriteFontFace::GetDesignGlyphMetrics fills advanceHeight and topSideBearing from vmtx; the isSideways argument only matters for simulated
+ * IDWriteFontFace::GetDesignGlyphMetrics fills advanceHeight and topSideBearing from vmtx; the isSideways argument only matters for simulated
  * oblique fonts. A NULL glyph index array is E_INVALIDARG (even for a zero count) and the metrics array is zeroed first.
- * DWriteFontFace::GetDesignGlyphAdvances zeroes the advance array first, takes advanceHeight when isSideways is TRUE, and rejects a NULL index array
+ * IDWriteFontFace::GetDesignGlyphAdvances zeroes the advance array first, takes advanceHeight when isSideways is TRUE, and rejects a NULL index array
  * only for a non-zero count.
  */
 #include "vto.h"

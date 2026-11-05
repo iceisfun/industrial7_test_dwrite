@@ -1,5 +1,5 @@
 /* The extension interfaces must be available on a face however it was created: factory + file, IDWriteFont, GDI interop (LOGFONT, HDC),
- * a font face reference, a font resource and a custom font collection. All of them are DWriteFontFace objects, so they answer
+ * a font face reference, a font resource and a custom font collection. All of them are IDWriteFontFace objects, so they answer
  * IDWriteFontFace .. IDWriteFontFace5 with one pointer and agree with each other on identity (IDWriteFontFace5::Equals). */
 #include "ffx.h"
 

@@ -1,7 +1,7 @@
 #include "ntf.h"
 
 /* IDWriteFontFallback (system object from IDWriteFactory2::GetSystemFontFallback) on Windows 10:
- *   - GetSystemFontFallback zeroes the out pointer and builds a NEW DWriteFontFallback object per call (refcount 1, never cached/shared);
+ *   - GetSystemFontFallback zeroes the out pointer and builds a NEW IDWriteFontFallback object per call (refcount 1, never cached/shared);
  *   - the object answers IDWriteFontFallback and IDWriteFontFallback1 (and a private interface), nothing else public;
  *   - MapCharacters (v0) first stores mappedLength = 0, *mappedFont = NULL, *scale = 1.0 and only then validates:
  *       source == NULL, textPosition + textLength overflowing 32 bits, weight outside 1..999, style > 2, stretch outside 1..9  =>  E_INVALIDARG

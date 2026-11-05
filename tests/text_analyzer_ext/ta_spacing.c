@@ -1,6 +1,6 @@
 /* IDWriteTextAnalyzer1::ApplyCharacterSpacing.
  *
- * Windows 10 behaviour (DWriteTextAnalyzer::ApplyCharacterSpacing / TextAnalyzer::ApplyCharacterSpacing):
+ * Windows 10 behaviour (IDWriteTextAnalyzer::ApplyCharacterSpacing / TextAnalyzer::ApplyCharacterSpacing):
  *   - modifiedGlyphAdvances / modifiedGlyphOffsets are zeroed first unless they alias the corresponding input pointer
  *     (so a failing call leaves distinct outputs zero and aliased outputs untouched);
  *   - E_INVALIDARG when leading or trailing is NaN, minimumAdvanceWidth is NaN or < 0, or - for glyphCount != 0 - when

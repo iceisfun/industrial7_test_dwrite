@@ -27,7 +27,7 @@ static IDWriteInlineObject *mk_sign(r2_fx *x, IDWriteTextFormat *t)
 RT(sign_null_format_invalidarg)
 {
     R2_BEGIN(); IDWriteInlineObject *s = (IDWriteInlineObject *)(ULONG_PTR)1;
-    /* DWriteFactory::CreateEllipsisTrimmingSign clears *sign first, then rejects a NULL format with E_INVALIDARG */
+    /* IDWriteFactory::CreateEllipsisTrimmingSign clears *sign first, then rejects a NULL format with E_INVALIDARG */
     CHECK_HR(IDWriteFactory_CreateEllipsisTrimmingSign(f, NULL, &s), E_INVALIDARG);
     CHECK_OUT_NULL(s);
     R2_END();

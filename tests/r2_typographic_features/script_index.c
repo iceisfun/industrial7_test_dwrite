@@ -1,5 +1,5 @@
 /* Generated: one test per DWRITE_SCRIPT_ANALYSIS.script index of the 153 entry table behind IDWriteTextAnalyzer1::GetScriptProperties.
- * Windows 10 (DWriteTextAnalyzer::GetScriptProperties): index < 0x99 copies the 20 byte DWRITE_SCRIPT_PROPERTIES of the table entry and returns S_OK. */
+ * Windows 10 (IDWriteTextAnalyzer::GetScriptProperties): index < 0x99 copies the 20 byte DWRITE_SCRIPT_PROPERTIES of the table entry and returns S_OK. */
 #include "r2.h"
 
 int r2_sp_check_index(IDWriteTextAnalyzer1 *a1, UINT32 idx);

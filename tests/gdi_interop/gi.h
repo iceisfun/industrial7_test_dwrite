@@ -1,6 +1,6 @@
 /* Shared fixtures for the gdi_interop area (IDWriteGdiInterop / IDWriteGdiInterop1).
  *
- * Facts from the Windows 10 decompilation that the expectations rest on:
+ * Facts from the Windows 10 probing that the expectations rest on:
  *  - every LOGFONT-producing method memsets the whole 0x5c-byte LOGFONTW first, then fills lfWeight, lfItalic, lfCharSet
  *    (DEFAULT_CHARSET=1, SYMBOL_CHARSET=2 for symbol fonts), lfOutPrecision (OUT_OUTLINE_PRECIS=8) and lfFaceName (<= 31 chars).
  *  - a LOGFONT is resolved by Win32 family name (informational string WIN32_FAMILY_NAMES, falling back to the full name) with a

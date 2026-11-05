@@ -2,16 +2,16 @@
  * text complexity, script properties, justification.  Everything is
  *   LoadLibrary("dwrite.dll") -> GetProcAddress("DWriteCreateFactory") -> factory -> CreateTextAnalyzer -> vtable calls.
  *
- * Facts from the Windows 10 19041 dwrite.dll decompilation that the typography tests rely on:
- *   DWriteTextAnalyzer::GetTypographicFeatures  : *actualTagCount = 0 first; fontFace NULL -> E_INVALIDARG; NULL locale == L"";
- *        then ShapingInterface::GetTypographicFeatures; result 0x8007007A when maxTagCount < *actualTagCount.
- *   ShapingInterface::GetTypographicFeatures     : fonts without GSUB and without GPOS list nothing; otherwise the cached
+ * Facts from the Windows 10 19041 dwrite.dll probing that the typography tests rely on:
+ *   IDWriteTextAnalyzer::GetTypographicFeatures  : *actualTagCount = 0 first; fontFace NULL -> E_INVALIDARG; NULL locale == L"";
+ *        then GetTypographicFeatures; result 0x8007007A when maxTagCount < *actualTagCount.
+ *   GetTypographicFeatures     : fonts without GSUB and without GPOS list nothing; otherwise the cached
  *        FontFeatureCoverage (built from GSUB, then GPOS) is searched with FindScriptLanguageIndexWithFallback.
- *   FontFeatureCoverage::GetFeatureList          : *count = number of features of the script/language entry, copies
+ *   GetFeatureList          : *count = number of features of the script/language entry, copies
  *        min(count, maxTagCount) tags in table order (which is ascending order of the big-endian tag, i.e. alphabetical).
  *   FindScriptLanguageIndexWithFallback          : tries the script's second tag (when it has one), its first tag, 'DFLT', 'latn';
  *        inside a script the language tag from LOCALE_SOPENTYPELANGUAGETAG (LangGetOpenTypeLanguageTag) is tried, then 'dflt'.
- *   DWriteTextAnalyzer::CheckTypographicFeature  : featureApplies[0..glyphCount) cleared first; fontFace NULL or
+ *   IDWriteTextAnalyzer::CheckTypographicFeature  : featureApplies[0..glyphCount) cleared first; fontFace NULL or
  *        (glyphIndices NULL && glyphCount) -> E_INVALIDARG, otherwise S_OK.
  */
 #ifndef R2_H

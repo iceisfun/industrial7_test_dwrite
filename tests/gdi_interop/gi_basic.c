@@ -1,5 +1,5 @@
 /* IDWriteGdiInterop object identity: acquisition from the factory, caching, QueryInterface, reference counts, lifetime.
- * GetGdiInterop (DWriteFactory) creates one DWriteGdiInterop per factory on first use and publishes it with a compare-exchange; every
+ * GetGdiInterop (IDWriteFactory) creates one DWriteGdiInterop per factory on first use and publishes it with a compare-exchange; every
  * call returns that same child object with one more reference.  The object is a ChildComObject: its 0 -> 1 AddRef pins the factory. */
 #include "gi.h"
 
@@ -100,7 +100,7 @@ TEST(gi_shared_vs_isolated_differ)
 }
 TEST(gi_interop_pins_factory)
 {
-    /* ChildComObject::AddRef takes a reference on the parent factory on the 0 -> 1 transition */
+    /* AddRef takes a reference on the parent factory on the 0 -> 1 transition */
     IDWriteFactory *f = dw_new_factory(DWRITE_FACTORY_TYPE_ISOLATED);
     IDWriteGdiInterop *g = NULL; ULONG before, during, after;
     if (!f) { t_skip("no factory"); return; }

@@ -1,7 +1,7 @@
 /* Trimming (SetTrimming / GetTrimming / CreateEllipsisTrimmingSign) of IDWriteTextLayout.
  *
- * Facts from the Windows 10 decompilation (DWriteTextLayout::SetTrimming, TextLayout::TrimLines / TrimRange / BreakLines,
- * DWriteFactory::CreateEllipsisTrimmingSign, InlineLayout):
+ * Facts from the Windows 10 probing (IDWriteTextLayout::SetTrimming, TrimLines / TrimRange / BreakLines,
+ * IDWriteFactory::CreateEllipsisTrimmingSign):
  *  - SetTrimming validates granularity <= 2 and delimiter <= 0x10FFFF (E_INVALIDARG otherwise, nothing changes), AddRefs the sign and
  *    releases the previous one; GetTrimming AddRefs the sign it returns.
  *  - Trimming runs only for granularity CHARACTER or WORD. The sign's GetMetrics is called while the layout is built; its width is
@@ -137,7 +137,7 @@ TEST(sign_overhang_metrics_succeed)
 
 TEST(sign_draw_emits_one_glyph_run)
 {
-    /* InlineLayout::Draw forwards to the one-glyph layout, shifted so that the origin passed is the baseline origin */
+    /* Draw forwards to the one-glyph layout, shifted so that the origin passed is the baseline origin */
     WT_BEGIN(); IDWriteInlineObject *s = ellipsis(&X, WT_SIZE); dwx_renderer *r = dwx_renderer_new();
     if (!s) { dwx_release(r); WT_END(); t_skip("sign unavailable"); return; }
     CHECK_HR_OK(IDWriteInlineObject_Draw(s, (void *)(ULONG_PTR)0x1234, (IDWriteTextRenderer *)r, 100.0f, 200.0f, FALSE, FALSE, NULL));
@@ -612,7 +612,7 @@ TEST(trim_delimiter_keeps_tail)
         CHECK_HR_OK(wt_get_lines(l, &o)); EXPECT_EQ(o.lm[0].isTrimmed, 1); wt_metrics(l, &m);
         r = wt_draw(l, 0, 0); analyze_draw(r, &d);
         EXPECT_EQ(d.inlines, 1);
-        t_note("delimiter tail: start %u chars %u head %u width %g", d.tail_start, d.tail_chars, d.head_chars, m.width);   /* exact tail placement not verified in the decomp */
+        t_note("delimiter tail: start %u chars %u head %u width %g", d.tail_start, d.tail_chars, d.head_chars, m.width);   /* exact tail placement not verified in the observations */
         CHECK(m.width <= WT_FIT(9) + 0.02f);
         dwx_release(r); IDWriteTextLayout_Release(l);
     }

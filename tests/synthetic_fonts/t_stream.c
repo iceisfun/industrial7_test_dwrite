@@ -1,5 +1,5 @@
 /* How CreateFontFace / TryGetFontTable behave when the application's font stream misbehaves, and how the fragments it hands out are balanced.
- * Decomp: FontFileReference::ThrowIfFailed turns a failing ReadFileFragment into DWRITE_E_FILEFORMAT when the requested range lies beyond
+ * Observed: ThrowIfFailed turns a failing ReadFileFragment into DWRITE_E_FILEFORMAT when the requested range lies beyond
  * GetFileSize, otherwise into a CallbackException carrying the stream's own HRESULT. */
 #include "sf.h"
 

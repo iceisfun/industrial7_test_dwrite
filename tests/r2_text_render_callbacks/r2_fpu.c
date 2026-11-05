@@ -1,7 +1,7 @@
 /* Floating point state around IDWriteTextLayout::Draw.
  *
- * DWriteTextLayout::Draw constructs an FPUStateSSE: when (MXCSR & 0xff80) != 0x1f80 it loads 0x1f80 (exceptions masked, round to nearest,
- * no flush-to-zero) and restores the caller's control bits when it returns.  TextLayout::Draw and the DrawGlyphRuns / DrawInlineObjects /
+ * IDWriteTextLayout::Draw constructs an FPUStateSSE: when (MXCSR & 0xff80) != 0x1f80 it loads 0x1f80 (exceptions masked, round to nearest,
+ * no flush-to-zero) and restores the caller's control bits when it returns.  Draw and the DrawGlyphRuns / DrawInlineObjects /
  * DrawUnderlines / DrawStrikethroughs helpers wrap every client callback in an FPUStateSandboxSSE which puts back the MXCSR value that was
  * current before the callback if the callback changed it.  Hence: a renderer always runs with the default FPU mode, whatever the caller
  * used, and neither the caller's mode nor a callback's own change leaks into later callbacks.

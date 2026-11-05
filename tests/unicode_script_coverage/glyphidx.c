@@ -1,6 +1,6 @@
 /* IDWriteFontFace::GetGlyphIndices / IDWriteFontFace1::GetGlyphIndices / IDWriteFont::HasCharacter over Unicode boundaries.
  *
- * Facts (decomp of DWriteFontFace::GetGlyphIndices, DWriteFont::HasCharacter, DWriteFontFace::GetUnicodeRanges):
+ * Facts (observed behaviour of IDWriteFontFace::GetGlyphIndices, IDWriteFont::HasCharacter, IDWriteFontFace::GetUnicodeRanges):
  *   - the glyph array is zero-filled for `count` entries before anything is looked up;
  *   - codePoints == NULL with count != 0 => E_INVALIDARG (0x80070057), and the outputs stay zero; count == 0 => S_OK;
  *   - code points are UTF-32; values whose cmap block index (cp >> 6) is >= 0x4400, i.e. cp >= 0x110000, map to glyph 0;

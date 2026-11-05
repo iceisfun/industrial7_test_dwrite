@@ -1,6 +1,6 @@
 /* IDWriteFontFace::GetGdiCompatibleMetrics / IDWriteFontFace1::GetGdiCompatibleMetrics.
  *
- * Algorithm (FontFace::GetGdiCompatibleMetrics): ppem = emSize * pixelsPerDip * scale(transform); designUnitsPerPixel = upm / ppem;
+ * Algorithm (GetGdiCompatibleMetrics): ppem = emSize * pixelsPerDip * scale(transform); designUnitsPerPixel = upm / ppem;
  * every vertical/box/script metric v becomes round(round(v / dpp) * dpp) (round half up, stored back into 16 bits); designUnitsPerEm
  * and hasTypographicMetrics are copied; when ppem or dpp is ~0 (|x| < 2^-16) the unrounded metrics are returned. ascent/descent
  * come from a VDMX table when one covers the integral ppem (1 < ppem < 255), which the synthetic fonts do not have. */

@@ -1,7 +1,7 @@
 /* Fonts and faces of custom collections: GetFontFromFontFace, interface surface, font sets, family model, text layout selection,
  * leak balance.
  *
- * Win10 decomp: GetFontFromFontFace looks the face's physical key (file loader id + reference key + face index) up in the
+ * Win10 observed: GetFontFromFontFace looks the face's physical key (file loader id + reference key + face index) up in the
  * collection's font set (then its canonical key); a hit builds an IDWriteFont with the FACE's simulations, a miss gives
  * DWRITE_E_NOFONT (0x88985002) with *ppFont = NULL.
  */

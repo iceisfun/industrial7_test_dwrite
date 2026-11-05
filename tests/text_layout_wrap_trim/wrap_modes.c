@@ -1,6 +1,6 @@
 /* DWRITE_WORD_WRAPPING on IDWriteTextLayout / IDWriteTextFormat and the line breaking it drives.
  *
- * Facts from the Windows 10 decompilation (DWriteTextLayout::SetWordWrapping, TextLayout::BreakLines / FindLineBreak):
+ * Facts from the Windows 10 probing (IDWriteTextLayout::SetWordWrapping, BreakLines / FindLineBreak):
  *  - SetWordWrapping accepts the values 0..4 (WRAP, NO_WRAP, EMERGENCY_BREAK, WHOLE_WORD, CHARACTER) on the base interface and
  *    rejects everything else with E_INVALIDARG; no IDWriteTextFormat1 is involved.
  *  - WRAP and EMERGENCY_BREAK break between clusters when a single unbreakable segment is wider than the line; WHOLE_WORD never

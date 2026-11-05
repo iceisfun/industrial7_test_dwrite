@@ -2,7 +2,7 @@
  * IDWriteFontResource / IDWriteFontDownloadQueue / IDWriteFontDownloadListener.
  *
  * Facts the area relies on (Windows 10 build 19041 dwrite.dll):
- *   - DWriteFactory::CreateFontFaceReference (file / path / axis flavours) writes *ref = NULL first, rejects a NULL file or path,
+ *   - IDWriteFactory::CreateFontFaceReference (file / path / axis flavours) writes *ref = NULL first, rejects a NULL file or path,
  *     simulations with bits outside {BOLD,OBLIQUE} (value & ~3) and axis arrays that are NULL with count != 0 or have 0x10000+ entries
  *     with E_INVALIDARG; it does not open the font file (the reference is only a key: loader id, key bytes, face index, axes, simulations).
  *   - A reference whose loader does not implement IDWriteRemoteFontFileLoader is DWRITE_LOCALITY_LOCAL and its Enqueue* methods succeed

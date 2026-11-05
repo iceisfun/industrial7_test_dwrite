@@ -1,12 +1,12 @@
 /* IDWriteRemoteFontFileLoader::CreateFontFileReferenceFromUrl (the loader returned by IDWriteFactory3::CreateHttpFontFileLoader) and
  * CreateHttpFontFileLoader argument handling.
- * Win10 decompilation: NetFontLoader::CreateFontFileReferenceFromUrl (dwrite.dll!0x147950) writes *fontFile = NULL first, normalizes
- * the URL (NetFontLoader::NormalizeUrl !0x148008) into a std::wstring and then calls the factory's CreateCustomFontFileReference
- * with (key = normalized URL as UTF-16, no terminator, size = 2 * length, loader = this). NormalizeUrl starts with a 256-character
+ * Win10 probing: CreateFontFileReferenceFromUrl writes *fontFile = NULL first, normalizes
+ * the URL into a wide string and then calls the factory's CreateCustomFontFileReference
+ * with (key = normalized URL as UTF-16, no terminator, size = 2 * length, loader = this). normalization starts with a 256-character
  * buffer; baseUrl NULL or "" -> InternetCanonicalizeUrlW(fileUrl, flags 0), otherwise InternetCombineUrlW(base, file, flags 0);
  * ERROR_INSUFFICIENT_BUFFER grows the buffer and retries; any other wininet error is returned as HRESULT_FROM_WIN32.
  * CreateFontFileReference through a factory that has not registered the loader fails with E_INVALIDARG.
- * DWriteFactory::CreateHttpFontFileLoader (!0xd8120) zeroes the out pointer, copies referrer and headers (either may be NULL) and
+ * IDWriteFactory::CreateHttpFontFileLoader zeroes the out pointer, copies referrer and headers (either may be NULL) and
  * always succeeds. */
 #include "g2.h"
 

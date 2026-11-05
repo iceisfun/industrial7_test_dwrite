@@ -1,5 +1,5 @@
 /* System font collection: IDWriteFontCollection::FindFamilyName.
- * Windows 10: DWriteFontCollection::FindFamilyName writes index = UINT_MAX and exists = 0 first, then looks the name up in
+ * Windows 10: IDWriteFontCollection::FindFamilyName writes index = UINT_MAX and exists = 0 first, then looks the name up in
  * an ordered map whose comparer is CompareStringW(LOCALE_INVARIANT, NORM_IGNORECASE, ...) over (pointer, length) pairs;
  * on a hit it stores the index and exists = 1. The method always returns S_OK. */
 #include "fcs.h"

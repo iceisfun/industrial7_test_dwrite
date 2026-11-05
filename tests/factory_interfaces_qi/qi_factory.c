@@ -1,8 +1,8 @@
 /* DWriteCreateFactory(riid) and the factory interface family IDWriteFactory .. IDWriteFactory7.
  *
- * DWriteCreateFactory (decomp 0x1800434c0): writes *ppFactory = NULL first, creates (isolated) or fetches (shared) a
- * DWriteFactory and returns its QueryInterface(riid, ppFactory). The factory QueryInterface table
- * (ComInterfaceMap<DWriteFactory,...>::interfaceMap_) lists IDWriteFactory .. IDWriteFactory7 and IUnknown; an IID that is not
+ * DWriteCreateFactory: writes *ppFactory = NULL first, creates (isolated) or fetches (shared) a
+ * IDWriteFactory and returns its QueryInterface(riid, ppFactory). The factory QueryInterface table
+ * (ComInterfaceMap<IDWriteFactory,...>::interfaceMap_) lists IDWriteFactory .. IDWriteFactory7 and IUnknown; an IID that is not
  * in the table gives E_NOINTERFACE (0x80004002) with *ppv = NULL. The table lookup has no NULL check on either argument,
  * so no test passes a NULL riid or a NULL ppv.
  */
@@ -210,7 +210,7 @@ TEST(isolated_factories_are_distinct) {
     CHECK(!dw_same_identity((IUnknown *)a, (IUnknown *)b));
     CHECK(!dw_same_identity((IUnknown *)a, (IUnknown *)s));
     CHECK(!dw_same_identity((IUnknown *)b, (IUnknown *)s));
-    /* decomp 0x1800434c0: ctor, AddRef, QueryInterface (+1), Release -> exactly one reference for the caller */
+    /* observed: ctor, AddRef, QueryInterface (+1), Release -> exactly one reference for the caller */
     EXPECT_REFS(a, 1); EXPECT_REFS(b, 1);
     IDWriteFactory_Release(a);
     EXPECT_REFS(b, 1);

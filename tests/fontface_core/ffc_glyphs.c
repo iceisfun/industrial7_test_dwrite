@@ -1,6 +1,6 @@
 /* IDWriteFontFace::GetGlyphIndices, GetDesignGlyphMetrics, GetGdiCompatibleGlyphMetrics.
  *
- * GetGlyphIndices (DWriteFontFace::GetGlyphIndicesW): the output array is zeroed first (count entries), then NULL codePoints with a
+ * GetGlyphIndices (IDWriteFontFace::GetGlyphIndicesW): the output array is zeroed first (count entries), then NULL codePoints with a
  * non-zero count is E_INVALIDARG; code points >= 0x110000 and unmapped code points give glyph 0 with S_OK; surrogates are looked up like any other
  * value (no special casing), count 0 succeeds without touching anything.
  *

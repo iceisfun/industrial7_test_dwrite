@@ -1,6 +1,6 @@
 /* GetRecommendedRenderingMode on synthetic fonts WITH a version-1 'gasp' table.
  *
- * Facts (dwrite.dll!0x48618 OpenTypeFontFaceBuilder::ReadRenderingModeRanges, !0x95c8c GetRenderingModeFromFontSize, !0x95d18 IsGridFitFontSize):
+ * Facts (gasp table reading, rendering mode from font size, grid-fit size check):
  *   The font loader turns the gasp ranges into three "toggle vectors" (flag 8 GASP_SYMMETRIC_SMOOTHING, flag 2 GASP_DOGRAY, flag 4
  *   GASP_SYMMETRIC_GRIDFIT).  A range with a non-increasing maxPPEM is skipped, neighbours with the same flag state merge, the last
  *   range extends to 0xFFFF.  The rounded ppem (half up) is looked up with lower_bound: an odd index means "flag set".

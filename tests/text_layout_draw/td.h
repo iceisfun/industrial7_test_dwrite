@@ -1,10 +1,10 @@
 /* Shared fixtures for the text_layout_draw area: IDWriteTextLayout::Draw and the IDWriteTextRenderer callbacks it makes.
  *
- * What Draw does on Windows 10 (TextLayout::Draw and its DrawGlyphRuns / DrawInlineObjects / DrawUnderlines / DrawStrikethroughs helpers):
+ * What Draw does on Windows 10 (Draw and its DrawGlyphRuns / DrawInlineObjects / DrawUnderlines / DrawStrikethroughs helpers):
  *   - a NULL renderer is rejected with E_INVALIDARG before anything else happens; the layout is (re)built first (DoLayout);
  *   - the renderer is asked for IDWriteTextRenderer1 (QueryInterface); a vertical layout and a renderer without it fail with DWRITE_E_TEXTRENDERERINCOMPATIBLE;
  *   - IsPixelSnappingDisabled is called once; only when it answers FALSE are GetPixelsPerDip and GetCurrentTransform called (once each);
- *     a failing snapping callback aborts Draw with that HRESULT (CallbackException::ThrowIfFailed);
+ *     a failing snapping callback aborts Draw with that HRESULT (ThrowIfFailed);
  *   - then, over the WHOLE layout and in this order: all glyph runs, all inline objects, all underlines, all strikethroughs.
  *     The HRESULTs returned by those four callbacks are never inspected: a failing DrawGlyphRun does not stop the Draw.
  *

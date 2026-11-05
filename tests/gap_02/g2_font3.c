@@ -1,6 +1,6 @@
 /* IDWriteFont3::CreateFontFace(IDWriteFontFace3**) (vtable slot 19; IDWriteFont::CreateFontFace thunks into it).
- * Win10 decompilation (dwrite.dll!DWriteFont::CreateFontFace 0x692a0): *face = NULL first; the font's face key (file reference,
- * face index, simulations) is copied into a FontFaceElementKey and DWriteFontFace::Create builds (or finds) the face in the factory
+ * Win10 probing (IDWriteFont::CreateFontFace): *face = NULL first; the font's face key (file reference,
+ * face index, simulations) is copied into a FontFaceElementKey and IDWriteFontFace::Create builds (or finds) the face in the factory
  * the font's collection belongs to; the HRESULT of Create is returned and *face receives whatever it produced. The function does not
  * validate the out pointer (NULL crashes) and takes no other argument. */
 #include "g2.h"

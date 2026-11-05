@@ -216,7 +216,7 @@ TEST(rpc_precision_is_exact_32_bit) {
 }
 TEST(rpc_gamma_upper_boundary_inclusive) {
     int ver;
-    /* GammaTable::IsInRange is (0 < gamma <= 256) */
+    /* IsInRange is (0 < gamma <= 256) */
     for (ver = 0; ver <= 3; ver++) {
         rp_vals v = rp_base(); if (!dw_factory_v(DWRITE_FACTORY_TYPE_SHARED, ver)) continue;
         v.gamma = 256.0f; RP_ROUNDTRIP(ver, &v);

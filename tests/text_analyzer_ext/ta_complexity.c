@@ -1,6 +1,6 @@
 /* IDWriteTextAnalyzer1::GetTextComplexity.
  *
- * Windows 10 (DWriteTextAnalyzer::GetTextComplexity + FontFace::GetSimpleGlyphs):
+ * Windows 10 (IDWriteTextAnalyzer::GetTextComplexity + GetSimpleGlyphs):
  *   - *isTextSimple and *textLengthRead are cleared first (their pointers must be valid);
  *   - fontFace == NULL, or textString == NULL with textLength != 0 -> E_INVALIDARG (outputs stay cleared, glyphIndices untouched);
  *   - otherwise S_OK. The method inspects the LEADING run of the text: the characters are classified one UTF-16 unit at a time as

@@ -9,7 +9,7 @@
  *     COLR+CPAL (4) and the format byte of every entry that was accepted.
  *   - GlyphGraphicDataBuilder::SetEntry drops entries whose glyph id is >= maxp.numGlyphs, completes bitmap entries with
  *     metrics derived from the font (scale ppem / unitsPerEm) and orders the per glyph list by increasing ppem.
- *   - FontFace::GetGlyphImageData returns the first entry (smallest ppem) whose ppem >= the requested ppem and whose format matches;
+ *   - GetGlyphImageData returns the first entry (smallest ppem) whose ppem >= the requested ppem and whose format matches;
  *     uniqueDataId and the data pointer both come from the absolute file offset of the image bytes.
  */
 #ifndef CRB_H

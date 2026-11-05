@@ -1,6 +1,6 @@
 /* Fixtures for the r2_text_render_callbacks area: IDWriteTextLayout::Draw / IDWriteInlineObject driven against a hook renderer.
  *
- * Facts used here (Windows 10 dwrite.dll: DWriteTextLayout::Draw, TextLayout::Draw, DrawGlyphRuns/DrawInlineObjects/DrawUnderlines/
+ * Facts used here (Windows 10 dwrite.dll: IDWriteTextLayout::Draw, Draw, DrawGlyphRuns/DrawInlineObjects/DrawUnderlines/
  * DrawStrikethroughs, InlineLayout, FPUStateSSE / FPUStateSandboxSSE):
  *   - Draw rejects a NULL renderer with E_INVALIDARG; otherwise it saves MXCSR and, when (MXCSR & 0xff80) != 0x1f80, loads 0x1f80
  *     (all exceptions masked, round to nearest, no flush-to-zero) for the whole call and restores the caller's value on exit;

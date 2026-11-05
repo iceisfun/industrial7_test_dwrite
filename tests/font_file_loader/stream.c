@@ -1,6 +1,6 @@
 /* Callbacks into application-supplied loaders and streams: error propagation, ordering and fragment protocol.
- * Basis: FontFileReference::GetStreamInternal (loader HRESULT thrown as CallbackException, DWRITE_E_REMOTEFONT kept),
- * FontFileReference::ThrowIfFailed(hr, offset, size, stream) (a failed ReadFileFragment is re-classified as
+ * Basis: GetStreamInternal (loader HRESULT thrown as CallbackException, DWRITE_E_REMOTEFONT kept),
+ * ThrowIfFailed(hr, offset, size, stream) (a failed ReadFileFragment is re-classified as
  * DWRITE_E_FILEFORMAT when GetFileSize says the requested range lies outside the file), FontFragmentPtr (every fragment is
  * released with the context ReadFileFragment returned), the FPU state sandbox around callbacks. */
 #include "fl.h"

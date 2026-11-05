@@ -1,6 +1,6 @@
 /* head / hhea / hmtx / maxp / OS/2 / post / name variants and omissions.
  *
- * Decomp facts used (OpenTypeTables::InitializeInternal / InitializeOS2 / OpenTypeFace::OpenTypeFace / HorizontalMetrics):
+ * Observed facts used (InitializeInternal / InitializeOS2 / OpenTypeFace::OpenTypeFace / HorizontalMetrics):
  *   - head is used when >= 54 bytes, hhea when >= 36, OS/2 when > 0x4d bytes (versions 1,2,5 need 0x56, 0x60, 0x64), maxp when >= 6;
  *   - the face's glyph count is maxp.numGlyphs, capped to numberOfHMetrics + (hmtx length - 4*numberOfHMetrics)/2;
  *   - hmtx shorter than 4*numberOfHMetrics is a format error; glyphs >= numberOfHMetrics reuse the last advance. */

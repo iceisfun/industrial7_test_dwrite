@@ -1,5 +1,5 @@
 /* IDWriteFont objects reached through other routes (family matching, GetFontFromFontFace, GDI interop), whole-collection invariants,
- * and concurrent use.  Decomp references: DWriteFontCollection::GetFontFromFontFace (zeroes *font, DWRITE_E_NOFONT when the face's physical or
+ * and concurrent use.  Observed references: IDWriteFontCollection::GetFontFromFontFace (zeroes *font, DWRITE_E_NOFONT when the face's physical or
  * canonical key is not in the collection, simulations taken from the face), DWriteGdiInterop::CreateFontFromLOGFONT /
  * ConvertFontToLOGFONT (E_INVALIDARG for NULL, DWRITE_E_NOFONT for unknown names, lfCharSet SYMBOL for symbol fonts, lfOutPrecision 8,
  * isSystemFont iff the font's collection loader id is 0). */

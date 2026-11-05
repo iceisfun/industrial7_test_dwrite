@@ -78,7 +78,7 @@ TEST(exp_export_is_not_a_forwarder) {
     dstart = dd->VirtualAddress; dend = dstart + dd->Size;
     rva = ((const DWORD *)(base + ed->AddressOfFunctions))[0];
     CHECK(rva != 0);
-    /* An RVA inside the export directory range would be a forwarder string; DWriteCreateFactory is real code. */
+    /* An address inside the export directory range would be a forwarder string; DWriteCreateFactory is real code. */
     CHECK(!(rva >= dstart && rva < dend));
     CHECK(rva < nt->OptionalHeader.SizeOfImage);
 }

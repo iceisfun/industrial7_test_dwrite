@@ -1,6 +1,6 @@
 /* Resolved bidi levels and visual reordering of Hebrew / Arabic / mixed strings.
  *
- * Facts used (TextLayout::GetClusterMetrics, DrawGlyphRuns in dwrite.dll):
+ * Facts used (GetClusterMetrics, DrawGlyphRuns in dwrite.dll):
  *  - GetClusterMetrics walks the clusters in LOGICAL order and reports isRightToLeft from the odd bit of the span's bidi level;
  *  - every span handed to DrawGlyphRun carries its resolved level in DWRITE_GLYPH_RUN.bidiLevel and a description whose
  *    textPosition/stringLength cover the span's text; the spans of a layout partition the text;

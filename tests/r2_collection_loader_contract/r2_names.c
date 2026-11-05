@@ -1,7 +1,7 @@
 /* What the collection looks like once the loader contract has run: family order, duplicates, localized names taken from
  * the name table, collections as members of a TrueType collection (TTC).
  *
- * Win10 decomp / documented facts used as hard checks:
+ * Win10 observed / documented facts used as hard checks:
  *  - The family count is the number of distinct (en-us / WWS) family names; identical names merge, regardless of the order
  *    in which the enumerator delivered the files.
  *  - Every localized family name found in a font's name table (platform 3 records) is reachable through FindFamilyName and

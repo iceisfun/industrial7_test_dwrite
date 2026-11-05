@@ -1,7 +1,7 @@
 /* IDWriteFontFace::GetMetrics and IDWriteFontFace1::GetMetrics (DWRITE_FONT_METRICS / DWRITE_FONT_METRICS1) on synthetic fonts
  * with controlled head / hhea / OS/2 / post values.
  *
- * Derivation (Windows 10 InitializeDefaultFontMetrics / FontFaceLight::GetFontMetrics decompilation):
+ * Derivation (Windows 10 default font metrics probing):
  *   designUnitsPerEm = head.unitsPerEm (0x800 when head is missing);
  *   OS/2 fsSelection bit 7 (USE_TYPO_METRICS): ascent = typoAscender, descent = -typoDescender (clamped to >= 0), lineGap = typoLineGap,
  *       hasTypographicMetrics = TRUE;

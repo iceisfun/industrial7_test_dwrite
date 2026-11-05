@@ -497,7 +497,7 @@ TEST(fcl_prop_missing_cmap_or_glyf_table_note)
 }
 TEST(fcl_rev_get_font_family_out_zeroed_on_bad_index)
 {
-    /* GetFontFamily stores NULL into *out before the range check (decomp), so a stale pointer never survives a failure. */
+    /* GetFontFamily stores NULL into *out before the range check (observed), so a stale pointer never survives a failure. */
     FCL_OPEN(x);
     fcl_add_family(&x, "Zero Out A");
     FCL_COLL(x, c);

@@ -1,4 +1,4 @@
-/* Justification and character spacing relations that hold for every input (derived from DWriteTextAnalyzer::GetJustificationOpportunities,
+/* Justification and character spacing relations that hold for every input (derived from IDWriteTextAnalyzer::GetJustificationOpportunities,
  * TextAnalyzer::GetJustificationOpportunities and TextAnalyzer::ApplyCharacterSpacing of the Windows 10 dwrite.dll):
  *   - GetJustificationOpportunities without a font face computes every float from fontEmSize times power-of-two constants, so the
  *     entries scale exactly with the em size; the other fields do not depend on it.

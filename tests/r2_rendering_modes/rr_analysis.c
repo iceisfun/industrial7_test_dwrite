@@ -1,7 +1,7 @@
 /* IDWriteGlyphRunAnalysis matrix: creation overloads x rendering mode x measuring mode x orientation x transform, bounds and textures.
  *
- * Facts (dwrite.dll!0xd7850/0xd7a70/0xd7cb0 CreateGlyphRunAnalysis, !0x94b00 GlyphRunAnalysis ctor, !0xdd930/!0x1334bc GetAlphaTextureBounds,
- *        !0xdd560/!0x132c7c CreateAlphaTexture, !0x132d1c CreateAlphaTextureGrayscale):
+ * Facts (the three CreateGlyphRunAnalysis overloads, glyph run analysis construction, GetAlphaTextureBounds,
+ * CreateAlphaTexture, CreateAlphaTextureGrayscale):
  *   - the rendering mode / antialias mode pair selects the texture kind: GetAlphaTextureBounds(type) returns the bounds when `type` is the
  *     kind of this analysis and S_OK with an all-zero RECT otherwise; type >= 2 -> E_INVALIDARG with a zeroed RECT.
  *   - CreateAlphaTexture: bounds == NULL -> E_INVALIDARG; empty rectangle -> E_INVALIDARG (checked before the texture type);

@@ -1,6 +1,6 @@
-/* IDWriteFactory2::TranslateColorGlyphRun on synthetic COLR/CPAL fonts (dwrite.dll!DWriteFactory::TranslateColorGlyphRun 0x25240 forwards to
- * the shared worker with formats = TRUETYPE|CFF|COLR; the worker (0x1cf40) zeroes *layers first, fails E_INVALIDARG for a NULL run,
- * and DWRITE_E_NOCOLOR (0x8898500C) when DWriteColorGlyphRunEnumerator::Create finds no colour glyph: no usable format left after the face's
+/* IDWriteFactory2::TranslateColorGlyphRun on synthetic COLR/CPAL fonts (the factory translate entry forwards to
+ * the shared worker with formats = TRUETYPE|CFF|COLR; the worker zeroes *layers first, fails E_INVALIDARG for a NULL run,
+ * and DWRITE_E_NOCOLOR (0x8898500C) when the enumerator creation finds no colour glyph: no usable format left after the face's
  * formats and the palette index check, or no glyph of the run with colour data).
  * All expectations come from the oracle in cg.c (see cg.h for the rules it encodes). */
 #include "cg.h"

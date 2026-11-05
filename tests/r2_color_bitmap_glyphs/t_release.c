@@ -1,8 +1,8 @@
 /* GetGlyphImageData / ReleaseGlyphImageData and the application's font file stream.
  *
- * FontFace::GetGlyphImageData calls FontFileReference::ReadFragment with the entry's absolute file offset and size only when the
+ * GetGlyphImageData calls ReadFragment with the entry's absolute file offset and size only when the
  * entry size is non-zero; ReadFragment is a direct IDWriteFontFileStream::ReadFileFragment on the stream the reference holds.  The fragment pointer and the
- * fragment context returned by the stream are handed to the caller unchanged, and DWriteFontFace::ReleaseGlyphImageData forwards the context to
+ * fragment context returned by the stream are handed to the caller unchanged, and IDWriteFontFace::ReleaseGlyphImageData forwards the context to
  * IDWriteFontFileStream::ReleaseFileFragment (clamped to 65535). */
 #include "crb.h"
 #include <process.h>
@@ -69,7 +69,7 @@ T(release_empty_results_never_touch_the_stream) {
             HRESULT hr; ctx = (void *)(ULONG_PTR)1;
             if (g >= 2 && g <= 7 && q[i].fmt == F_PNG) continue;   /* a request above the largest strike returns the largest strike */
             hr = crb_gid(&x, (UINT16)g, q[i].ppem, q[i].fmt, &d, &ctx);
-            /* the DWriteFontFace wrapper (0xdc780) accepts exactly one of SVG/PNG/JPEG/TIFF/PREMULTIPLIED and returns E_INVALIDARG otherwise */
+            /* the IDWriteFontFace wrapper (0xdc780) accepts exactly one of SVG/PNG/JPEG/TIFF/PREMULTIPLIED and returns E_INVALIDARG otherwise */
             CHECKF(hr == (i >= 8 && i <= 11 ? E_INVALIDARG_ : S_OK), "glyph %u query %u: %s", g, i, dw_hr_name(hr));
             CHECKF(ctx == NULL, "glyph %u query %u: context %p", g, i, ctx);
         }

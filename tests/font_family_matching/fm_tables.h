@@ -1,5 +1,5 @@
 /* Hand-audited expected results of GetFirstMatchingFont for synthetic families (generated once from the matcher model and then
- * checked row by row against the rules of FontSet::FindNearestMatchingWwsFont / MatchingStyle::IsBetterMatch; see tests_match.c for
+ * checked row by row against the rules of FindNearestMatchingWwsFont / MatchingStyle::IsBetterMatch; see tests_match.c for
  * the rules each table exercises).  mrow: request (weight, stretch, style) -> face (weight, stretch, style) and simulations. */
 #ifndef FM_TABLES_H
 #define FM_TABLES_H

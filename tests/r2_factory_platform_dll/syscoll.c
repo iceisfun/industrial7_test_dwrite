@@ -1,6 +1,6 @@
 /* System font collection / system font set at factory level: caching and identity.
- * Decompilation: DWriteFactory::GetSystemFontCollection keeps one cached collection object per (variant) slot under the factory
- * critical section and hands out an AddRef'd pointer to it; GetSystemFontSet caches the DWriteFontSet the same way. The
+ * Observed behaviour: IDWriteFactory::GetSystemFontCollection keeps one cached collection object per (variant) slot under the factory
+ * critical section and hands out an AddRef'd pointer to it; GetSystemFontSet caches the IDWriteFontSet the same way. The
  * IDWriteFactory pointers of every generation share one object, hence one cache. */
 #include "rfp.h"
 
@@ -280,7 +280,7 @@ TEST(fs_collection_from_font_set_distinct_objects) {
     CHECK_HR_OK(IDWriteFactory3_GetSystemFontSet(f3, &s)); REQUIRE(s);
     CHECK_HR_OK(IDWriteFactory3_CreateFontCollectionFromFontSet(f3, s, &a));
     CHECK_HR_OK(IDWriteFactory3_CreateFontCollectionFromFontSet(f3, s, &b));
-    CHECK(a != b);   /* a fresh DWriteFontCollection per call (decompiled: operator_new each time) */
+    CHECK(a != b);   /* a fresh IDWriteFontCollection per call (observed: allocated each time) */
     DW_RELEASE(a); DW_RELEASE(b); DW_RELEASE(s);
 }
 TEST(fs_gdi_interop_per_factory_object_stable) {

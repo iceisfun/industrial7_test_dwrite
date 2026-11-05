@@ -1,8 +1,8 @@
 /* System font collection: enumerating families and fonts.
- * Windows 10 (decompilation): GetFontFamilyCount is the length of the family index vector; GetFontFamily(i) builds a NEW
- * DWriteFontFamily object per call (operator new) that references its owning collection, GetFontCount is the length of the
- * family's font list, DWriteFont::GetFontFamily returns the family that created the font and
- * DWriteFontFamily::GetFontCollection returns the owning collection. */
+ * Windows 10 (probing): GetFontFamilyCount is the length of the family index vector; GetFontFamily(i) builds a NEW
+ * IDWriteFontFamily object per call (operator new) that references its owning collection, GetFontCount is the length of the
+ * family's font list, IDWriteFont::GetFontFamily returns the family that created the font and
+ * IDWriteFontFamily::GetFontCollection returns the owning collection. */
 #include "fcs.h"
 
 TEST(enum_family_count_positive) {
@@ -537,7 +537,7 @@ TEST(enum_family_is_a_font_list) {
         IDWriteFontList *list = NULL;
         CHECK_HR_OK(IDWriteFontFamily_QueryInterface(fam, &IID_IDWriteFontList, (void **)&list));
         if (list) {
-            CHECK(fcs_same(list, fam));  /* FontList is a secondary base of DWriteFontFamily: another address, same identity */
+            CHECK(fcs_same(list, fam));  /* FontList is a secondary base of IDWriteFontFamily: another address, same identity */
             CHECK(IDWriteFontList_GetFontCount(list) == IDWriteFontFamily_GetFontCount(fam));
             IDWriteFontList_Release(list);
         }

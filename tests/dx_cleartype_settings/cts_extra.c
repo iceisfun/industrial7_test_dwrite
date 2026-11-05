@@ -1,5 +1,5 @@
 /* Outline thresholds, measuring-mode validation and rendering-params object identity, driven from the
- * DWriteFontFace::GetRecommendedRenderingMode / DWriteRenderingParams implementations. */
+ * IDWriteFontFace::GetRecommendedRenderingMode / DWriteRenderingParams implementations. */
 #include "cts.h"
 
 typedef struct { dwx_font h; IDWriteFontFace3 *f3; } fx3;

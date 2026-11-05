@@ -2,16 +2,16 @@
  * (IDWriteFontFamily1 / IDWriteFontList1), IDWriteFontList2 / IDWriteFontFamily2::GetFontSet and IDWriteFontCollection3::GetExpirationEvent.
  *
  * Win10 dwrite.dll:
- *   DWriteFontSet::GetFontAxisRanges (!0x8b6e0 per font, !0xe6840 whole set): *actual = 0 and the output array is zero-filled first, then *actual is set to
+ *   IDWriteFontSet::GetFontAxisRanges (per font and whole set): *actual = 0 and the output array is zero-filled first, then *actual is set to
  *     the number of ranges (whole set: the union over all fonts, one entry per axis tag in order of first appearance, minimum of the minima and maximum of
  *     the maxima); the result is E_NOT_SUFFICIENT_BUFFER (0x8007007A) when the capacity is below *actual. Failures of the per-font lookup are caught and mapped.
- *   DWriteFontSet::GetFilteredFonts (!0xe62c0, index selection): *out = NULL first; indices == NULL with a non-zero count -> E_INVALIDARG; an index >= the
+ *   IDWriteFontSet::GetFilteredFonts (index selection): *out = NULL first; indices == NULL with a non-zero count -> E_INVALIDARG; an index >= the
  *     font count raises ArgumentException("indices") which the catch handler maps to E_INVALIDARG; the result holds the selected fonts in index order.
- *   DWriteFontSet::GetFontLocality (!0xe6920), DWriteFontFamily::GetFontLocality (!0xe2700), DWriteMatchingFontList::GetFontLocality (!0x4ec20): a new
- *     FontFileReference is built from the font's key and FontFileReference::GetLocality is asked, which calls IDWriteRemoteFontFileLoader::GetLocalityFromKey
+ *   IDWriteFontSet::GetFontLocality, IDWriteFontFamily::GetFontLocality, IDWriteFontList::GetFontLocality: a new
+ *     FontFileReference is built from the font's key and GetLocality is asked, which calls IDWriteRemoteFontFileLoader::GetLocalityFromKey
  *     of the font's loader exactly once per call when the loader supports it, and answers LOCAL otherwise. Nothing is cached.
- *   DWriteFontFamily::GetFontSet (!0xe2970) and DWriteMatchingFontList::GetFontSet (!0xe2a50) always create a NEW DWriteFontSet over the family's / list's fonts.
- *   DWriteFontCollection::GetExpirationEvent (!0xd8b50): NULL without a cache reference, otherwise the event handle stored in it (not duplicated).
+ *   IDWriteFontFamily::GetFontSet and IDWriteFontList::GetFontSet always create a NEW IDWriteFontSet over the family's / list's fonts.
+ *   IDWriteFontCollection::GetExpirationEvent: NULL without a cache reference, otherwise the event handle stored in it (not duplicated).
  */
 #include "g1.h"
 

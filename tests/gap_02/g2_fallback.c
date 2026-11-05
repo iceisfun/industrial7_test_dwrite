@@ -1,8 +1,8 @@
 /* IDWriteFontFallback1::MapCharacters (the overload with font axis values, vtable slot 4).
- * Win10 decompilation (dwrite.dll!DWriteFontFallback::MapCharacters 0xe5390): *mappedLength = 0, *mappedFontFace = NULL, *scale = 1.0
+ * Win10 probing (IDWriteFontFallback::MapCharacters): *mappedLength = 0, *mappedFontFace = NULL, *scale = 1.0
  * first; then E_INVALIDARG when the analysis source is NULL, when textPosition + textLength wraps past 2^32, when fontAxisValueCount
  * is above 0xFFFF, or when the count is non-zero and the axis array is NULL (the source is not consulted in those cases). Otherwise the
- * shared FontFallback::MapCharacters picks a face and the result is QueryInterface'd to IDWriteFontFace5. */
+ * shared MapCharacters picks a face and the result is QueryInterface'd to IDWriteFontFace5. */
 #include "g2.h"
 
 typedef struct { IDWriteFontFallback1 *fb1; IDWriteFactory2 *f2; } fbx;

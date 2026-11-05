@@ -12,7 +12,7 @@
  *   gvar   (always) glyph 'A' moves all four outline points by +100 design units in x at wght = +1 (region peak wght 1.0); no other glyph varies
  *
  * dwrite also adds fixed standard axes (min == default == max) for every tag of {wght, wdth, ital, slnt} the font does not define
- * (AddStandardAxes !0x10b5c): the fixture therefore reports RV_NALL = 7 axes, a static font 4.
+ * (standard axes added): the fixture therefore reports RV_NALL = 7 axes, a static font 4.
  * Expected values by the OpenType variation rules (scalar = normalised coordinate inside the region, avar applied first):
  *   advance('A') at wght 900 = 1100, at wght 100 = 950, at wdth 125 = 1060, default 1000; 'B' at wght 900 = 1200.
  * Whether dwrite applies HVAR/gvar to a face built from this synthetic file is observed with t_note first and the exact value is only

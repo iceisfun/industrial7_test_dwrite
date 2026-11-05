@@ -1,7 +1,7 @@
 /* Shared scaffolding for the r2_rendering_modes area: rendering-mode resolution (IDWriteFontFace*::GetRecommendedRenderingMode)
  * and the glyph run analysis matrix.  Everything is LoadLibrary("dwrite.dll") -> GetProcAddress("DWriteCreateFactory") -> vtable calls.
  *
- * Decompilation facts the model below reproduces (Windows 10 19041 dwrite.dll):
+ * Observed facts the model below reproduces (Windows 10 19041 dwrite.dll):
  *   ComputePpem            ppem = fontEmSize * scale; scale = dpi/96 per axis combined with the matrix.  An axis-aligned matrix (m12 == 0 &&
  *                          m21 == 0, or m11 == 0 && m22 == 0) gives max(|sx|,|sy|); anything else the largest singular value.
  *                          dpiX == dpiY without a matrix is "aligned" (flag 1); isSideways (or a 90 degree matrix) sets flag 2, both together cancel.

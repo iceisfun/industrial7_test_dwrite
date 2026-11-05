@@ -1,6 +1,6 @@
 /* IDWriteTextLayout::HitTestTextRange.
  *
- * Facts (DWriteTextLayout::HitTestTextRange -> TextLayout::HitTestTextRange + HitTestMetricsMerger):
+ * Facts (IDWriteTextLayout::HitTestTextRange -> HitTestTextRange + HitTestMetricsMerger):
  *  - *actualHitTestMetricsCount is zeroed first; startPosition + length overflowing 32 bits, or a NULL buffer with a non-zero
  *    maxHitTestMetricsCount, is E_INVALIDARG (count stays 0);
  *  - the range is clamped to the text: end = min(start+length, textLength), start = min(start, end);

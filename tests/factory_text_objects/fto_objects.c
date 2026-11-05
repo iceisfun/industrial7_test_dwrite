@@ -2,7 +2,7 @@
  * GDI interop, text analyzer, system font collection.
  *
  * Facts (Win10 19041 dwrite.dll):
- *   CreateCustomRenderingParams (all overloads): gamma must satisfy 0 < gamma <= 256 (GammaTable::IsInRange); enhanced
+ *   CreateCustomRenderingParams (all overloads): gamma must satisfy 0 < gamma <= 256 (IsInRange); enhanced
  *     contrast, grayscale contrast and cleartype level must be >= 0 (no upper bound); pixel geometry <= 2 (BGR); rendering
  *     mode <= 6 (OUTLINE) for the DWRITE_RENDERING_MODE overloads, <= 7 for the IDWriteFactory3 (RENDERING_MODE1) overload;
  *     grid fit mode <= 2. Violations -> E_INVALIDARG with *params zeroed. The object stores the arguments verbatim; the
@@ -182,7 +182,7 @@ FTO_BOTH(fto_rp_custom_no_upper_bound_on_levels) {
 }
 
 FTO_BOTH(fto_rp_custom_nan_levels_note) {
-    /* NaN contrast / cleartype compare false against 0, so the validation as decompiled lets them through; recorded only. */
+    /* NaN contrast / cleartype compare false against 0, so the validation as observed lets them through; recorded only. */
     IDWriteRenderingParams *p = (IDWriteRenderingParams *)FTO_SENTINEL;
     HRESULT hr = IDWriteFactory_CreateCustomRenderingParams(f, 1.0f, NAN, 0.5f, DWRITE_PIXEL_GEOMETRY_RGB, DWRITE_RENDERING_MODE_DEFAULT, &p);
     t_note("%s: NaN enhanced contrast -> %s", tag, dw_hr_name(hr));

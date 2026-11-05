@@ -1,6 +1,6 @@
 /* Metrics of vertical layouts (reading TOP_TO_BOTTOM / BOTTOM_TO_TOP with flow RIGHT_TO_LEFT / LEFT_TO_RIGHT).
  *
- * dwrite lays text out in an abstract horizontal frame whose wrapping length is maxHeight (TextLayout::GetLayoutWidth in a vertical layout) and whose
+ * dwrite lays text out in an abstract horizontal frame whose wrapping length is maxHeight (GetLayoutWidth in a vertical layout) and whose
  * paragraph-alignment extent is maxWidth (GetLayoutHeight), then swaps left/top, width/height and widthIncludingTrailingWhitespace/
  * heightIncludingTrailingWhitespace, and mirrors left against maxWidth. layoutWidth / layoutHeight are NOT swapped (they stay maxWidth / maxHeight).
  * AlignmentHelperVertical (paragraph alignment x flow direction) and AlignmentHelperHorizontal (text alignment x reading direction bit 0) give the

@@ -1,6 +1,6 @@
 #include "ntf.h"
 
-/* CreateNumberSubstitution (DWriteFactory vtable method) on Windows 10:
+/* CreateNumberSubstitution (IDWriteFactory vtable method) on Windows 10:
  *   - *substitution is zeroed first;
  *   - localeName == NULL is E_INVALIDARG for every method except NONE (the only method that never reads the locale);
  *   - methods 0..4 are FROM_CULTURE, CONTEXTUAL, NONE, NATIONAL, TRADITIONAL; anything else throws ArgumentException

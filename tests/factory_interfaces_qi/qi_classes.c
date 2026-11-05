@@ -1,7 +1,7 @@
 /* Table-driven QueryInterface / refcount / vtable checks, instantiated for every class in FQ_CLASSES.
  * The expectations per class come from the QueryInterface implementations of build 19041 (dwrite.dll):
  *   - every ComObject<> answers exactly the interfaces of its type list plus IUnknown; others give E_NOINTERFACE and *ppv = NULL
- *   - DWriteFontFace::QueryInterface answers E_NOTIMPL (0x80004001) for an unsupported IID, still with *ppv = NULL.
+ *   - IDWriteFontFace::QueryInterface answers E_NOTIMPL (0x80004001) for an unsupported IID, still with *ppv = NULL.
  */
 #include "fq.h"
 

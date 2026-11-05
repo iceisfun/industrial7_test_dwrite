@@ -1,14 +1,14 @@
 #include "r2fs.h"
 
 /* Argument validation of the fallback family on Windows 10 (dwrite.dll):
- *   DWriteFontFallback::MapCharacters (v0): writes *mappedLength = 0, *mappedFont = NULL, *scale = 1.0 BEFORE validating, then fails with
+ *   IDWriteFontFallback::MapCharacters (v0): writes *mappedLength = 0, *mappedFont = NULL, *scale = 1.0 BEFORE validating, then fails with
  *     E_INVALIDARG when the source is NULL, textPosition + textLength wraps past 2^32, (weight - 1) > 998 (so 1..999 are valid),
  *     style > 2 or (stretch - 1) > 8 (1..9 valid). Nothing else is checked (no range check against the text length).
- *   DWriteFontFallback::MapCharacters (v1, IDWriteFontFallback1): same zeroing (face instead of font), E_INVALIDARG when the source is NULL,
+ *   IDWriteFontFallback::MapCharacters (v1, IDWriteFontFallback1): same zeroing (face instead of font), E_INVALIDARG when the source is NULL,
  *     the position + length wraps, fontAxisValueCount > 0xFFFF, or fontAxisValueCount != 0 with a NULL value array.
- *   DWriteFontFallbackBuilder::AddMapping: E_INVALIDARG when ranges == NULL, rangesCount == 0, targetFamilyNames == NULL,
+ *   IDWriteFontFallbackBuilder::AddMapping: E_INVALIDARG when ranges == NULL, rangesCount == 0, targetFamilyNames == NULL,
  *     targetFamilyNamesCount == 0, scale < 0, or any of the first targetFamilyNamesCount names is NULL. Everything else is stored verbatim.
- *   DWriteFontFallbackBuilder::AddMappings(NULL): E_INVALIDARG.   CreateFontFallback: out pointer zeroed, always S_OK.
+ *   IDWriteFontFallbackBuilder::AddMappings(NULL): E_INVALIDARG.   CreateFontFallback: out pointer zeroed, always S_OK.
  * Only objects created by DirectWrite may be passed to AddMappings (the implementation reinterprets the pointer), so these tests never do. */
 
 typedef struct { const char *what; int null_src; UINT32 pos, len; UINT32 w, st, sx; } bad_row;

@@ -1,5 +1,5 @@
 /* IDWriteFontFace::TryGetFontTable / ReleaseFontTable protocol, on a synthetic font opened through our own memory loader.
- * Windows behaviour (dwrite.dll DWriteFontFace::TryGetFontTable): all four out parameters are zeroed first, the table directory of the
+ * Windows behaviour (dwrite.dll IDWriteFontFace::TryGetFontTable): all four out parameters are zeroed first, the table directory of the
  * face is searched linearly for the first record whose tag (read as a little-endian ULONG from the file bytes) equals the argument,
  * the table bytes are read with exactly one ReadFileFragment(offset, directory length) on the file stream, and the pointer handed
  * back is the pointer the stream returned. ReleaseFontTable forwards its context to ReleaseFileFragment unchanged. */

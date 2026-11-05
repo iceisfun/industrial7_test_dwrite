@@ -1,8 +1,8 @@
 /* Property getters of IDWriteFontFaceReference: GetFontFaceIndex, GetSimulations, GetFontFile, GetFileSize, GetLocalFileSize,
  * GetFileTime, GetLocality, Equals, CreateFontFace, CreateFontFaceWithSimulations.
  *
- * Win10 dwrite.dll (DWriteFontFaceReferenceBase, !0xe42b0 GetFileSize, !0xe4530 GetLocalFileSize, !0xe4320 GetFileTime, !0x4e4d0 GetLocality,
- * !0xe4450 GetFontFile, !0xe4240 Equals, !0x2a210 CreateFontFace, !0x78360 CreateFontFaceWithSimulations):
+ * Win10 dwrite.dll (IDWriteFontFaceReference: GetFileSize, GetLocalFileSize, GetFileTime, GetLocality,
+ * GetFontFile, Equals, CreateFontFace, CreateFontFaceWithSimulations):
  *   - GetFileSize / GetLocalFileSize / GetFileTime forward to the font file stream of the reference's loader: GetFileSize or GetLastWriteTime
  *     of the stream. A stream failing GetFileSize (any failure) or GetLastWriteTime (anything but E_NOTIMPL) raises a C++ exception, so those
  *     failure modes are deliberately not exercised here. E_NOTIMPL from GetLastWriteTime reads as time 0 with S_OK.

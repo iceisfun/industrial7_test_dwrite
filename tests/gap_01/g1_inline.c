@@ -1,7 +1,7 @@
 /* IDWriteInlineObject::GetBreakConditions and IDWriteInlineObject::GetOverhangMetrics as called back by IDWriteTextLayout.
  *
- * Win10 dwrite.dll (TextLayout::SlowPath !0x573f8 -> ApplyInlineObjectProperties !0x6ece0; TextLayout::GetBlackBox !0x96234,
- * TextLayout::GetOverhangMetrics !0x96188, DWriteTextLayout::SetInlineObject !0xdf290):
+ * Win10 dwrite.dll (inline object property application; GetBlackBox,
+ * GetOverhangMetrics, IDWriteTextLayout::SetInlineObject):
  *   - SetInlineObject only stores the object (overflow of start + length -> E_INVALIDARG); no callback happens until the layout is computed
  *     (the first metrics / line / cluster / hit-test query or Draw).
  *   - GetBreakConditions is called once per maximal run of adjacent text spans that share the same object pointer, with the values the line

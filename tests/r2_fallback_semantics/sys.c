@@ -1,7 +1,7 @@
 #include "r2fs.h"
 
-/* IDWriteFactory2::GetSystemFontFallback on Windows 10 (DWriteFactory::GetSystemFontFallback):
- *   - *fallback is set to NULL first, then a NEW DWriteFontFallback object is created on every call (distinct pointers, refcount 1);
+/* IDWriteFactory2::GetSystemFontFallback on Windows 10 (IDWriteFactory::GetSystemFontFallback):
+ *   - *fallback is set to NULL first, then a NEW IDWriteFontFallback object is created on every call (distinct pointers, refcount 1);
  *   - the object implements IUnknown, IDWriteFontFallback and IDWriteFontFallback1 (the same primary vtable, so the pointers are equal)
  *     and an internal private interface that is not part of the public interface list; every other public IID gives E_NOINTERFACE.
  * The mapping data comes from the OS font fallback resource; a stock Windows 10 installs fonts for all major scripts, so for those the

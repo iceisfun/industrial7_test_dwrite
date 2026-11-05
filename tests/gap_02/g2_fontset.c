@@ -1,11 +1,11 @@
 /* IDWriteFontSet3::GetFontSourceType / GetFontSourceNameLength / GetFontSourceName and IDWriteFontSet2::GetExpirationEvent.
- * Win10 decompilation:
- *   GetFontSourceType (dwrite.dll!0xe6c40) and GetFontSourceNameLength (!0xe6b90) read the font entry's byte / string and THROW an
+ * Win10 probing:
+ *   GetFontSourceType and GetFontSourceNameLength read the font entry's byte / string and THROW an
  *   ArgumentException("listIndex") for index >= GetFontCount(): an unhandled C++ exception, so out-of-range indices are never passed here.
- *   GetFontSourceName (!0xe6aa0): bufferSize == 0 -> HRESULT_FROM_WIN32(ERROR_INSUFFICIENT_BUFFER) before anything is written (the
+ *   GetFontSourceName: bufferSize == 0 -> HRESULT_FROM_WIN32(ERROR_INSUFFICIENT_BUFFER) before anything is written (the
  *   buffer pointer is not touched); otherwise buffer[0] = 0, index check, then StringCchCopyNW(buffer, bufferSize, name, length):
  *   bufferSize <= length -> 0x8007007A with a truncated, NUL-terminated copy; bufferSize > length -> S_OK.
- *   GetExpirationEvent (!0xd8b50, shared by font sets and font collections): NULL unless the object carries a cache reference.
+ *   GetExpirationEvent (shared by font sets and font collections): NULL unless the object carries a cache reference.
  * The source type is a byte of the font entry: UNKNOWN 0, PER_MACHINE 1, PER_USER 2, APPX_PACKAGE 3, REMOTE_FONT_PROVIDER 4. */
 #include "g2.h"
 
@@ -243,7 +243,7 @@ TEST(gap2_fexp_builder_set_has_no_event)
     bset x; IDWriteFontSet2 *s2 = NULL;
     if (!bset_open(&x, 2)) return;
     if (FAILED(IDWriteFontSet_QueryInterface(x.set, &IID_IDWriteFontSet2, (void **)&s2))) { bset_close(&x); t_skip("no Set2"); return; }
-    /* A set made by a builder carries no cache reference (this+0x38 == 0), so there is nothing to wait on. */
+    /* A set made by a builder carries no cache reference, so there is nothing to wait on. */
     CHECK(IDWriteFontSet2_GetExpirationEvent(s2) == NULL);
     CHECK(IDWriteFontSet2_GetExpirationEvent(s2) == NULL);
     DW_RELEASE(s2);

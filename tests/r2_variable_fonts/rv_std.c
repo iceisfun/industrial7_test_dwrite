@@ -1,6 +1,6 @@
 /* Standard axes (wght, wdth, ital, slnt) of fonts that do not define them in fvar.
  *
- * Win10 dwrite.dll (AddStandardAxes !0x10b5c called by FontStyleAttributesRegion::WriteRegion !0x10850 after ReadAxes): for each tag of
+ * Win10 dwrite.dll (standard axes are added after the axes are read): for each tag of
  * {wght, wdth, ital, slnt} that the font (fvar or STAT) does not define an axis is added with minimum == default == maximum:
  *   wght = the font's weight (OS/2 usWeightClass), wdth = FontStretchToWidthAxisValue(stretch) (100 for normal),
  *   ital = 1 for DWRITE_FONT_STYLE_ITALIC else 0,

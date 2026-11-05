@@ -1,7 +1,7 @@
 /* Shared helpers for the fontface_outline area: IDWriteFontFace::GetGlyphRunOutline.
  *
  * The expectation model (fo_exp) re-derives, from the *synthetic font description* alone, the exact stream of
- * ID2D1SimplifiedGeometrySink calls the OS must produce.  Facts it encodes (Win10 DWriteFontFace::GetGlyphRunOutline ->
+ * ID2D1SimplifiedGeometrySink calls the OS must produce.  Facts it encodes (Win10 IDWriteFontFace::GetGlyphRunOutline ->
  * ComputeGlyphRunOutline -> StreamGlyphOutlines, TrueTypeRasterizer::GetOutline):
  *   - SetFillMode(WINDING) once per call (when glyphCount > 0), then per glyph / per contour:
  *     BeginFigure(pt, FILLED) , AddLines(1 point) / AddBeziers(1 segment) per segment , EndFigure(CLOSED).

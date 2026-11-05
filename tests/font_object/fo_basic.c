@@ -1,5 +1,5 @@
 /* IDWriteFont object basics: interface set, identity, lifetime, family back-pointer, weight/stretch/style/simulations.
- * DWriteFont (dwrite.dll) is one COM class answering IUnknown, IDWriteFont, IDWriteFont1, IDWriteFont2 and IDWriteFont3
+ * IDWriteFont (dwrite.dll) is one COM class answering IUnknown, IDWriteFont, IDWriteFont1, IDWriteFont2 and IDWriteFont3
  * (QueryInterfaceImpl<..., TypeList<IDWriteFont1, TypeList<IDWriteFont2, TypeList<IDWriteFont3>>>>). */
 #include "fo.h"
 
@@ -174,7 +174,7 @@ TEST(font_survives_collection_loader_unregistered) {
 
 /* ---- family back pointer --------------------------------------------------------------------------------- */
 TEST(font_family_same_pointer_each_call) {
-    /* DWriteFont::GetFontFamily returns the stored family pointer (AddRef'd) every time. */
+    /* IDWriteFont::GetFontFamily returns the stored family pointer (AddRef'd) every time. */
     fo_fx x; ttf_spec s; IDWriteFontFamily *a = NULL, *b = NULL; fo_spec(&s, "FoFamId"); FO_OPEN1(x, s);
     CHECK_HR_OK(IDWriteFont_GetFontFamily(x.font[0], &a)); CHECK_HR_OK(IDWriteFont_GetFontFamily(x.font[0], &b));
     CHECK(a != NULL && a == b);
@@ -355,7 +355,7 @@ TEST(font_simulated_bold_from_regular_only_family) {
     b = sim_font(&x, DWRITE_FONT_WEIGHT_BOLD, DWRITE_FONT_STYLE_NORMAL); CHECK(b != NULL);
     if (b) {
         CHECK(IDWriteFont_GetSimulations(b) & DWRITE_FONT_SIMULATIONS_BOLD);
-        EXPECT_EQ(IDWriteFont_GetWeight(b), DWRITE_FONT_WEIGHT_BOLD);   /* FontFaceLight::GetFontWeight: BOLD simulation => 700 */
+        EXPECT_EQ(IDWriteFont_GetWeight(b), DWRITE_FONT_WEIGHT_BOLD);   /* GetFontWeight: BOLD simulation => 700 */
         EXPECT_EQ(IDWriteFont_GetStyle(b), DWRITE_FONT_STYLE_NORMAL);
         DW_RELEASE(b);
     }
@@ -366,7 +366,7 @@ TEST(font_simulated_oblique_from_upright_family) {
     o = sim_font(&x, DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STYLE_ITALIC); CHECK(o != NULL);
     if (o) {
         CHECK(IDWriteFont_GetSimulations(o) & DWRITE_FONT_SIMULATIONS_OBLIQUE);
-        EXPECT_EQ(IDWriteFont_GetStyle(o), DWRITE_FONT_STYLE_OBLIQUE);  /* FontFaceLight::GetFontStyle: OBLIQUE simulation => 1 */
+        EXPECT_EQ(IDWriteFont_GetStyle(o), DWRITE_FONT_STYLE_OBLIQUE);  /* GetFontStyle: OBLIQUE simulation => 1 */
         EXPECT_EQ(IDWriteFont_GetWeight(o), DWRITE_FONT_WEIGHT_NORMAL);
         DW_RELEASE(o);
     }
@@ -413,7 +413,7 @@ TEST(font_simulated_font_same_family) {
 }
 static void ls_first_en(IDWriteLocalizedStrings *n, char *buf, int cap) { buf[0] = 0; if (n) dw_ls_en(n, buf, cap); }
 TEST(font_simulated_face_names) {
-    /* FontFaceLight::GetFaceNames: CreateSimulatedBold/ObliqueFaceName remove 'Regular' and append ' Bold' / ' Oblique' (or yield the bare word). */
+    /* GetFaceNames: CreateSimulatedBold/ObliqueFaceName remove 'Regular' and append ' Bold' / ' Oblique' (or yield the bare word). */
     fo_fx x; ttf_spec s; IDWriteFont *f; IDWriteLocalizedStrings *n; char buf[64]; fo_spec(&s, "FoSimNm"); FO_OPEN1(x, s);
     static const struct { int w, st; const char *want; } t[] = {
         { 400, 0, "Regular" }, { 700, 0, "Bold" }, { 400, 2, "Oblique" }, { 700, 1, "Bold Oblique" } };
@@ -427,7 +427,7 @@ TEST(font_simulated_face_names) {
     fo_close(&x);
 }
 TEST(font_simulated_oblique_metrics_shift_glyph_box) {
-    /* FontFaceLight::GetFontMetrics: for an OBLIQUE simulation glyphBoxLeft/Right and sub/superscript X offsets are shifted by (y * 0x5700) >> 16. */
+    /* GetFontMetrics: for an OBLIQUE simulation glyphBoxLeft/Right and sub/superscript X offsets are shifted by (y * 0x5700) >> 16. */
     fo_fx x; ttf_spec s; IDWriteFont *o; IDWriteFont1 *b1 = NULL, *o1 = NULL; DWRITE_FONT_METRICS1 mb, mo; fo_spec(&s, "FoSimMet"); FO_OPEN1(x, s);
     o = sim_font(&x, DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STYLE_ITALIC);
     IDWriteFont_QueryInterface(x.font[0], &IID_IDWriteFont1, (void **)&b1);

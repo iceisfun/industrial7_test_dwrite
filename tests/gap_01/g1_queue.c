@@ -1,6 +1,6 @@
 /* IDWriteFontDownloadQueue::CancelDownload and IDWriteFontDownloadListener::DownloadCompleted: extra angles on an idle queue.
  *
- * Win10 dwrite.dll (DWriteFontDownloadQueue::CancelDownload !0x40680): takes the queue lock, cancels the pending downloads (or sets the cancel flag of the running
+ * Win10 dwrite.dll (IDWriteFontDownloadQueue::CancelDownload): takes the queue lock, cancels the pending downloads (or sets the cancel flag of the running
  * one), leaves the lock, waits for the completion event and returns S_OK. On an idle queue it neither changes the generation count nor calls a listener.
  */
 #include "g1.h"

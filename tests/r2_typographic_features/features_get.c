@@ -1,6 +1,6 @@
 /* IDWriteTextAnalyzer2::GetTypographicFeatures with fonts whose GSUB / GPOS tables are known byte for byte (otl.c).
- * Expectations come from DWriteTextAnalyzer::GetTypographicFeatures, ShapingInterface::GetTypographicFeatures,
- * FontFeatureCoverage::GetFeatureList, FindScriptLanguageIndexWithFallback and FontFeatureCoverageRegionBuilder::{ReadTable,
+ * Expectations come from IDWriteTextAnalyzer::GetTypographicFeatures, GetTypographicFeatures,
+ * GetFeatureList, FindScriptLanguageIndexWithFallback and FontFeatureCoverageRegionBuilder::{ReadTable,
  * AddLanguageFeatures,WriteRegion} of the Windows 10 dwrite.dll. */
 #include "r2.h"
 

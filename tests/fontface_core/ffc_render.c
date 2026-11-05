@@ -1,6 +1,6 @@
 /* GetGdiCompatibleMetrics (v0 and v1) and GetRecommendedRenderingMode (IDWriteFontFace, IDWriteFontFace1, IDWriteFontFace2, IDWriteFontFace3).
  *
- * GDI-compatible metrics (FontFace::GetGdiCompatibleMetrics, RoundDesignValueToPixelGrid): with ppem = emSize * pixelsPerDip * scale(transform) and
+ * GDI-compatible metrics (GetGdiCompatibleMetrics, RoundDesignValueToPixelGrid): with ppem = emSize * pixelsPerDip * scale(transform) and
  * upp = unitsPerEm / ppem design units per pixel, every metric v (except unitsPerEm and hasTypographicMetrics) becomes
  *     round_half_up( round_half_up(v / upp) * upp )
  * in single precision; no VDMX table => ascent and descent follow the same rule. Invalid input (emSize <= 0, pixelsPerDip <= 0, NaN in the matrix)

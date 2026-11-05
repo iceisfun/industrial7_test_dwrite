@@ -3,7 +3,7 @@
  * The analyzer is reached through DWriteCreateFactory -> IDWriteFactory::CreateTextAnalyzer.  The analysis source/sink are the
  * recording doubles of common/dwx; the text pointer handed to a source is NOT copied, so every fixture string outlives its source.
  *
- * Facts every test in this area relies on (decomp of the four Analyze* entry points):
+ * Facts every test in this area relies on (observed behaviour of the four Analyze* entry points):
  *   - source == NULL, sink == NULL or textPosition + textLength overflowing 32 bits  => E_INVALIDARG, no callback of any kind
  *   - everything else succeeds with S_OK unless a callback (source or sink) fails; the callback's HRESULT stops the walk
  *   - line breakpoints: ONE sink call covers the whole range; zero length returns before any source call
@@ -82,7 +82,7 @@ typedef struct ta_fsrc {
 } ta_fsrc;
 void ta_fsrc_init(ta_fsrc *s, const WCHAR *text, UINT32 len);
 
-/* a callback failure must abort the call with a failure; the exact code is only recorded (the HRESULT mapping is not visible in the decomp) */
+/* a callback failure must abort the call with a failure; the exact code is only recorded (the HRESULT mapping is not visible in the observations) */
 #define CHECK_HR_PROP(hr, code) do { HRESULT p_ = (hr); CHECK_HR_FAILED(p_); if (p_ != (HRESULT)(code)) t_note("callback failed with %s, analyzer returned %s", dw_hr_name((HRESULT)(code)), dw_hr_name(p_)); } while (0)
 
 #define LEN(s) ((UINT32)wcslen(s))

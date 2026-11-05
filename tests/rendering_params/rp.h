@@ -1,7 +1,7 @@
 /* Shared scaffolding for the rendering_params area (IDWriteRenderingParams .. IDWriteRenderingParams3 and the factory
  * methods that create them).
  *
- * Facts established from the Windows 10 dwrite.dll decompilation that the tests below rely on:
+ * Facts established from the Windows 10 dwrite.dll probing that the tests below rely on:
  *  - every IDWriteFactory*::CreateCustomRenderingParams overload writes *params = NULL first, then rejects with E_INVALIDARG
  *    when NOT (0 < gamma <= 256), enhancedContrast < 0, (grayscaleEnhancedContrast < 0), clearTypeLevel < 0,
  *    pixelGeometry > 2, renderingMode > 6 (> 7 for the DWRITE_RENDERING_MODE1 overload), gridFitMode > 2.

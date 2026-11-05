@@ -1,6 +1,6 @@
 /* IDWriteTextLayout::HitTestTextPosition on left-to-right text.
  *
- * Facts (DWriteTextLayout::HitTestTextPosition -> TextLayout::HitTestTextPosition / HitTestTextPositionInSpan):
+ * Facts (IDWriteTextLayout::HitTestTextPosition -> HitTestTextPosition / HitTestTextPositionInSpan):
  *  - never fails; x, y and the metrics are zeroed, then filled; positions past the end are clamped to the text length;
  *  - the metrics describe the whole CLUSTER that holds the position (textPosition = cluster start, length = cluster length, left/width =
  *    its extent, top/height = the line box), whichever code unit inside the cluster was asked for;

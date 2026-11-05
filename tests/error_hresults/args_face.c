@@ -254,7 +254,7 @@ TEST(analyzer_sink_failure_passes_through) {
     for (i = 0; i < 5; i++) {
         dwx_ana_src *src = dwx_ana_src_new(txt, 11); dwx_ana_sink *snk = dwx_ana_sink_new();
         snk->fail_script = codes[i];
-        /* AnalyzeScript routes every sink result through CallbackException::ThrowIfFailed */
+        /* AnalyzeScript routes every sink result through ThrowIfFailed */
         HRESULT hr = IDWriteTextAnalyzer_AnalyzeScript(a, (IDWriteTextAnalysisSource *)src, 0, 11, (IDWriteTextAnalysisSink *)snk);
         CHECKF(hr == codes[i], "script sink injected %s got %s", dw_hr_name(codes[i]), dw_hr_name(hr));
         dwx_release(src); dwx_release(snk);

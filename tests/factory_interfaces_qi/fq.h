@@ -25,7 +25,7 @@ typedef struct fq_class {
     IUnknown *(*create)(fq_ctx *c);   /* returns one owned reference or NULL (prerequisite missing -> test skips) */
     /* Interfaces accepted by QueryInterface (besides IUnknown). A leading '?' means "not established": noted, never checked. */
     const char *const *ifaces;
-    HRESULT noiface;                  /* HRESULT returned for an unsupported IID: E_NOINTERFACE (E_NOTIMPL for DWriteFontFace) */
+    HRESULT noiface;                  /* HRESULT returned for an unsupported IID: E_NOINTERFACE (E_NOTIMPL for IDWriteFontFace) */
     int fresh;                        /* 1: every creator call returns a new object whose first refcount is exactly 1 */
     int distinct;                     /* 1: two creator calls must give distinct objects */
 } fq_class;

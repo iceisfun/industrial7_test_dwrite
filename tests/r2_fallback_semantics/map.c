@@ -1,6 +1,6 @@
 #include "r2fs.h"
 
-/* MapCharacters semantics of a builder-made fallback (DWriteFontFallback / FontFallback::MapCharacters on Windows 10):
+/* MapCharacters semantics of a builder-made fallback (IDWriteFontFallback / MapCharacters on Windows 10):
  *   1. When a base collection and a non-empty base family name are given, the base family is matched first (its GetMatchingFonts order, the
  *      first font that covers the leading text wins). If it covers anything, the source's GetLocaleName is never called.
  *   2. Otherwise the mappings whose base family / locale filters match are tried in order; for each, the target families are tried in order

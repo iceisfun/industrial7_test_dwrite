@@ -4,7 +4,7 @@
  * usWidthClass and fsSelection are chosen by the test, so every expectation is exact and independent of installed fonts.
  *
  * The matching oracle (fm_oracle_*) is a straight transcription of the Windows 10 matcher:
- *   FontSet::FindNearestMatchingWwsFont / ApplySimulationsForWwsFallback / MatchingFont::MatchingFont / MatchingStyle::IsBetterMatch.
+ *   FindNearestMatchingWwsFont / ApplySimulationsForWwsFallback / MatchingFont::MatchingFont / MatchingStyle::IsBetterMatch.
  */
 #ifndef FM_H
 #define FM_H

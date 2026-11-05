@@ -1,11 +1,11 @@
 /* IDWriteFontFileEnumerator::MoveNext / GetCurrentFontFile as driven by dwrite.
  *
- * Win10 decomp (FontCollectionBuilder::AddFontFiles):
+ * Win10 observed (AddFontFiles):
  *   for (;;) {
  *       hr = MoveNext(&has); ThrowIfFailed(hr);        // a failing HRESULT aborts the whole creation, `has` is not looked at
  *       if (has == 0) break;                           // any non-zero BOOL means "there is a current file"
  *       hr = GetCurrentFontFile(&file);
- *       if (hr >= 0) { file->GetLoader; file->GetReferenceKey; FontSetBuilder::AddFontFile(...); }   // a failing hr only skips the file
+ *       if (hr >= 0) { file->GetLoader; file->GetReferenceKey; AddFontFile(...); }   // a failing hr only skips the file
  *       if (file) file->Release();                      // also after a failure when *out was non-NULL
  *   }
  * MoveNext is never called again after it reported "no current file"; GetCurrentFontFile only after a successful MoveNext.

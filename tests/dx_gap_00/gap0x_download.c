@@ -3,8 +3,8 @@
  * These tests start a real WinInet request, so they live in a dx_ area (run with /destructive). The host name uses the reserved ".invalid"
  * top-level domain, which never resolves: no font data is ever transferred and the download is expected to complete with a failure.
  *
- * Windows 10 build 19041 decomp facts (NetFontStream::BeginDownload !0x1489d0, NetDownload ctor !0x149df8, ::BeginDownload !0x14a338,
- * ::SetErrorState !0x14a9c8, ::GetResult !0x93790, ::GetWaitHandle !0x937a0):
+ * Windows 10 build 19041 observed facts (font stream BeginDownload, download object construction,
+ * SetErrorState, GetResult, GetWaitHandle):
  *   - with no fragments the stream creates one NetDownload (cached in the stream while it is pending) and starts the request asynchronously;
  *   - the result code of a NetDownload starts as E_PENDING (0x8000000A) and is replaced by the failure when the request fails, at which
  *     moment the manual-reset completion event returned by GetWaitHandle is signalled;

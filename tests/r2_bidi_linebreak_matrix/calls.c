@@ -333,7 +333,7 @@ static void sink_fail(int kind, int which, HRESULT hr, const WCHAR *t, UINT32 mi
         CHECK_HR_FAILED(got);
         EXPECT_EQ(k->n[k->fail_kind], which);                   /* the failing call was the last one */
     } else {
-        /* the AnalyzeBidi/AnalyzeLineBreakpoints entry points call a void worker and return S_OK (decomp), so the sink HRESULT
+        /* the AnalyzeBidi/AnalyzeLineBreakpoints entry points call a void worker and return S_OK (observed), so the sink HRESULT
            is not guaranteed to surface and whether the walk stops is not verified */
         CHECK(k->n[k->fail_kind] >= which);
         t_note("sink returned %s, analyzer returned %s, callbacks %d", dw_hr_name(hr), dw_hr_name(got), k->n[k->fail_kind]);
@@ -444,7 +444,7 @@ MT(calls_orient_sink_failure_stops_walk) {
     or_setup(s, 4, len, NULL, lv);
     k->fail_kind = MK_ORIENT; k->fail_after = 2; k->fail_hr = E_FAIL;
     hr = ms_orient(an2, s, 0, 4, k);
-    /* AnalyzeVerticalGlyphOrientation returns S_OK after a void worker (decomp): failure propagation is not verified */
+    /* AnalyzeVerticalGlyphOrientation returns S_OK after a void worker (observed): failure propagation is not verified */
     CHECK(k->n[MK_ORIENT] >= 2); t_note("hr %s, callbacks %d", dw_hr_name(hr), k->n[MK_ORIENT]);
     ms_src_free(s); ms_sink_free(k); MS_END();
 }
@@ -452,7 +452,7 @@ MT(calls_orient_source_failure_surfaces) {
     MS_BEGIN2(); ms_src *s = ms_src_new(L"abcd", 4); ms_sink *k = ms_sink_new(1); HRESULT hr;
     s->fail_orient = E_FAIL;
     hr = ms_orient(an2, s, 0, 4, k);
-    /* worker is void and the entry point returns S_OK (decomp): only the source call itself is certain */
+    /* worker is void and the entry point returns S_OK (observed): only the source call itself is certain */
     CHECK(s->n[MF_ORIENT] >= 1); t_note("hr %s", dw_hr_name(hr));
     ms_src_free(s); ms_sink_free(k); MS_END();
 }

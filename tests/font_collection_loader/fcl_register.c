@@ -1,7 +1,7 @@
 /* RegisterFontCollectionLoader / UnregisterFontCollectionLoader / CreateCustomFontCollection: argument validation,
  * registration lifetime, reference counting and the way the collection loader is called.
  *
- * Win10 decomp facts used below:
+ * Win10 observed facts used below:
  *  - Register: stores a ComPtr (+1 ref) in a per-factory map keyed by the loader pointer; a second registration of the same
  *    pointer throws OSException(DWRITE_E_ALREADYREGISTERED 0x88985006); NULL throws ArgumentException (E_INVALIDARG).
  *  - Unregister: an unknown or NULL pointer throws ArgumentException (E_INVALIDARG); success erases the map entry (-1 ref).
@@ -335,7 +335,7 @@ TEST(fcl_create_key_size_zero_with_pointer)
     CHECK_HR_OK(fcl_px_create_key(&p, "x", 0, &c));
     EXPECT_EQ(p.cl->n_create, 1);
     EXPECT_EQ(p.cl->last_ks, 0);
-    /* the key is copied into the loader call; an empty key is handed over as NULL (decomp: begin==end -> NULL) */
+    /* the key is copied into the loader call; an empty key is handed over as NULL (observed: begin==end -> NULL) */
     t_note("key size 0 with non-NULL pointer: loader saw key=%s", p.cl->key_was_null ? "NULL" : "non-NULL");
     DW_RELEASE(c);
     fcl_px_close(&p);

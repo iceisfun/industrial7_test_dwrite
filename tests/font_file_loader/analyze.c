@@ -1,6 +1,6 @@
 /* IDWriteFontFile::Analyze.
- * Basis: DWriteFontFile::Analyze (outputs preset to FALSE / UNKNOWN / DWRITE_FONT_FACE_TYPE_UNKNOWN / 0 before the argument
- * check; isSupported = faceType < 3; fontFaceType may be NULL), FontFileAnalyzer::Analyze = IsPfm, then IsPfb, then
+ * Basis: IDWriteFontFile::Analyze (outputs preset to FALSE / UNKNOWN / DWRITE_FONT_FACE_TYPE_UNKNOWN / 0 before the argument
+ * check; isSupported = faceType < 3; fontFaceType may be NULL), Analyze = IsPfm, then IsPfb, then
  * IsOpenType, then IsFon, each reading a fixed header prefix through the stream (0x75 bytes, 7 bytes, 0x10 bytes). */
 #include "fl.h"
 

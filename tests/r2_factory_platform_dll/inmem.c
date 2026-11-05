@@ -1,5 +1,5 @@
 /* IDWriteFactory5: in-memory and HTTP font file loaders, font set builders, collections from font sets.
- * Decompilation notes: MemoryFontFileLoader::CreateInMemoryFontFileReference rejects NULL data / zero size with E_INVALIDARG and
+ * Observed behaviour notes: CreateInMemoryFontFileReference rejects NULL data / zero size with E_INVALIDARG and
  * zeroes *fontFile first; each accepted call appends an entry and creates the file through the factory with a 4 byte key holding
  * the entry index; CreateStreamFromKey requires keySize == 4 and index < entry count (E_INVALIDARG otherwise, out zeroed). */
 #include "rfp.h"
@@ -503,7 +503,7 @@ TEST(fsb_collection_from_font_set_null_is_invalidarg) {
     IDWriteFactory3 *f3 = (IDWriteFactory3 *)dw_factory_v(FT_ISOLATED, 3); IDWriteFontCollection1 *c = (IDWriteFontCollection1 *)RFP_SENTINEL;
     if (!f3) { t_skip("IDWriteFactory3 unsupported"); return; }
     if (t_is_wine()) { t_skip("emulated implementation dereferences the NULL set"); return; }
-    CHECK_HR(IDWriteFactory3_CreateFontCollectionFromFontSet(f3, NULL, &c), E_INVALIDARG);   /* decompiled: NULL set rejected, out zeroed first */
+    CHECK_HR(IDWriteFactory3_CreateFontCollectionFromFontSet(f3, NULL, &c), E_INVALIDARG);   /* observed: NULL set rejected, out zeroed first */
     CHECK(c == NULL);
 }
 TEST(fsb_collection_from_font_set_ok_and_family_count) {

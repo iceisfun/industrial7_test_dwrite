@@ -1,6 +1,6 @@
 /* IDWriteFontFile::Analyze: what the sniffer accepts, classifies and rejects.
  *
- * Windows reads the file in a fixed order (decomp: DWriteFontFile::Analyze -> FontFileAnalyzer::Analyze):
+ * Windows reads the file in a fixed order (observed: IDWriteFontFile::Analyze -> Analyze):
  *   GetFileSize, then IsPfm (fragment 0,0x75), IsPfb (0,7), IsOpenType (0,0x10), IsFon (MZ/NE resource walk).
  * Any short read or inconsistent header throws FileFormatException, surfaced as DWRITE_E_FILEFORMAT, with the
  * four out values left at their defaults {FALSE, UNKNOWN(0), UNKNOWN(6), 0}. */
@@ -225,7 +225,7 @@ TEST(an_fon_resource_beyond_file) {
     free(b);
 }
 
-/* ---- argument validation (decomp of DWriteFontFile::Analyze) ----------------------------------------------- */
+/* ---- argument validation (observed behaviour of IDWriteFontFile::Analyze) ----------------------------------------------- */
 TEST(an_null_issupported_is_invalidarg_and_others_defaulted) {
     if (t_is_wine()) { t_skip("Wine dereferences NULL output pointers; Windows returns E_INVALIDARG"); return; }
     sf_blob b = sf_default(); sf_probe p; UINT32 nf = 77; DWRITE_FONT_FILE_TYPE ft = (DWRITE_FONT_FILE_TYPE)77; DWRITE_FONT_FACE_TYPE fc = (DWRITE_FONT_FACE_TYPE)77;

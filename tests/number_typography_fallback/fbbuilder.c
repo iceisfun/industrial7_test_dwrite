@@ -7,7 +7,7 @@
  *     the collection may be NULL, scale 0 is accepted, and the Unicode ranges are copied verbatim (first > last is accepted here);
  *   - AddMappings(NULL) is E_INVALIDARG; otherwise every mapping of the given (DirectWrite-created) fallback is appended;
  *   - CreateFontFallback zeroes the out pointer, snapshots the builder (later AddMapping calls do not change fallbacks made earlier)
- *     and returns a new DWriteFontFallback (IDWriteFontFallback + IDWriteFontFallback1);
+ *     and returns a new IDWriteFontFallback (IDWriteFontFallback + IDWriteFontFallback1);
  *   - text format / layout SetFontFallback AddRefs (NULL allowed), GetFontFallback returns the stored pointer (AddRef'd) or NULL, always S_OK. */
 
 static IDWriteFontFallbackBuilder *mkb(IDWriteFactory *f)

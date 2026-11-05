@@ -516,7 +516,7 @@ TEST(lsi_design_script_language_absent_or_derived) { info_absent(DWRITE_INFORMAT
 TEST(lsi_supported_script_language_absent_or_derived) { info_absent(DWRITE_INFORMATIONAL_STRING_SUPPORTED_SCRIPT_LANGUAGE_TAG, "supported script language"); }
 
 TEST(lsi_invalid_ids) {
-    /* ids outside 1..21 (FontFaceLight::GetInformationalStrings): success, exists FALSE, strings NULL, on both interfaces */
+    /* ids outside 1..21 (GetInformationalStrings): success, exists FALSE, strings NULL, on both interfaces */
     LS_NEED_FACTORY(); LS_NEED_MULTI(x);
     static const int bad[] = { 0, 22, 23, 100, 0xDEAD, 0x7FFFFFFF, -1, 0x80000000 };
     size_t k;

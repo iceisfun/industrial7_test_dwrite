@@ -1,5 +1,5 @@
 /* Factory object creation arguments: CreateTextFormat / CreateTextLayout / CreateNumberSubstitution validation and locale handling.
- * Decompilation: DWriteFactory::CreateTextFormat zeroes *out, then returns E_INVALIDARG when family or locale is NULL, weight is
+ * Observed behaviour: IDWriteFactory::CreateTextFormat zeroes *out, then returns E_INVALIDARG when family or locale is NULL, weight is
  * outside 1..999, style > 2 (unsigned), stretch outside 1..9, or size is <= 0 or NaN; nothing else is validated there.
  * CreateTextLayout rejects a NULL string or format and negative / NaN maxWidth / maxHeight.
  * CreateNumberSubstitution accepts a NULL locale only for method NONE (2). */

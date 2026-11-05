@@ -1,5 +1,5 @@
 /* Colour related IDWriteFontFace2/IDWriteFontFace4 behaviour on the COLR/CPAL (+SVG, +CBDT) fixtures and malformed variants.
- *   IsColorFont / GetColorPaletteCount / GetPaletteEntryCount (dwrite.dll!0x208b0 / 0x924c0 / 0x92510): cached face data.
+ *   IsColorFont / GetColorPaletteCount / GetPaletteEntryCount: cached face data.
  *   GetPaletteEntries (0xdcbe0): unknown palette -> DWRITE_E_NOCOLOR; first > count or entryCount > count - first -> E_INVALIDARG.
  *   GetGlyphImageFormats() (0x924e0) face-wide byte; GetGlyphImageFormats(glyph, ppemFirst, ppemLast, *fmt) (0xdc920): *fmt = 0 first, ORs
  *   the formats of the glyph's linked entries whose ppem is inside [first, last] (or 0 = any size).

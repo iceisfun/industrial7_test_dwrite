@@ -82,7 +82,7 @@ TEST(exp_export_directory_has_exactly_one_entry) {
         const DWORD *names = (const DWORD *)(base + ed->AddressOfNames);
         EXPECT_STR((const char *)(base + names[0]), "DWriteCreateFactory");
     }
-    {   /* the single function is a real code RVA (not a forwarder string inside the export directory) */
+    {   /* the single function is a real code address (not a forwarder string inside the export directory) */
         const DWORD *fn = (const DWORD *)(base + ed->AddressOfFunctions);
         CHECK(fn[0] < dd->VirtualAddress || fn[0] >= dd->VirtualAddress + dd->Size);
     }
@@ -168,7 +168,7 @@ TEST(mod_independent_loadlibraryex_flags_keep_export) {
     CHECK(x == NULL); EXPECT_ERR(ERROR_MOD_NOT_FOUND);
 }
 
-/* ---- DWriteCreateFactory argument contract (decomp: *ppFactory zeroed first, IID forwarded to QueryInterface) --- */
+/* ---- DWriteCreateFactory argument contract (observed: *ppFactory zeroed first, IID forwarded to QueryInterface) --- */
 TEST(exp_create_factory_unknown_iid_isolated_no_interface) {
     void *p = (void *)(ULONG_PTR)1; HRESULT hr;
     IID bogus = { 0x12345678, 0x9abc, 0xdef0, { 1, 2, 3, 4, 5, 6, 7, 8 } };

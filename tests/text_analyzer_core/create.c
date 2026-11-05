@@ -24,7 +24,7 @@ TEST(create_distinct_objects)
     CHECK_HR_OK(IDWriteFactory_CreateTextAnalyzer(f, &b));
     CHECK(a && b);
     if (a && b) {
-        /* DWriteFactory::CreateTextAnalyzer allocates a new object on every call */
+        /* IDWriteFactory::CreateTextAnalyzer allocates a new object on every call */
         CHECK(a != b);
         if (a != b) { EXPECT_REFS(a, 1); EXPECT_REFS(b, 1); }
     }

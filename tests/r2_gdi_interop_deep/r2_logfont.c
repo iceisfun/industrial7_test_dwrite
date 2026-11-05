@@ -2,7 +2,7 @@
  * idempotence, face versus font conversion, GetFontSignature against the font's own OS/2 table, GetMatchingFontsByLOGFONT against
  * CreateFontFromLOGFONT, and the factory's GetGdiInterop identity.
  *
- * Facts used (Windows 10 decompilation): CreateFontFromLOGFONT reads only lfFaceName, lfWeight, lfItalic and lfCharSet; every convert call
+ * Facts used (Windows 10 probing): CreateFontFromLOGFONT reads only lfFaceName, lfWeight, lfItalic and lfCharSet; every convert call
  * rewrites the whole 0x5c byte LOGFONTW (zeroed, then weight, italic, charset, OUT_OUTLINE_PRECIS and a face name of at most 31 characters);
  * GetFontSignature copies OS/2 ulUnicodeRange1..4 and ulCodePageRange1..2 and zeroes the output first. */
 #include "r2.h"

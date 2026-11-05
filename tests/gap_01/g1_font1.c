@@ -1,9 +1,9 @@
 /* IDWriteFont1::GetPanose, IDWriteFont1::IsMonospacedFont and IDWriteFont2::IsColorFont, with their IDWriteFontFace1/2/3 twins.
  *
- * Win10 dwrite.dll: DWriteFont::GetPanose (!0x928a0) copies the 10 panose bytes (an 8 byte and a 2 byte store, nothing else is written) from the
- * cached face data, DWriteFontFace::GetPanose (!0x92520) does the same from the face's own cache; DWriteFont::IsMonospacedFont (!0xe3150) is bit 1 and
- * DWriteFont::IsColorFont (!0xe3130) is bit 7 of the 16 bit flags word of the same cached data that DWriteFontFace::IsMonospacedFont (!0x8f720) and
- * DWriteFontFace::IsColorFont (!0x208b0) read. The two vtables of one font therefore always agree, the answers are exactly TRUE or FALSE (0 / 1) and
+ * Win10 dwrite.dll: IDWriteFont::GetPanose copies the 10 panose bytes (an 8 byte and a 2 byte store, nothing else is written) from the
+ * cached face data, IDWriteFontFace::GetPanose does the same from the face's own cache; IDWriteFont::IsMonospacedFont is bit 1 and
+ * IDWriteFont::IsColorFont is bit 7 of the 16 bit flags word of the same cached data that IDWriteFontFace::IsMonospacedFont and
+ * IDWriteFontFace::IsColorFont read. The two vtables of one font therefore always agree, the answers are exactly TRUE or FALSE (0 / 1) and
  * never fail. The panose bytes are the 10 bytes at offset 32 of the OS/2 table.
  */
 #include "g1.h"

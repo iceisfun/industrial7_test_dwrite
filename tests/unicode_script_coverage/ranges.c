@@ -1,6 +1,6 @@
 /* IDWriteFontFace1::GetUnicodeRanges / IDWriteFont1::GetUnicodeRanges versus per-code-point HasCharacter / GetGlyphIndices.
  *
- * Decomp of DWriteFontFace::GetUnicodeRanges + CmapBase::GetUnicodeRanges<FontCmap>:
+ * Observed of IDWriteFontFace::GetUnicodeRanges + GetUnicodeRanges<FontCmap>:
  *   - *actualRangeCount is zeroed first, then `maxRangeCount` entries of `ranges` are zero-filled (when ranges != NULL);
  *   - ranges != NULL || maxRangeCount == 0 is required, otherwise E_INVALIDARG with *actualRangeCount == 0;
  *   - the walk reports MAXIMAL runs of mapped code points (a run ends at the first unmapped value, so two consecutive ranges are

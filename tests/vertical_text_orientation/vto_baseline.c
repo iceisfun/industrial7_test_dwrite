@@ -1,6 +1,6 @@
 /* IDWriteTextAnalyzer1::GetBaseline for fonts without a BASE table (synthetic fonts), and with one.
  *
- * DWriteTextAnalyzer::GetBaseline zeroes both outputs, rejects a NULL font face or a baseline above DWRITE_BASELINE_MAXIMUM (8) with E_INVALIDARG and
+ * IDWriteTextAnalyzer::GetBaseline zeroes both outputs, rejects a NULL font face or a baseline above DWRITE_BASELINE_MAXIMUM (8) with E_INVALIDARG and
  * otherwise runs BaseTable::GetBaseline: DEFAULT means ROMAN for horizontal text and CENTRAL for vertical text; MINIMUM and MAXIMUM ignore the locale.
  * Without a BASE entry the coordinate is only produced when simulation is allowed, from the font metrics (ascent A, descent D, capHeight C, xHeight X):
  *   horizontal (returned value = - coordinate):  ideographic top = A, ideographic bottom = -D, central = math = (A - D) >> 1, roman = 0,

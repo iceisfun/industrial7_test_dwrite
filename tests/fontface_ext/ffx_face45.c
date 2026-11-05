@@ -1,11 +1,11 @@
 /* IDWriteFontFace4 (glyph image formats / data) and IDWriteFontFace5 (variations, font resource, Equals).
- *   GetGlyphImageFormats(glyph, ppemFirst, ppemLast, *formats) (dwrite.dll!0xdc920): *formats = 0, S_OK; ORs the formats of the glyph's entries whose
+ *   GetGlyphImageFormats(glyph, ppemFirst, ppemLast, *formats): *formats = 0, S_OK; ORs the formats of the glyph's entries whose
  *       pixelsPerEm lies in [first, last] or is 0.
- *   GetGlyphImageFormats() (!0x924e0): face-wide byte.
- *   GetGlyphImageData (!0xdc780): *context = NULL and *data zeroed first; format must be exactly one of SVG(8), PNG(0x10), JPEG(0x20), TIFF(0x40),
+ *   GetGlyphImageFormats(): face-wide byte.
+ *   GetGlyphImageData: *context = NULL and *data zeroed first; format must be exactly one of SVG(8), PNG(0x10), JPEG(0x20), TIFF(0x40),
  *       PREMULTIPLIED_B8G8R8A8(0x80), else E_INVALIDARG; otherwise S_OK (data stays zeroed when the glyph has no such image).
- *   GetFontAxisValueCount (!0xdc180) / GetFontAxisValues (!0xdc1e0): values zeroed first; valueCount < count -> E_NOT_SUFFICIENT_BUFFER (0x8007007A).
- *   HasVariations (!0x2a520), GetFontResource (!0xd190), Equals (!0xdbd40: NULL -> FALSE). */
+ *   GetFontAxisValueCount / GetFontAxisValues: values zeroed first; valueCount < count -> E_NOT_SUFFICIENT_BUFFER (0x8007007A).
+ *   HasVariations, GetFontResource, Equals (NULL -> FALSE). */
 #include "ffx.h"
 
 #define EINVAL ((HRESULT)0x80070057)

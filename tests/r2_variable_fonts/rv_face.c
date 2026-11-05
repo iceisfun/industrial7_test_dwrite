@@ -1,7 +1,7 @@
 /* IDWriteFontResource::CreateFontFace with axis values and IDWriteFontFace5 axis methods on the synthetic variable fixture (rv.h).
  *
- * Win10 dwrite.dll (DWriteFontResource::CreateFontFace !0xe1270, FontStyleAttributes::GetCanonicalAxisValues !0xd984 used by ReadFontFace,
- * DWriteFontFace::GetFontAxisValueCount !0xdc180, GetFontAxisValues !0xdc1e0, Equals !0xdbd40, ConvertAxisValuesFloatToFixed !0x6ff68):
+ * Win10 dwrite.dll (IDWriteFontResource::CreateFontFace, GetCanonicalAxisValues used when reading the face,
+ * IDWriteFontFace::GetFontAxisValueCount, GetFontAxisValues, Equals, float to fixed conversion):
  *   - CreateFontFace zeroes *face first and returns E_INVALIDARG for simulations & ~3, a value count > 0xFFFF, or NULL values with a non-zero count;
  *   - the values are converted to 16.16 fixed: round(v * 65536) with halves up (trunc(v * 2^32) + 0x8000 >> 16);
  *   - the face keeps CANONICAL values: one entry per font axis in axis order (the supplied value, FIRST occurrence of the tag wins, clamped to the
@@ -98,7 +98,7 @@ TEST(r2_variable_fonts_face_other_axes_stay_default)
 }
 TEST(r2_variable_fonts_face_clamps_to_axis_range)
 {
-    /* out-of-range values are clamped, never rejected (GetCanonicalAxisValues !0xd984) */
+    /* out-of-range values are clamped, never rejected (GetCanonicalAxisValues) */
     static const struct { UINT32 tag; float in, want; } t[] = {
         { TAG_WGHT, -5, 100 }, { TAG_WGHT, 0, 100 }, { TAG_WGHT, 99.5f, 100 }, { TAG_WGHT, 900.5f, 900 }, { TAG_WGHT, 1000, 900 }, { TAG_WGHT, 5000, 900 }, { TAG_WGHT, 1e9f, 900 }, { TAG_WGHT, -1e9f, 100 },
         { TAG_WDTH, 0, 75 }, { TAG_WDTH, 74.9f, 75 }, { TAG_WDTH, 125.1f, 125 }, { TAG_WDTH, 1000, 125 },

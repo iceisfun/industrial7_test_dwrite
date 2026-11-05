@@ -1,6 +1,6 @@
 /* IDWriteFactory::CreateTextFormat: argument validation, getters, defaults, locale normalisation, collections.
  *
- * Facts (Win10 19041 dwrite.dll, DWriteFactory::CreateTextFormat):
+ * Facts (Win10 19041 dwrite.dll, IDWriteFactory::CreateTextFormat):
  *   - *ppFormat is zeroed first; family==NULL, locale==NULL, weight-1 > 998 (i.e. 0 or >999), style > 2, stretch-1 > 8
  *     (i.e. 0 or >9), size <= 0 or NaN all return E_INVALIDARG before anything is built.
  *   - fontCollection == NULL selects the system collection (the checkForUpdates=FALSE one).

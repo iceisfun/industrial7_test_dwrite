@@ -1,6 +1,6 @@
 /* Per-property setter and getter value and argument validation.
  *
- * Validation visible in the decompilation of the public entry points:
+ * Validation visible in the probing of the public entry points:
  *   weight    1..999 accepted (anything else E_INVALIDARG, before the range is looked at)
  *   style     0..2 (NORMAL, OBLIQUE, ITALIC)
  *   stretch   1..9

@@ -1,6 +1,6 @@
 /* DirectWrite family font matching (IDWriteFontFamily::GetFirstMatchingFont / GetMatchingFonts) on synthetic families.
  *
- * The Windows 10 matcher (FontSet::FindNearestMatchingWwsFont, FontSet::ApplySimulationsForWwsFallback, MatchingFont::MatchingFont,
+ * The Windows 10 matcher (FindNearestMatchingWwsFont, ApplySimulationsForWwsFallback, MatchingFont::MatchingFont,
  * MatchingStyle::IsBetterMatch) works like this, and the tables below are exact consequences of it:
  *   - every candidate is mapped to a point (stretch*1100, style*700, weight*5) relative to (normal, normal, 400);
  *     the request maps to (requestStretch-5)*1100, requestStyle*700, (requestWeight-400)*5; the candidate with the smallest squared
@@ -195,7 +195,7 @@ TEST(mt_bold_simulation_reports_weight_700) {
         IDWriteFont *font = NULL;
         CHECK_HR_OK(IDWriteFontFamily_GetFirstMatchingFont(m.fam, (DWRITE_FONT_WEIGHT)rw, 5, 0, &font));
         if (font) {
-            /* FontFaceLight::GetFontWeight returns 700 once BOLD is simulated, whatever was requested */
+            /* GetFontWeight returns 700 once BOLD is simulated, whatever was requested */
             EXPECT_EQ(IDWriteFont_GetWeight(font), 700);
             EXPECT_EQ(IDWriteFont_GetSimulations(font), DWRITE_FONT_SIMULATIONS_BOLD);
             EXPECT_EQ(IDWriteFont_GetStyle(font), DWRITE_FONT_STYLE_NORMAL);

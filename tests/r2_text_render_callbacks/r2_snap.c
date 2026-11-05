@@ -1,8 +1,8 @@
 /* HRESULT / out-parameter protocol between IDWriteTextLayout::Draw and the renderer's pixel snapping and drawing callbacks.
  *
- * TextLayout::Draw: IsPixelSnappingDisabled gets *isDisabled preset to FALSE; every non-zero answer counts as disabled and skips
- * GetPixelsPerDip / GetCurrentTransform; each of the three HRESULTs goes through CallbackException::ThrowIfFailed, i.e. negative
- * values abort Draw and are returned by DWriteTextLayout::Draw, non-negative values (S_FALSE, ...) are accepted and Draw returns S_OK.
+ * Draw: IsPixelSnappingDisabled gets *isDisabled preset to FALSE; every non-zero answer counts as disabled and skips
+ * GetPixelsPerDip / GetCurrentTransform; each of the three HRESULTs goes through ThrowIfFailed, i.e. negative
+ * values abort Draw and are returned by IDWriteTextLayout::Draw, non-negative values (S_FALSE, ...) are accepted and Draw returns S_OK.
  * The four Draw* helpers never look at the HRESULT of DrawGlyphRun / DrawInlineObject / DrawUnderline / DrawStrikethrough.
  */
 #include "r2.h"
@@ -96,7 +96,7 @@ static void ok_codes_for(int type)
     for (i = 0; i < sizeof k_ok / sizeof k_ok[0]; i++) {
         rh_clear(r); r->ret_set[type] = 1; r->ret[type] = k_ok[i];
         HRESULT hr = rh_draw(l, r, CTX_A, 0.0f, 0.0f);
-        /* DWriteTextLayout::Draw returns 0 on completion, never the callback's positive code */
+        /* IDWriteTextLayout::Draw returns 0 on completion, never the callback's positive code */
         CHECKF(hr == S_OK, "callback returned 0x%lx: Draw returned %s", (unsigned long)k_ok[i], dw_hr_name(hr));
         CHECKF(r->count[RH_GLYPH] >= 2 && r->count[RH_UNDER] == 1, "callback code 0x%lx still draws", (unsigned long)k_ok[i]);
     }

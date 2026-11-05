@@ -29,8 +29,8 @@ void ffx_close(ffx *x);
 /* DWRITE_FONT_METRICS1 helpers */
 void ffx_metrics1(ffx *x, DWRITE_FONT_METRICS1 *m);
 
-/* Failure HRESULT of QueryInterface for an interface the object does not implement. The Windows 10 DWriteFontFace::QueryInterface
- * falls through to `*ppv = NULL; return 0x80004001` (decompiled at dwrite.dll!0x75620). */
+/* Failure HRESULT of QueryInterface for an interface the object does not implement. The Windows 10 IDWriteFontFace::QueryInterface
+ * falls through to `*ppv = NULL; return 0x80004001` (observed). */
 #define FFX_QI_FAIL ((HRESULT)0x80004001)
 #define FFX_E_NOCOLOR ((HRESULT)0x8898500C)      /* DWRITE_E_NOCOLOR */
 #define FFX_E_UNSUPPORTEDOPERATION ((HRESULT)0x88985009)

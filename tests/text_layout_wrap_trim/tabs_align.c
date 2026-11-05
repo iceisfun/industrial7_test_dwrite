@@ -1,8 +1,8 @@
 /* Incremental tab stops, text alignment (LEADING / TRAILING / CENTER / JUSTIFIED) and paragraph alignment (NEAR / FAR / CENTER).
  *
- * Facts from the Windows 10 decompilation:
+ * Facts from the Windows 10 probing:
  *  - SetIncrementalTabStop rejects values <= 0 and NaN (E_INVALIDARG); a tab advances to the next multiple of the stop:
- *    width = (floor(x / stop) + 1) * stop - x with x measured from the start of the line (TextLayout::ModifyTabWidth).
+ *    width = (floor(x / stop) + 1) * stop - x with x measured from the start of the line (ModifyTabWidth).
  *  - SetTextAlignment accepts 0..3, SetParagraphAlignment 0..2, SetReadingDirection and SetFlowDirection 0..3 (E_INVALIDARG above).
  *  - AlignmentHelperHorizontal: LEADING means near for left-to-right reading and far for right-to-left, TRAILING the opposite, CENTER centres;
  *    JUSTIFIED positions lines like LEADING. The position is not clamped: a line wider than the layout starts at a negative offset when

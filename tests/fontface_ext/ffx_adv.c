@@ -1,12 +1,12 @@
 /* IDWriteFontFace1: GetDesignGlyphAdvances, GetGdiCompatibleGlyphAdvances, GetKerningPairAdjustments / HasKerningPairs,
  * GetVerticalGlyphVariants / HasVerticalGlyphVariants.
- *   GetDesignGlyphAdvances (dwrite.dll!0x68d90): advances zeroed first; sideways on raw CFF -> DWRITE_E_UNSUPPORTEDOPERATION;
+ *   GetDesignGlyphAdvances: advances zeroed first; sideways on raw CFF -> DWRITE_E_UNSUPPORTEDOPERATION;
  *       glyphCount != 0 with NULL indices -> E_INVALIDARG.
- *   GetGdiCompatibleGlyphAdvances (!0xdc300): advances zeroed first; glyphCount != 0 && !indices, emSize < 0, pixelsPerDip <= 0, NaN in the
+ *   GetGdiCompatibleGlyphAdvances: advances zeroed first; glyphCount != 0 && !indices, emSize < 0, pixelsPerDip <= 0, NaN in the
  *       transform -> E_INVALIDARG; emSize == 0 -> S_OK with zeros.
- *   GetKerningPairAdjustments (!0x24eb0): zeroed first; count != 0 && !indices -> E_INVALIDARG; adjustment[i] belongs to the pair (i, i+1),
- *       the last entry is always 0; only the legacy 'kern' table (format 0, horizontal) is consulted (OpenTypeKerningPairs, !0x7a95c).
- *   GetVerticalGlyphVariants (!0xdd150, FontFace!0xfc408): count != 0 && !nominal -> vertical zero-filled, E_INVALIDARG; otherwise copy
+ *   GetKerningPairAdjustments: zeroed first; count != 0 && !indices -> E_INVALIDARG; adjustment[i] belongs to the pair (i, i+1),
+ *       the last entry is always 0; only the legacy 'kern' table (format 0, horizontal) is consulted.
+ *   GetVerticalGlyphVariants: count != 0 && !nominal -> vertical zero-filled, E_INVALIDARG; otherwise copy
  *       the input and substitute through the font's vertical-variant map; in-place is allowed. */
 #include "ffx.h"
 
@@ -135,7 +135,7 @@ TEST(da_sideways_with_vertical_metrics_font) {
     ffx_close(&x);
 }
 TEST(da_bold_simulation_adds_embolden_delta) {
-    /* FontFace::GetDesignGlyphAdvances (!0x68e40) with the bold simulation: every glyph that has a box and a non-zero advance grows by
+    /* GetDesignGlyphAdvances with the bold simulation: every glyph that has a box and a non-zero advance grows by
      * (unitsPerEm + 25) / 50 design units (41 at 2048); empty glyphs are unchanged. The same delta applies to DWRITE_GLYPH_METRICS.advanceWidth. */
     ttf_spec s; ttf_default_spec(&s);
     ffx a, b; int oa = ffx_open_spec(&a, &s, DWRITE_FONT_SIMULATIONS_NONE), ob = oa ? ffx_open_spec(&b, &s, DWRITE_FONT_SIMULATIONS_BOLD) : 0;

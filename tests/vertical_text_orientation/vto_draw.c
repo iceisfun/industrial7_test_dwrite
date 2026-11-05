@@ -1,9 +1,9 @@
 /* IDWriteTextLayout::Draw for vertical layouts: renderer protocol (IDWriteTextRenderer1), isSideways / angle of the glyph runs,
  * baseline origins, decorations and inline objects.
  *
- * TextLayout::Draw asks the renderer for IDWriteTextRenderer1; a vertical layout without it throws DWRITE_E_TEXTRENDERERINCOMPATIBLE before any
+ * Draw asks the renderer for IDWriteTextRenderer1; a vertical layout without it throws DWRITE_E_TEXTRENDERERINCOMPATIBLE before any
  * other renderer callback. With IDWriteTextRenderer1 every Draw* callback goes to the *1 entry point (also for horizontal layouts) and carries the
- * glyph orientation angle that the layout stored for the span (TextLayout::SetGlyphOrientation).
+ * glyph orientation angle that the layout stored for the span (SetGlyphOrientation).
  * Per span the layout keeps (angle, isSideways) from IDWriteTextAnalysisSink1::SetGlyphOrientation: the DEFAULT orientation reports
  * (90 degrees, isSideways FALSE) for rotated scripts (Latin: horizontal metrics, run rotated with the line) and (0 degrees, isSideways TRUE) for upright
  * scripts (Han: vertical metrics); a span with isSideways TRUE sits on the central baseline of the line, the others on the roman baseline

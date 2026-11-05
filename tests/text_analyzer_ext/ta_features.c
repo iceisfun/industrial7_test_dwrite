@@ -1,6 +1,6 @@
 /* IDWriteTextAnalyzer2::GetTypographicFeatures and ::CheckTypographicFeature.
  *
- * Windows 10 (DWriteTextAnalyzer::GetTypographicFeatures / CheckTypographicFeature, ShapingInterface::*):
+ * Windows 10 (IDWriteTextAnalyzer::GetTypographicFeatures / CheckTypographicFeature, ShapingInterface::*):
  *   GetTypographicFeatures
  *     - *actualTagCount is cleared first; fontFace == NULL -> E_INVALIDARG; NULL localeName is treated as "" and an unknown
  *       locale is ignored. maxTagCount == 0 with tags == NULL is allowed.

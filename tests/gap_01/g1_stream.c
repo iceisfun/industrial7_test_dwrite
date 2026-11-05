@@ -2,8 +2,8 @@
  *
  * Win10 dwrite.dll: IDWriteFontFaceReference::GetFileTime forwards to the stream's GetLastWriteTime (E_NOTIMPL reads as time 0 with S_OK; other failures
  * leave through a C++ exception and are not exercised); the built-in local loader's stream returns the last-write time stored in the reference key
- * (LocalFileLoader::FontFileStream::GetLastWriteTime !0x92c10 copies it, always S_OK) and IDWriteLocalFontFileLoader::GetLastWriteTimeFromKey
- * (!0xee590) deserializes the first 8 key bytes (verbatim, every bit pattern).
+ * (GetLastWriteTime copies it, always S_OK) and IDWriteLocalFontFileLoader::GetLastWriteTimeFromKey
+ * deserializes the first 8 key bytes (verbatim, every bit pattern).
  */
 #include "g1.h"
 

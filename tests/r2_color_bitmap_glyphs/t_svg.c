@@ -3,7 +3,7 @@
  * SvgTableReader::EnumerateGlyphData walks the document index and, for every glyph start..end of a record, hands the sink
  * an entry {format SVG, flags 0, ppem 0, offset = svgTableOffset + documentListOffset + docOffset, size = docLength}.  Entries of glyphs >= numGlyphs are
  * dropped (clamped to 65535) and a record with start > end enumerates nothing.
- * FontFace::GetGlyphImageData completes SVG entries (no stored metrics) from the glyph's design metrics: pixelsPerEm = designUnitsPerEm,
+ * GetGlyphImageData completes SVG entries (no stored metrics) from the glyph's design metrics: pixelsPerEm = designUnitsPerEm,
  * pixelSize = 0x0, left origin (0,0), right origin (advanceWidth,0), top origin (advanceWidth/2, -verticalOriginY), bottom origin
  * (advanceWidth/2, advanceHeight - verticalOriginY).
  * A glyph image request finds the first entry whose ppem is >= the requested ppem and otherwise the largest one; on Win10 an SVG document is returned for every
@@ -204,7 +204,7 @@ T(svg_empty_document_note) {
     CRB_NEED(x, b, n);
     DWRITE_GLYPH_IMAGE_DATA im; void *ctx = (void *)(ULONG_PTR)1;
     CHECK_HR_OK(crb_gid(&x, 3, 0, F_SVG, &im, &ctx));
-    /* size 0 skips ReadFragment (FontFace::GetGlyphImageData tests entry.size != 0): no pointer, no context */
+    /* size 0 skips ReadFragment (GetGlyphImageData tests entry.size != 0): no pointer, no context */
     CHECKF(im.imageData == NULL && im.imageDataSize == 0 && ctx == NULL, "empty document returned %p size %u ctx %p", im.imageData, im.imageDataSize, ctx);
     t_note("empty SVG document: uniqueDataId %u ppem %u face formats 0x%x", im.uniqueDataId, im.pixelsPerEm, crb_face_formats(&x));
     crb_close(&x);

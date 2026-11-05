@@ -1,5 +1,5 @@
 /* IDWriteColorGlyphRunEnumerator / IDWriteColorGlyphRunEnumerator1 behaviour on the COLR fixture.
- *   MoveNext (dwrite.dll!0x1daf0): *hasRun = 0 first, S_OK always; state 0 -> base run, states 1/2 -> next colour layer, then FALSE forever.
+ *   MoveNext: *hasRun = 0 first, S_OK always; state 0 -> base run, states 1/2 -> next colour layer, then FALSE forever.
  *   GetCurrentRun (v1: 0x2c2f0; v0 0xe1120 forwards to it): S_OK + pointer to the enumerator's record while a run is current, otherwise
  *       *run = NULL and HRESULT 0x8007139F (HRESULT_FROM_WIN32(ERROR_INVALID_STATE)).
  *   QueryInterface (0xe1140): IUnknown, IDWriteColorGlyphRunEnumerator and IDWriteColorGlyphRunEnumerator1 return the same pointer. */

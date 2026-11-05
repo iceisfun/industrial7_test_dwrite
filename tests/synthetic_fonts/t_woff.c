@@ -1,5 +1,5 @@
 /* IDWriteFactory5::AnalyzeContainerType and UnpackFontFile.
- * Decomp: DWriteFactory::AnalyzeContainerType -> NetFontLoader::AnalyzeContainerType (first four bytes only: 'wOFF' = 1, 'wOF2' = 2,
+ * Observed: IDWriteFactory::AnalyzeContainerType -> AnalyzeContainerType (first four bytes only: 'wOFF' = 1, 'wOF2' = 2,
  * anything else, including fewer than four bytes, = UNKNOWN).  UnpackFontFile -> WoffDecoder::ParseWoffHeader / UnpackWoffData and
  * Woff2Decoder::UnpackFont; every inconsistency throws FileFormatException (DWRITE_E_FILEFORMAT), *fontFileStream is NULL first. */
 #include "sf.h"

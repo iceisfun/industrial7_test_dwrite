@@ -1,11 +1,11 @@
 /* IDWriteFontResource::GetAxisNames, GetAxisValueNameCount and GetAxisValueNames on synthetic variable fonts.
  *
- * Win10 dwrite.dll (DWriteFontResource::GetAxisNames !0xe1860, GetAxisValueNameCount !0xe1950, GetAxisValueNames !0xe19f0 over FontStyleAttributes
- * !0x11a240 / !0x11a2f0):
+ * Win10 dwrite.dll (IDWriteFontResource::GetAxisNames, GetAxisValueNameCount, GetAxisValueNames over the style attribute data
+ *):
  *   - GetAxisNames zeroes *names first, GetAxisValueNames zeroes *names and the range first; both return a NEW IDWriteLocalizedStrings object on every call
  *     (possibly with zero strings) and S_OK.
  *   - an axis index >= the axis count (and for GetAxisValueNames a value index >= the axis' value-name count) raises ArgumentException inside the
- *     call; the method's catch handler (catch$ funclets in DWriteFontResource::GetAxisNames / GetAxisValueNames) maps it to E_INVALIDARG, so the call fails
+ *     call; the method's catch handler (catch$ funclets in IDWriteFontResource::GetAxisNames / GetAxisValueNames) maps it to E_INVALIDARG, so the call fails
  *     cleanly with the outputs already zeroed. GetAxisValueNameCount has no HRESULT, its handler swallows the failure.
  *   - when a value record carries a range, *range receives { axis tag, minimum, maximum } of the record.
  */

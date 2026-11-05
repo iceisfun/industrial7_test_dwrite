@@ -1,5 +1,5 @@
 /* DWriteCreateFactory: factory type validation, riid handling, shared/isolated identity rules and the factory interface chain.
- * Decompilation: *ppFactory is zeroed first; type 0 = process-wide factory, type 1 = new DWriteFactory, other values raise an
+ * Observed behaviour: *ppFactory is zeroed first; type 0 = process-wide factory, type 1 = new IDWriteFactory, other values raise an
  * argument exception mapped to E_INVALIDARG; QueryInterface failures give E_NOINTERFACE with the out pointer left NULL. */
 #include "rfp.h"
 

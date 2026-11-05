@@ -9,7 +9,7 @@
 TEST(draw_null_renderer_invalidarg)
 {
     if (t_is_wine()) { t_skip("Wine dereferences a NULL renderer"); return; }
-    /* DWriteTextLayout::Draw rejects a NULL renderer with E_INVALIDARG before touching the layout. */
+    /* IDWriteTextLayout::Draw rejects a NULL renderer with E_INVALIDARG before touching the layout. */
     TD_BEGIN(); TD_LAYOUT(l, L"ABC", 16.0f, 100.0f, 50.0f);
     CHECK_HR(IDWriteTextLayout_Draw(l, CTX_A, NULL, 0.0f, 0.0f), E_INVALIDARG);
     CHECK_HR(IDWriteTextLayout_Draw(l, NULL, NULL, 10.0f, 10.0f), E_INVALIDARG);
@@ -136,7 +136,7 @@ TEST(draw_snapping_enabled_calls_each_once)
 }
 TEST(draw_snapping_disabled_skips_other_callbacks)
 {
-    /* TextLayout::Draw only reads the pixels-per-dip and the transform when pixel snapping is not disabled */
+    /* Draw only reads the pixels-per-dip and the transform when pixel snapping is not disabled */
     TD_BEGIN(); TD_LAYOUT(l, L"ABC", 16.0f, 100.0f, 50.0f); RD();
     r->snapping_disabled = TRUE;
     DRAW_OK(l, r, 0.0f, 0.0f);
@@ -202,7 +202,7 @@ TEST(draw_snapping_counts_independent_of_run_count)
 static const HRESULT k_hrs[] = { E_FAIL, E_OUTOFMEMORY, E_NOTIMPL, E_INVALIDARG, (HRESULT)0x88985003, (HRESULT)0x80070005 };
 TEST(draw_snapping_failure_propagates_hresult)
 {
-    /* CallbackException::ThrowIfFailed turns a failing IsPixelSnappingDisabled into the Draw result; nothing is drawn */
+    /* ThrowIfFailed turns a failing IsPixelSnappingDisabled into the Draw result; nothing is drawn */
     TD_BEGIN(); TD_LAYOUT(l, L"ABC", 16.0f, 100.0f, 50.0f);
     size_t i;
     for (i = 0; i < sizeof k_hrs / sizeof k_hrs[0]; i++) {
@@ -630,7 +630,7 @@ static IDWriteTextLayout *vertical_layout(td_fx *x)
 }
 TEST(draw_vertical_plain_renderer_incompatible)
 {
-    /* TextLayout::Draw throws DWRITE_E_TEXTRENDERERINCOMPATIBLE when the layout is vertical and the renderer lacks IDWriteTextRenderer1 */
+    /* Draw throws DWRITE_E_TEXTRENDERERINCOMPATIBLE when the layout is vertical and the renderer lacks IDWriteTextRenderer1 */
     TD_BEGIN(); IDWriteTextLayout *l = vertical_layout(&X);
     if (!l) { TD_END(); t_skip("vertical layout unavailable"); return; }
     RD(); r->support_r1 = 0;

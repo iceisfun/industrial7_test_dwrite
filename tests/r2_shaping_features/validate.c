@@ -1,5 +1,5 @@
-/* Buffer protocol and argument handling of GetGlyphs/GetGlyphPlacements when shaping changes the glyph count (decomp:
- * DWriteTextAnalyzer::GetGlyphs clears *actualGlyphCount first, fontFace NULL -> E_INVALIDARG, length 0 -> S_OK, maxGlyphCount 0 ->
+/* Buffer protocol and argument handling of GetGlyphs/GetGlyphPlacements when shaping changes the glyph count (observed:
+ * IDWriteTextAnalyzer::GetGlyphs clears *actualGlyphCount first, fontFace NULL -> E_INVALIDARG, length 0 -> S_OK, maxGlyphCount 0 ->
  * 0x8007007A, and the shaping status mapping -3 -> 0x8007007A). */
 #include "r2.h"
 #define LATN() FX_BEGIN(x, FX_LATN); shaped s
@@ -77,7 +77,7 @@ TEST(r2_shaping_features_shape_cluster_map_mixed_sentence)
     CHECK_CMAP(&s, 0, 0, 0, 1, 2, 3, 4, 5, 5, 7, 8, 9); fx_close(&x);
 }
 TEST(r2_shaping_features_placement_requires_matching_arrays)
-{   /* GetGlyphPlacements with glyphCount 0 returns S_OK and does not touch advances/offsets (decomp) */
+{   /* GetGlyphPlacements with glyphCount 0 returns S_OK and does not touch advances/offsets (observed) */
     LATN(); float adv[2] = { 5, 5 }; DWRITE_GLYPH_OFFSET off[2] = { { 3, 3 }, { 3, 3 } };
     CHECK_HR_OK(sh_glyphs(&x, &s, L"ab", 2, FALSE, NULL, NULL, 0));
     CHECK_HR_OK(IDWriteTextAnalyzer_GetGlyphPlacements(x.an, L"ab", s.cmap, s.tp, 2, s.gid, s.gp, 0, x.face, 2048.0f, FALSE, FALSE, &s.sa, L"en-us", NULL, NULL, 0, adv, off));

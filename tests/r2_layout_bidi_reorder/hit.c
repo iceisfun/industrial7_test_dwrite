@@ -1,6 +1,6 @@
 /* Hit testing on bidirectional runs: multiple boxes per range, caret splits at direction changes, point -> position.
  *
- * Facts (TextLayout::HitTestTextRange / HitTestPointInSpan / HitTestTextPosition):
+ * Facts (HitTestTextRange / HitTestPointInSpan / HitTestTextPosition):
  *  - HitTestTextRange clamps the range to the text, returns the boxes merged per visual run, writes nothing when more
  *    boxes are needed than the buffer holds (E_NOT_SUFFICIENT_BUFFER with the required count), and rejects start+length
  *    wrap-around or a NULL buffer with a non-zero capacity (E_INVALIDARG, count 0);

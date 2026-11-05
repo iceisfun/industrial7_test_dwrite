@@ -1,6 +1,6 @@
 /* System font collection: acquisition, object identity, caching, QueryInterface, refcounts and lifetime.
- * Windows 10 behaviour (dwrite.dll decompilation): every GetSystemFontCollection overload funnels into
- * DWriteFactory::GetSystemFontCollection(model, includeDownloadable) which caches one collection object per
+ * Windows 10 behaviour (dwrite.dll probing): every GetSystemFontCollection overload funnels into
+ * IDWriteFactory::GetSystemFontCollection(model, includeDownloadable) which caches one collection object per
  * (model != typographic, includeDownloadable) pair inside the factory and always returns S_OK;
  * checkForUpdates is not used by the IDWriteFactory3 entry point. The factory only holds a weak slot (ChildComObject):
  * object identity is guaranteed while a client reference is held. */
@@ -183,8 +183,8 @@ TEST(sys_qi_adds_one_reference) {
 /* ---- QueryInterface ----------------------------------------------------------------------------------------- */
 TEST(sys_qi_matrix) {
     NEED_SYS();
-    /* DWriteFontCollection answers IUnknown and the whole IDWriteFontCollection .. IDWriteFontCollection3 chain
-     * (ComObject::QueryInterface compares IDWriteFontCollection3 first, then a type list of 2, 1, 0). */
+    /* IDWriteFontCollection answers IUnknown and the whole IDWriteFontCollection .. IDWriteFontCollection3 chain
+     * (QueryInterface compares IDWriteFontCollection3 first, then a type list of 2, 1, 0). */
     dw_qi_row rows[] = {
         DW_QI_ROW(IUnknown, 1), DW_QI_ROW(IDWriteFontCollection, 1), DW_QI_ROW(IDWriteFontCollection1, 1),
         DW_QI_ROW(IDWriteFontCollection2, 1), DW_QI_ROW(IDWriteFontCollection3, 1),
@@ -482,7 +482,7 @@ TEST(sys_shared_factory_twice_same_collection) {
     DW_RELEASE(a); DW_RELEASE(b); DW_RELEASE(g);
 }
 TEST(sys_collection_outlives_factory) {
-    /* A collection holds a reference on its factory while it has outstanding references (ChildComObject::AddRef
+    /* A collection holds a reference on its factory while it has outstanding references (AddRef
      * forwards the first reference to the parent). */
     IDWriteFactory *iso = dw_new_factory(DWRITE_FACTORY_TYPE_ISOLATED);
     if (!iso) { t_skip("isolated factory unavailable"); return; }

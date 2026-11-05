@@ -1,6 +1,6 @@
 /* The sfnt table directory and table records: what CreateFontFace / TryGetFontTable tolerate.
  *
- * Facts from the decompilation (OpenTypeTables::InitializeInternal, OpenTypeTableDirectory, OpenTypeFace):
+ * Facts from the probing (table directory parsing):
  *   - the directory is scanned linearly (no ordering requirement, no binary search); for a duplicated tag the first record with enough data wins;
  *   - head (>= 54 bytes), hhea (>= 36), OS/2 (> 0x4d), maxp (>= 6) are read eagerly while the face is created; a record whose range lies
  *     outside the file makes the read fail with FileFormatException (DWRITE_E_FILEFORMAT);

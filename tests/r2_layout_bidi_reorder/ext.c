@@ -1,6 +1,6 @@
 /* IDWriteTextLayout2: SetLastLineWrapping and SetOpticalAlignment with bidirectional text.
  *
- * Facts: SetLastLineWrapping stores (value != 0) and invalidates the layout (DWriteTextLayout::SetLastLineWrapping);
+ * Facts: SetLastLineWrapping stores (value != 0) and invalidates the layout (IDWriteTextLayout::SetLastLineWrapping);
  * SetOpticalAlignment accepts DWRITE_OPTICAL_ALIGNMENT_NONE (0) and _USING_SIDE_BEARINGS (1) only. How the two change
  * the geometry is recorded rather than asserted, except for relations that hold whatever the engine does.
  */

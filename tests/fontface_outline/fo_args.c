@@ -1,5 +1,5 @@
 /* IDWriteFontFace::GetGlyphRunOutline: argument validation, call protocol, object lifetime.
- * Windows: DWriteFontFace::GetGlyphRunOutline returns E_INVALIDARG (0x80070057) when (indices == NULL && count != 0),
+ * Windows: IDWriteFontFace::GetGlyphRunOutline returns E_INVALIDARG (0x80070057) when (indices == NULL && count != 0),
  * sink == NULL, or !(emSize > 0) (NaN included); otherwise it returns S_OK after streaming the outline.  With count == 0
  * nothing at all is sent to the sink (no SetFillMode, no Close). */
 #include "fo.h"
@@ -201,7 +201,7 @@ TEST(proto_sink_refcount_untouched) {
     dwx_geom *s = dwx_geom_new(); UINT16 g[3] = { 2, 64, 65 };
     CHECK_HR(fo_call(h.face, 64.0f, g, NULL, NULL, 3, FALSE, FALSE, s), S_OK);
     EXPECT_REFS(s, 1);                      /* not retained after the call returns */
-    if (dwx_qi_calls(s) != 0) t_note("sink QueryInterface calls: %ld", (long)dwx_qi_calls(s));   /* decomp uses the pointer as is; not guaranteed by the docs */
+    if (dwx_qi_calls(s) != 0) t_note("sink QueryInterface calls: %ld", (long)dwx_qi_calls(s));   /* the implementation uses the pointer as is; not guaranteed by the docs */
     CHECK(!dwx_destroyed(s));
     dwx_release(s);
     CHECK(dwx_destroyed(s));

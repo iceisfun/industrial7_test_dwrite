@@ -1,5 +1,5 @@
 /* IDWriteFontFace::GetGlyphIndices over synthetic fonts with specific cmap subtables (format 4 / 12 / 0 / 6 / 13 / 14) and symbol
- * encodings.  Decomp (DWriteFontFace::GetGlyphIndicesW): the output array is zeroed first; codePoints == NULL with count != 0 returns
+ * encodings.  Observed (IDWriteFontFace::GetGlyphIndicesW): the output array is zeroed first; codePoints == NULL with count != 0 returns
  * E_INVALIDARG (outputs stay zero); count 0 is S_OK; code points >= 0x110000 map to glyph 0; the code point is looked up in a
  * two-level (block of 64) table built from the font's Unicode cmap. */
 #include "r2.h"
@@ -59,7 +59,7 @@ TEST(r2_shaping_features_cmap12_basic)
     GI_EXPECT(&c, cp, w); cf_close(&c);
 }
 TEST(r2_shaping_features_cmap12_beyond_unicode_range)
-{   /* decomp: block index (cp >> 6) must be below 0x4400, i.e. cp < 0x110000 */
+{   /* observed: block index (cp >> 6) must be below 0x4400, i.e. cp < 0x110000 */
     CF_BEGIN(c, 3, 10, 12, m_all);
     static const UINT32 cp[] = { 0x110000, 0x110041, 0x7FFFFFFF, 0x80000041, 0xFFFFFFFF }; static const UINT16 w[] = { 0, 0, 0, 0, 0 };
     GI_EXPECT(&c, cp, w); cf_close(&c);
@@ -141,7 +141,7 @@ TEST(r2_shaping_features_cmap_nonsymbol_is_not_symbol)
     CF_BEGIN(c, 3, 1, 4, m_bmp); EXPECT_EQ(IDWriteFontFace_IsSymbolFont(c.x.face), FALSE); cf_close(&c);
 }
 
-/* ---- protocol: argument validation (decomp) ---- */
+/* ---- protocol: argument validation (observed) ---- */
 TEST(r2_shaping_features_gi_count_zero_ok)
 {
     CF_BEGIN(c, 3, 1, 4, m_bmp); UINT16 o = 0xAAAA; UINT32 cp = 0x41;

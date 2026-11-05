@@ -1,6 +1,6 @@
 /* cmap parsing through IDWriteFontFace::GetGlyphIndices.
  *
- * Decomp (OpenTypeCharacterMapSubtable, PlatformIdAndEncodingIdToCharacterEncoding, OpenTypeCharacterMap::Read, ReadFormat0/4/6/12or13):
+ * Observed (OpenTypeCharacterMapSubtable, PlatformIdAndEncodingIdToCharacterEncoding, OpenTypeCharacterMap::Read, ReadFormat0/4/6/12or13):
  *   - among all encoding records the one with the highest CharacterEncoding value wins, the first record on ties:
  *       (0,4),(0,6),(3,10) = 9 > (3,1) = 8 > (3,5) = 7 > (3,4) = 6 > (3,3) = 5 > (3,2) = 4 > (3,0) symbol = 3 > (0,0..3),(0,5)... = 2 > (1,0) = 1 > anything else = 0 (unusable);
  *   - mapped glyph ids must be non-zero (format 0/4/6) and < the face's glyph count, otherwise the code point is left unmapped;

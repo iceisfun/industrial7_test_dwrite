@@ -1,7 +1,7 @@
 /* Shared helpers for the text_analyzer_ext area: IDWriteTextAnalyzer1 / IDWriteTextAnalyzer2.
  * Everything is LoadLibrary("dwrite.dll") -> GetProcAddress("DWriteCreateFactory") -> factory -> CreateTextAnalyzer -> vtable calls.
  *
- * Facts observed on Windows 10 22H2 (DWriteTextAnalyzer vtable methods) and used throughout:
+ * Facts observed on Windows 10 22H2 (IDWriteTextAnalyzer vtable methods) and used throughout:
  *   - Every pointer-style argument that is reported as invalid yields E_INVALIDARG (0x80070057); a too small output buffer yields
  *     0x8007007A (HRESULT_FROM_WIN32(ERROR_INSUFFICIENT_BUFFER)).
  *   - Output counters / flags of several methods are cleared BEFORE the arguments are validated (so the out pointers themselves must

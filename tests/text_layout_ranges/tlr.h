@@ -11,7 +11,7 @@
  *   family "DwWide"    Regular advance 2000
  * Letters, digits and the space all share the advance of their face; .notdef is 1200 in every face.
  *
- * Range model verified in the decompilation (MutableTextLayout / RunIndexer<RunFormat> / RunVector<RunFormat>):
+ * Range model verified in the probing (MutableTextLayout / RunIndexer<RunFormat> / RunVector<RunFormat>):
  *   - every Set* stores its value in one table of runs covering [0, 0xFFFFFFFF); nothing is clipped to the text length;
  *   - a run is a maximal span of positions whose COMPLETE format is equal, so the range reported by any Get* is the run of the
  *     whole format and is split by a change of ANY property;

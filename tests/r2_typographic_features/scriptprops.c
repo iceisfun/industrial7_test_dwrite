@@ -1,6 +1,6 @@
 /* IDWriteTextAnalyzer1::GetScriptProperties: every table index, ISO 15924 consistency, and the script ids AnalyzeScript hands out for
  * sample characters of many scripts.
- * Windows 10 (DWriteTextAnalyzer::GetScriptProperties): index < 0x99 copies 20 bytes (DWRITE_SCRIPT_PROPERTIES) of a 32 byte table entry and
+ * Windows 10 (IDWriteTextAnalyzer::GetScriptProperties): index < 0x99 copies 20 bytes (DWRITE_SCRIPT_PROPERTIES) of a 32 byte table entry and
  * returns S_OK; any larger index fills entry 0 and returns E_INVALIDARG (0x80070057); DWRITE_SCRIPT_ANALYSIS.shapes plays no part. */
 #include "r2.h"
 

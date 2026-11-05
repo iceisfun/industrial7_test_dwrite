@@ -2,7 +2,7 @@
  * lifetime and independence from the memory the caller passed in.
  *
  * Facts (Win10 19041 dwrite.dll):
- *   DWriteFactory::CreateGlyphRunAnalysis (IDWriteFactory1 style, with pixelsPerDip): *out = NULL first; E_INVALIDARG (0x80070057) for
+ *   IDWriteFactory::CreateGlyphRunAnalysis (IDWriteFactory1 style, with pixelsPerDip): *out = NULL first; E_INVALIDARG (0x80070057) for
  *     run == NULL, run->fontFace == NULL, run->glyphIndices == NULL (also when glyphCount == 0), fontEmSize < 0, pixelsPerDip <= 0, NaN in
  *     pixelsPerDip / baseline origin / any of the six transform members, renderingMode > 6, measuringMode > 2. The modes DEFAULT (0) and
  *     OUTLINE (6) pass that first filter but the analysis constructor rejects them (renderingMode argument exception) -> E_INVALIDARG.

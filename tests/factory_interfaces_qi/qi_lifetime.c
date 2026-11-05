@@ -227,7 +227,7 @@ TEST(lifetime_layout_independent_of_source_format) {
     DW_RELEASE(fmt);
 }
 TEST(lifetime_face_reference_shares_count) {
-    /* DWriteFontFace::QueryInterface (decomp 0x180075620): IDWriteFontFaceReference is answered from the face object itself. */
+    /* IDWriteFontFace::QueryInterface: IDWriteFontFaceReference is answered from the face object itself. */
     fq_ctx c; IUnknown *face; IDWriteFontFaceReference *ref = NULL; ULONG base;
     fq_ctx_init(&c);
     face = fq_cls_font_face_custom.create(&c);

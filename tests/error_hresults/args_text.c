@@ -1,6 +1,6 @@
 /* TextFormat / TextLayout argument validation: enum ranges, float predicates, text-range overflow, NULL pointers and the
  * buffer-size protocol of the string / metric getters. All ranges come from the compare-and-reject prologues of the
- * DWriteTextFormat / DWriteTextLayout methods; a rejected call never changes the stored value. */
+ * IDWriteTextFormat / IDWriteTextLayout methods; a rejected call never changes the stored value. */
 #include "eh.h"
 
 /* ---- enum setters, table driven; the same table runs against a TextFormat and a TextLayout --------------------------------------- */
@@ -309,7 +309,7 @@ TEST(textformat3_font_axis_and_automatic_axes_validation) {
         CHECK_HR(IDWriteTextFormat3_SetFontAxisValues(t3, NULL, 0), S_OK);
         if (!t_is_wine()) CHECK_HR(IDWriteTextFormat3_SetFontAxisValues(t3, NULL, 1), E_INVALIDARG);
         if (!t_is_wine()) CHECK_HR(IDWriteTextFormat3_SetFontAxisValues(t3, v, 0x10000), E_INVALIDARG);
-        /* The plain format stores any mask without validation (DWriteTextFormat::SetAutomaticFontAxes just assigns). */
+        /* The plain format stores any mask without validation (IDWriteTextFormat::SetAutomaticFontAxes just assigns). */
         CHECK_HR(IDWriteTextFormat3_SetAutomaticFontAxes(t3, (DWRITE_AUTOMATIC_FONT_AXES)2), S_OK);
         CHECK_HR(IDWriteTextFormat3_SetAutomaticFontAxes(t3, (DWRITE_AUTOMATIC_FONT_AXES)0x100), S_OK);
         EXPECT_EQ(IDWriteTextFormat3_GetAutomaticFontAxes(t3), 0x100);
@@ -381,7 +381,7 @@ TEST(textformat_locale_name_buffer_protocol) {
     DONE_FACTORY();
 }
 TEST(layout_automatic_font_axes_validation) {
-    /* DWriteTextLayout::SetAutomaticFontAxes rejects every bit but bit 0 (OPTICAL_SIZE). */
+    /* IDWriteTextLayout::SetAutomaticFontAxes rejects every bit but bit 0 (OPTICAL_SIZE). */
     NEED_FACTORY(); IDWriteTextLayout *l = eh_layout(f, L"Hello", 100, 100, NULL); IDWriteTextLayout4 *l4 = NULL;
     if (l && SUCCEEDED(IDWriteTextLayout_QueryInterface(l, &IID_IDWriteTextLayout4, (void **)&l4)) && l4) {
         CHECK_HR(IDWriteTextLayout4_SetAutomaticFontAxes(l4, DWRITE_AUTOMATIC_FONT_AXES_NONE), S_OK);

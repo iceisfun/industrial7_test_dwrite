@@ -1,6 +1,6 @@
 /* QueryInterface / identity / lifetime of font faces with respect to the extension interfaces IDWriteFontFace1..7.
- * DWriteFontFace::QueryInterface (dwrite.dll!0x75620) answers IUnknown, IDWriteFontFace, IDWriteFontFace1..5 with the object pointer
- * itself, IDWriteFontFaceReference with an inner sub-object (this+0x18), and falls through to `*ppv = NULL; return 0x80004001`. */
+ * IDWriteFontFace::QueryInterface answers IUnknown, IDWriteFontFace, IDWriteFontFace1..5 with the object pointer
+ * itself, IDWriteFontFaceReference with an inner sub-object, and falls through to `*ppv = NULL; return 0x80004001`. */
 #include "ffx.h"
 
 static HRESULT qi(void *obj, const IID *iid, void **out) { *out = (void *)(ULONG_PTR)0x1; return IUnknown_QueryInterface((IUnknown *)obj, iid, out); }
@@ -37,8 +37,8 @@ TEST(qi_face_family_supported) {
 }
 TEST(qi_face6_unsupported_on_win10) {
     ffx x; if (!ffx_open_default(&x)) { ffx_close(&x); return; }
-    /* IDWriteFontFace6 (c4b1fe1b-...) is not in the IID list of the Windows 10 19041 DWriteFontFace::QueryInterface, and no
-     * DWriteFontFace::GetFamilyNames(DWRITE_FONT_FAMILY_MODEL, ...) exists in the module. */
+    /* IDWriteFontFace6 (c4b1fe1b-...) is not in the IID list of the Windows 10 19041 IDWriteFontFace::QueryInterface, and no
+     * IDWriteFontFace::GetFamilyNames(DWRITE_FONT_FAMILY_MODEL, ...) exists in the module. */
     expect_qi_fail(x.f0, &IID_IDWriteFontFace6, "IDWriteFontFace6");
     ffx_close(&x);
 }
@@ -79,7 +79,7 @@ TEST(qi_null_guid_family_fails) {
 TEST(qi_reference_subobject) {
     ffx x; if (!ffx_open_default(&x)) { ffx_close(&x); return; }
     void *r = NULL; ULONG before = dw_refcount((IUnknown *)x.f0);
-    /* IDWriteFontFaceReference (5e7fa7ca-...) is answered with the inner DWriteFontFaceReferenceBase sub-object at this+0x18 and AddRef(this). */
+    /* IDWriteFontFaceReference (5e7fa7ca-...) is answered with the inner IDWriteFontFaceReference sub-object and AddRef(this). */
     HRESULT hr = IDWriteFontFace_QueryInterface(x.f0, &IID_IDWriteFontFaceReference, &r);
     CHECK_HR(hr, S_OK);
     if (hr == S_OK) {

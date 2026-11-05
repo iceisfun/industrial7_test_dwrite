@@ -1,6 +1,6 @@
 /* IDWriteTextLayout1::SetPairKerning with a font that carries a legacy 'kern' table.
  *
- * Facts (TextLayout::GetGlyphs -> ApplyKerning, OpenTypeKerningPairs):
+ * Facts (GetGlyphs -> ApplyKerning, OpenTypeKerningPairs):
  *  - kerning is applied only for runs whose pair-kerning flag is set (default off), when the face has kerning pairs;
  *  - the adjustment of a pair (left, right) is added to the advance of the LEFT glyph of the pair, scaled by size/unitsPerEm,
  *    and only while that advance still equals the unkerned advance; the result never goes below zero;

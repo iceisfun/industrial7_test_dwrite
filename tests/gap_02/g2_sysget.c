@@ -1,12 +1,12 @@
 /* IDWriteFactory3/6/7 GetSystemFontSet and GetSystemFontCollection (plus IDWriteFactory::GetSystemFontCollection) - the cache slots.
- * Win10 decompilation: every entry point writes *out = NULL first and returns S_OK; they funnel into
- *   DWriteFactory::GetSystemFontCollection(model, includeDownloadable, forceUpdate) (dwrite.dll!0x68b34): one cached collection object
+ * Win10 probing: every entry point writes *out = NULL first and returns S_OK; they funnel into
+ *   IDWriteFactory::GetSystemFontCollection(model, includeDownloadable, forceUpdate): one cached collection object
  *   per slot (model == TYPOGRAPHIC ? slot A : slot B) x (includeDownloadable != 0), AddRef'd for each caller;
  *   IDWriteFactory::GetSystemFontCollection(c, check) == IDWriteFactory3 variant with includeDownloadable 0 (vtable call with edx = 0);
  *   IDWriteFactory3::GetSystemFontCollection(dl, c, check) uses model WEIGHT_STRETCH_STYLE (1);
  *   IDWriteFactory6/7::GetSystemFontCollection(dl, model, c) pass the model through (any non-zero value picks the WSS slot);
- *   DWriteFactory::GetSystemFontSet(includeDownloadable) (!0x50198): one cached DWriteFontSet per flag;
- *   IDWriteFactory3::GetSystemFontSet(set) (!0xd8e90) forwards to the IDWriteFactory6 vtable slot with includeDownloadable = 1. */
+ *   IDWriteFactory::GetSystemFontSet(includeDownloadable): one cached IDWriteFontSet per flag;
+ *   IDWriteFactory3::GetSystemFontSet(set) forwards to the IDWriteFactory6 vtable slot with includeDownloadable = 1. */
 #include "g2.h"
 
 #define FV(var, ver) IDWriteFactory##ver *var = dw_factory_v(DWRITE_FACTORY_TYPE_SHARED, ver); if (!var) { t_skip("IDWriteFactory" #ver " unsupported"); return; }

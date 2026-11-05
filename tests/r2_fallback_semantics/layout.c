@@ -1,10 +1,10 @@
 #include "r2fs.h"
 
 /* IDWriteTextFormat1 / IDWriteTextLayout2 SetFontFallback / GetFontFallback and what the layout does with the fallback.
- * DWriteTextFormat/DWriteTextLayout::SetFontFallback: AddRef the new pointer (NULL allowed), store it, Release the old one, return S_OK;
+ * IDWriteTextFormat/IDWriteTextLayout::SetFontFallback: AddRef the new pointer (NULL allowed), store it, Release the old one, return S_OK;
  * GetFontFallback: AddRef + return the stored pointer or NULL, always S_OK. The layout constructor copies the text format's fallback
  * (it queries IDWriteTextFormat1::GetFontFallback), so a layout starts with the format's fallback and later changes of the format do not
- * reach it. TextLayout::MapCharacters calls the stored fallback once per formatting span (a span being text with identical font
+ * reach it. MapCharacters calls the stored fallback once per formatting span (a span being text with identical font
  * family, collection, weight, style, stretch, locale, size ...) with the span's base family/collection/weight/style/stretch and, when the
  * returned mappedLength is shorter than the span, again for the remaining text; mappedFont == NULL means "use the span's own font";
  * the returned scale multiplies the span's font size. With no fallback set the system fallback is used. */

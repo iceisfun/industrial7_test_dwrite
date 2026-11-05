@@ -3,7 +3,7 @@
  *   IDWriteFontFace3:: (RENDERING_MODE1 out), IDWriteGlyphRunAnalysis::GetAlphaBlendParams,
  *   IDWriteBitmapRenderTarget::DrawGlyphRun, plus QueryInterface negatives and multi-threaded use.
  *
- * Decompilation facts used:
+ * Observed facts used:
  *  - a non-DEFAULT rendering mode stored in the params wins over the automatic choice (GetRecommendedRenderingMode returns it
  *    unchanged); value 7 is reported as 5 by the DWRITE_RENDERING_MODE out parameters;
  *  - the 5-argument GetRecommendedRenderingMode rejects NULL params with E_INVALIDARG (out zeroed); the others accept NULL;

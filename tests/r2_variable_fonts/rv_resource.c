@@ -1,7 +1,7 @@
 /* IDWriteFontResource axis surface on the synthetic variable fixture (rv.h): axis count, default values, ranges, attributes, names, HasVariations.
  *
- * Win10 dwrite.dll (DWriteFontResource::GetFontAxisCount !0x927f0, GetDefaultFontAxisValues !0xe1b00 -> FontStyleAttributes !0x11a458, GetFontAxisRanges
- * !0x25c40, GetFontAxisAttributes !0xe1bc0, built from the fvar table by GetFvarAxisInfo !0x106d4):
+ * Win10 dwrite.dll (IDWriteFontResource::GetFontAxisCount, GetDefaultFontAxisValues, GetFontAxisRanges
+ *, GetFontAxisAttributes, built from the fvar table by reading the fvar table):
  *   - one axis record per fvar axis, in table order: tag, minimum, default, maximum (16.16 fixed converted to float);
  *   - the attribute byte is HIDDEN (2) when the fvar axis flag bit 0 (HIDDEN_AXIS) is set, plus VARIABLE (1) when maximum > minimum; an axis with
  *     minimum == maximum is therefore reported as DWRITE_FONT_AXIS_ATTRIBUTES_NONE;
@@ -361,7 +361,7 @@ TEST(r2_variable_fonts_res_many_resources_same_file)
     RV_END();
 }
 
-/* ---- STAT design axes feed the axis table (ReadAxes !0x105d4: STAT axes first, then fvar axes merged by tag, then AddStandardAxes) ---------- */
+/* ---- STAT design axes feed the axis table (axis reading: STAT axes first, then fvar axes merged by tag, then the standard axes) ---------- */
 TEST(r2_variable_fonts_res_stat_axis_not_in_fvar_is_listed)
 {
     DWRITE_FONT_AXIS_VALUE v[16]; DWRITE_FONT_AXIS_RANGE r[16]; UINT32 n;

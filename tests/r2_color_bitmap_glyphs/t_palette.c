@@ -1,6 +1,6 @@
 /* CPAL palette layouts through IDWriteFontFace2::GetColorPaletteCount / GetPaletteEntryCount / GetPaletteEntries / IsColorFont.
  *
- * DWriteFontFace::GetPaletteEntries: the palette is resolved first (ColorGlyphMap::GetPalette: DWRITE_E_NOCOLOR 0x8898500C when
+ * IDWriteFontFace::GetPaletteEntries: the palette is resolved first (ColorGlyphMap::GetPalette: DWRITE_E_NOCOLOR 0x8898500C when
  * paletteIndex >= numPalettes), then firstEntryIndex > entryCount or entryCount > paletteEntries - firstEntryIndex gives E_INVALIDARG; nothing is written on failure.
  * Colour record n of palette p is colorRecords[colorRecordIndices[p] + n]; each channel is byte / 255 (ByteToFloat), CPAL stores B, G, R, A. */
 #include "crb.h"

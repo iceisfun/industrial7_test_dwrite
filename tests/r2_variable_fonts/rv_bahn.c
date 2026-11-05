@@ -2,9 +2,9 @@
  * axis APIs.  The font file is a system font, so numbers that come from the font (axis ranges, named instances) are read from its own fvar table
  * (TryGetFontTable) and compared with what dwrite reports; only relations are hard-checked.  Tests skip when the font is not installed.
  *
- * Win10 dwrite.dll: axis table = fvar axes (+ STAT axes) + the standard axes missing from {wght, wdth, ital, slnt} (AddStandardAxes !0x10b5c), so
+ * Win10 dwrite.dll: axis table = fvar axes (+ STAT axes) + the standard axes missing from {wght, wdth, ital, slnt} (standard axes added), so
  * Bahnschrift reports its fvar axes plus fixed ital and slnt; faces keep canonical (clamped) values; GetMatchingFonts(axis values) orders by
- * distance (FontSet::PrioritizeFontsByMatchDistance) and rejects NULL names / counts above 0xFFFF / NULL values with a count with E_INVALIDARG.
+ * distance (PrioritizeFontsByMatchDistance) and rejects NULL names / counts above 0xFFFF / NULL values with a count with E_INVALIDARG.
  */
 #include "rv.h"
 
@@ -530,7 +530,7 @@ TEST(r2_variable_fonts_bahn_collection_matching_fonts_errors)
     if (c) {
         DWRITE_FONT_AXIS_VALUE a = rv_av(TAG_WGHT, 650); IDWriteFontList2 *l; HRESULT hr;
         if (t_is_wine()) { DW_RELEASE(c); RB_END(); t_skip("emulator does not validate"); return; }
-        /* DWriteFontCollection::GetMatchingFonts !0xe2b30 */
+        /* IDWriteFontCollection::GetMatchingFonts */
         l = RV_SENT(IDWriteFontList2 *); hr = IDWriteFontCollection2_GetMatchingFonts(c, NULL, &a, 1, &l); CHECKF(hr == E_INVALIDARG, "NULL family -> %s", dw_hr_name(hr)); CHECK_OUT_NULL(l);
         l = RV_SENT(IDWriteFontList2 *); hr = IDWriteFontCollection2_GetMatchingFonts(c, L"Bahnschrift", NULL, 1, &l); CHECKF(hr == E_INVALIDARG, "NULL values with count -> %s", dw_hr_name(hr)); CHECK_OUT_NULL(l);
         l = RV_SENT(IDWriteFontList2 *); hr = IDWriteFontCollection2_GetMatchingFonts(c, L"Bahnschrift", &a, 0x10000, &l); CHECKF(hr == E_INVALIDARG, "count 0x10000 -> %s", dw_hr_name(hr)); CHECK_OUT_NULL(l);

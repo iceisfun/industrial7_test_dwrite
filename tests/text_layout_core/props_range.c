@@ -572,7 +572,7 @@ TEST(prop_family_name_empty_string)
     TL_BEGIN(); LAYOUT8(l);
     WCHAR buf[8] = { 'x' }; DWRITE_TEXT_RANGE r; UINT32 n = 9; HRESULT hr;
     hr = IDWriteTextLayout_SetFontFamilyName(l, L"", RNG(0, 4));
-    /* DWriteTextLayout::SetFontFamilyName only rejects a NULL name or an overflowing range; an empty string is stored as-is. */
+    /* IDWriteTextLayout::SetFontFamilyName only rejects a NULL name or an overflowing range; an empty string is stored as-is. */
     CHECK_HR(hr, S_OK);
     {
         CHECK_HR_OK(IDWriteTextLayout_GetFontFamilyNameLength(l, 0, &n, &r)); EXPECT_EQ(n, 0);

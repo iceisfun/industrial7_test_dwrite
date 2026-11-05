@@ -1,7 +1,7 @@
 /* IDWriteTextLayout2::SetLastLineWrapping / IDWriteTextFormat1::SetLastLineWrapping: object independence, invalidation and interplay.
  *
- * Win10 dwrite.dll: DWriteTextLayout::SetLastLineWrapping (!0xdf300) stores (value != 0) in its own byte and always returns S_OK, DWriteTextFormat::SetLastLineWrapping
- * (!0xe4ef0) stores (value != 0) in the format's byte; the getters (!0x92690, !0x92a20) return that byte (exactly 0 or 1). A layout copies the format's setting when it
+ * Win10 dwrite.dll: IDWriteTextLayout::SetLastLineWrapping stores (value != 0) in its own byte and always returns S_OK, IDWriteTextFormat::SetLastLineWrapping
+ * stores (value != 0) in the format's byte; the getters return that byte (exactly 0 or 1). A layout copies the format's setting when it
  * is created, afterwards the two objects are independent. With the setting off, the line that crosses maxHeight takes all the remaining text of its paragraph.
  */
 #include "g1.h"

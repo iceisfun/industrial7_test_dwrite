@@ -1,8 +1,8 @@
 /* RegisterFontFileLoader / UnregisterFontFileLoader / CreateCustomFontFileReference / IDWriteFontFile object semantics.
- * Behaviour basis: FontLoaderManagerBase<IDWriteFontFileLoader>::Register (duplicate -> OSException 0x88985006, NULL ->
+ * Behaviour basis: Register (duplicate -> OSException 0x88985006, NULL ->
  * ArgumentException = E_INVALIDARG), ::Unregister (unknown or built-in id <= 2 -> ArgumentException), ::GetIDFromObject
- * (unregistered loader -> ArgumentException), DWriteFactory::CreateCustomFontFileReference (out zeroed first, NULL key
- * -> E_INVALIDARG, key is copied, file object holds a reference on the loader), DWriteFontFile::GetLoader/GetReferenceKey. */
+ * (unregistered loader -> ArgumentException), IDWriteFactory::CreateCustomFontFileReference (out zeroed first, NULL key
+ * -> E_INVALIDARG, key is copied, file object holds a reference on the loader), IDWriteFontFile::GetLoader/GetReferenceKey. */
 #include "fl.h"
 
 #define NEED_F() IDWriteFactory *f = fl_factory(); if (!f) { t_skip("DWriteCreateFactory failed"); return; }
@@ -388,7 +388,7 @@ TEST(file_qi_matrix) {
     int n, i; const dw_qi_row *t = dw_iid_table(&n);
     dw_qi_row *rows = (dw_qi_row *)malloc(n * sizeof *rows);
     for (i = 0; i < n; i++) { rows[i] = t[i]; rows[i].expect = IsEqualIID(t[i].iid, &IID_IDWriteFontFile) ? 1 : 0; }
-    dw_qi_check_((IUnknown *)a, rows, n, __FILE__, __LINE__);   /* decomp: only IID_IDWriteFontFile and IUnknown are accepted */
+    dw_qi_check_((IUnknown *)a, rows, n, __FILE__, __LINE__);   /* observed: only IID_IDWriteFontFile and IUnknown are accepted */
     free(rows);
     DW_RELEASE(a); fl_unregister(l); fl_release(l); IDWriteFactory_Release(f);
 }

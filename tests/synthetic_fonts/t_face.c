@@ -1,7 +1,7 @@
 /* IDWriteFactory::CreateFontFace argument validation and the basic accessors of the face it returns.
- * Decomp: DWriteFactory::CreateFontFace validates, in this order, faceType in {0,1,2,6,7}; faceIndex == 0 unless faceType == 2;
+ * Observed: IDWriteFactory::CreateFontFace validates, in this order, faceType in {0,1,2,6,7}; faceIndex == 0 unless faceType == 2;
  * numberOfFiles == 1; fontFiles != NULL and fontFiles[0] != NULL; (simulations & ~3) == 0.  Any violation -> E_INVALIDARG with *ppFace = NULL.
- * DWriteFontFace::GetFiles/GetType/GetIndex/GetSimulations/GetGlyphCount read members of the face. */
+ * IDWriteFontFace::GetFiles/GetType/GetIndex/GetSimulations/GetGlyphCount read members of the face. */
 #include "sf.h"
 
 #define NEED_PROBE(p) sf_blob blob_ = sf_default(); sf_probe p; if (!sf_open(&p, blob_.p, blob_.n)) { sf_close(&p); sf_free(&blob_); return; } \

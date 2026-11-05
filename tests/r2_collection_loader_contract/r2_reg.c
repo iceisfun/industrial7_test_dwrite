@@ -1,6 +1,6 @@
 /* RegisterFontCollectionLoader / UnregisterFontCollectionLoader bookkeeping.
  *
- * Win10 decomp (FontLoaderManagerBase<IDWriteFontCollectionLoader,1>, one instance per factory):
+ * Win10 observed (FontLoaderManagerBase<IDWriteFontCollectionLoader,1>, one instance per factory):
  *  - Register(obj): NULL -> ArgumentException (E_INVALIDARG); an object pointer that is already in the map ->
  *    OSException(0x88985006 DWRITE_E_ALREADYREGISTERED); otherwise a new 64-bit id is allocated, the map owns +1 reference
  *    on the loader, the call returns S_OK.  The loader is not called.

@@ -117,7 +117,7 @@ TEST(reg_coll_and_file_registries_are_separate) {
 /* ---- CreateCustomFontFileReference / CreateCustomFontCollection argument checks --------------------------------------------- */
 TEST(custom_file_ref_unregistered_loader_is_invalidarg) {
     NEED_FACTORY(); dwx_mem_loader *l = dwx_loader_new(); UINT32 key = 0; IDWriteFontFile *file = SENT(IDWriteFontFile *);
-    /* DWriteFontFile's constructor asks the manager for the loader's id (GetIDFromObject): not registered -> ArgumentException. */
+    /* IDWriteFontFile's constructor asks the manager for the loader's id (GetIDFromObject): not registered -> ArgumentException. */
     CHECK_HR(IDWriteFactory_CreateCustomFontFileReference(f, &key, 4, LDR(l), &file), E_INVALIDARG);
     CHECK_OUT_NULL(file);
     EXPECT_EQ(l->n_create, 0);
@@ -293,7 +293,7 @@ TEST(callback_collection_enumerator_creation_failure) {
             cl = dwx_coll_new(r.ld); dwx_coll_add_key(cl, r.key);
             CHECK_HR(dwx_coll_register(cl, f), S_OK);
             cl->fail_create = passthru[i];
-            /* AddElementData: CreateEnumeratorFromKey result goes through CallbackException::ThrowIfFailed */
+            /* AddElementData: CreateEnumeratorFromKey result goes through ThrowIfFailed */
             HRESULT hr = dwx_coll_create(cl, f, &c);
             CHECKF(hr == passthru[i], "injected %s got %s", dw_hr_name(passthru[i]), dw_hr_name(hr)); CHECK_OUT_NULL(c);
             if (c && c != SENT(IDWriteFontCollection *)) DW_RELEASE(c);

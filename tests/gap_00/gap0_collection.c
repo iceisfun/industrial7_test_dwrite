@@ -1,5 +1,5 @@
 /* IDWriteFontCollectionLoader::CreateEnumeratorFromKey, IDWriteFontFileEnumerator::MoveNext / GetCurrentFontFile as driven by
- * IDWriteFactory::CreateCustomFontCollection (Windows 10 build 19041, FontCollectionConstructionTask / FontCollectionBuilder::AddFontFiles):
+ * IDWriteFactory::CreateCustomFontCollection (Windows 10 build 19041, FontCollectionConstructionTask / AddFontFiles):
  *
  *   loader->CreateEnumeratorFromKey(factory, key, keySize, &e);   once per collection construction, on the calling thread
  *   loop { e->MoveNext(&has); if (!has) break; e->GetCurrentFontFile(&file); file->Release(); }

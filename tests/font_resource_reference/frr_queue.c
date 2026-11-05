@@ -1,8 +1,8 @@
 /* IDWriteFactory3::GetFontDownloadQueue, IDWriteFontDownloadQueue and IDWriteFontDownloadListener on a machine with no remote fonts.
  *
- * Win10 dwrite.dll (DWriteFactory::GetFontDownloadQueue !0x417d0 / Internal !0x41810, DWriteFontDownloadQueue::* !0xe7490 AddListener,
- * !0xe7550 RemoveListener, !0x8a7c0 IsEmpty, !0xe7500 BeginDownload -> FontDownloadQueue::BeginDownloadInternal !0xeac0c, !0x40680 CancelDownload,
- * !0x92b00 GetGenerationCount, InvokeDownloadCompleted !0xeb0c8, PointerRegistryImpl::Register !0x1752d0):
+ * Win10 dwrite.dll (IDWriteFactory::GetFontDownloadQueue, IDWriteFontDownloadQueue: AddListener,
+ * RemoveListener, IsEmpty, BeginDownload, CancelDownload,
+ * GetGenerationCount, completion notification, listener registration):
  *   - GetFontDownloadQueue writes *queue = NULL first and always succeeds; the queue is created lazily and cached on the factory (one
  *     queue per factory object); it is a child object: the first external reference also references the factory, so it keeps the factory alive.
  *     QueryInterface answers IUnknown and IDWriteFontDownloadQueue only.

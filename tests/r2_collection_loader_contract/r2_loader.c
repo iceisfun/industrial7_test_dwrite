@@ -1,13 +1,13 @@
 /* IDWriteFontCollectionLoader::CreateEnumeratorFromKey as seen from the application.
  *
- * Win10 decomp facts (dwrite.dll):
- *  - DWriteFactory::CreateCustomFontCollection writes *out = NULL, rejects a NULL loader with E_INVALIDARG, then builds the
- *    collection synchronously (FontCollection ctor -> FontCollectionConstructionTask::AddElementData).
+ * Win10 observed facts (dwrite.dll):
+ *  - IDWriteFactory::CreateCustomFontCollection writes *out = NULL, rejects a NULL loader with E_INVALIDARG, then builds the
+ *    collection synchronously (collection construction).
  *  - AddElementData fetches the loader by its registration id (an unknown id throws ArgumentException -> E_INVALIDARG; the
  *    ComPtr holds a reference on the loader for the duration), calls
  *      CreateEnumeratorFromKey(loader, factory, keyPtr, keySize, &enumerator)
  *    where keyPtr/keySize come from a private std::vector copy of the caller's key (an empty key is passed as keyPtr == NULL),
- *    runs CallbackException::ThrowIfFailed on the result, drives FontCollectionBuilder::AddFontFiles, then releases the
+ *    runs ThrowIfFailed on the result, drives AddFontFiles, then releases the
  *    enumerator and finally the loader.
  *  - AddFontFiles: loop { MoveNext; ThrowIfFailed; if !has break; GetCurrentFontFile; if FAILED skip file; else analyze }.
  *  - Callbacks run between FPUStateSSE/FPUStateSandboxSSE guards, i.e. the caller's SSE control state is restored on return.

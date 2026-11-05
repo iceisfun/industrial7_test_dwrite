@@ -1,5 +1,5 @@
 /* IDWriteFont::GetMetrics, IDWriteFont1::GetMetrics, GetPanose, IsMonospacedFont, IsColorFont.
- * DWriteFont::GetMetrics(DWRITE_FONT_METRICS*) copies the first 20 bytes of the face's DWRITE_FONT_METRICS1 (FontFaceLight::GetFontMetrics);
+ * IDWriteFont::GetMetrics(DWRITE_FONT_METRICS*) copies the first 20 bytes of the face's DWRITE_FONT_METRICS1 (GetFontMetrics);
  * the values come from InitializeDefaultFontMetrics: head, hhea/OS/2/post, with OS/2 USE_TYPO_METRICS (fsSelection bit 7) switching
  * ascent/descent/lineGap to the typographic values and setting hasTypographicMetrics. */
 #include "fo.h"

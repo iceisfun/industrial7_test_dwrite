@@ -1,7 +1,7 @@
 /* IDWriteFontFace3::IsGlyphLocal.
- * Win10 decompilation: DWriteFontFace::IsGlyphLocal (dwrite.dll!0xdd280) fetches the factory's font download queue WITHOUT creating
- * it (GetFontDownloadQueueInternal(factory, false)) and calls FontFace::IsGlyphLocal (!0xfc7c4): when the face has no remote file
- * stream (the vector at +0x288..+0x290 is empty) the answer is TRUE for every glyph index, valid or not; only faces over remote
+ * Win10 probing: IDWriteFontFace::IsGlyphLocal fetches the factory's font download queue WITHOUT creating
+ * it (an internal accessor with create = false) and asks the face: when the face has no remote file
+ * stream (its remote stream list is empty) the answer is TRUE for every glyph index, valid or not; only faces over remote
  * (downloadable) streams consult the glyph locality. Returns a C++ bool widened to BOOL (0 or 1). */
 #include "g2.h"
 

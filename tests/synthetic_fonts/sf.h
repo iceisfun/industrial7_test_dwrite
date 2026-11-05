@@ -57,7 +57,7 @@ void sf_close(sf_probe *p);
 dwx_mem_stream *sf_stream(sf_probe *p);                            /* the stream dwrite opened (NULL until first use) */
 #define SF_PROBE_DEFINE(p) sf_probe p; memset(&p, 0, sizeof p)
 
-/* Soft expectation: never fails the test; reports only when the prediction (from the decompilation) did not hold. */
+/* Soft expectation: never fails the test; reports only when the prediction (from the probing) did not hold. */
 void sf_pred(int ok, const char *label, const char *expr);
 #define PRED(label, cond) sf_pred(!!(cond), label, #cond)
 /* Print one NOTE line with the outcome of each stage. */

@@ -1,6 +1,6 @@
 /* IDWriteFontFace::TryGetFontTable / ReleaseFontTable.
  *
- * Windows 10 (DWriteFontFace::TryGetFontTable): all four outputs (tableData, tableSize, tableContext, exists) are zeroed first; faces of an
+ * Windows 10 (IDWriteFontFace::TryGetFontTable): all four outputs (tableData, tableSize, tableContext, exists) are zeroed first; faces of an
  * unsupported kind (TYPE1 / RAW_CFF) answer DWRITE_E_UNSUPPORTEDOPERATION; otherwise the table directory of the font (at faceIndex for
  * collections) is searched by tag, exists = whether the tag is present, the returned pointer/size describe the table exactly as stored
  * in the file (unpadded length from the directory) and tableContext is the fragment context that ReleaseFontTable hands back to the stream.

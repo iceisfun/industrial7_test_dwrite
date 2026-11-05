@@ -1,7 +1,7 @@
 /* GetRecommendedRenderingMode matrix on a font WITHOUT a gasp table (and without hinting programs): IDWriteFontFace (pixelsPerDip),
  * IDWriteFontFace1 (dpiX/dpiY/transform/sideways), IDWriteFontFace2 and IDWriteFontFace3 (rendering params, grid fit).
  *
- * Facts (dwrite.dll!0x71520 FontFace3, !0xdcd40 FontFace2, !0xdce80 FontFace1, !0xdcf90 FontFace, !0x95b60 ResolveRenderingMode, !0x95de4 ComputePpem):
+ * Facts (IDWriteFontFace3/2/1/base rendering mode methods, mode resolution, ppem computation):
  *   - FontFace3/FontFace2: *mode and *gridFit zeroed first; outlineThreshold > 1 or measuringMode > 2 -> E_INVALIDARG 0x80070057.
  *   - FontFace (oldest): *mode zeroed; params == NULL -> E_INVALIDARG; threshold ANTIALIASED, dpi = pixelsPerDip * 96, no transform.
  *   - FontFace1: *mode zeroed, no validation, always S_OK.

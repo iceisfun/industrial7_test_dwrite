@@ -44,7 +44,7 @@ TEST(fset_sys_cached_identity)
     IDWriteFontSet *a = NULL, *b = NULL;
     CHECK_HR_OK(IDWriteFactory3_GetSystemFontSet(f3, &a));
     CHECK_HR_OK(IDWriteFactory3_GetSystemFontSet(f3, &b));
-    /* The factory keeps one DWriteFontSet for the system set and AddRefs it for every caller. */
+    /* The factory keeps one IDWriteFontSet for the system set and AddRefs it for every caller. */
     CHECKF(a == b, "%p vs %p", (void *)a, (void *)b);
     DW_RELEASE(a); DW_RELEASE(b);
 }

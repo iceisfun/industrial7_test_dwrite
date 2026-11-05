@@ -2,7 +2,7 @@
  *
  * DrawGlyphRuns passes pointers into layout-wide arrays: the text pointer is the layout's own copy of the string plus the run start (so
  * consecutive runs of one line are contiguous in memory), glyph indices / advances / cluster map come from layout-wide arrays offset by the
- * run's first glyph / character, glyphOffsets is NULL when the layout holds no offsets at all.  TextLayout::Draw calls QueryInterface on the
+ * run's first glyph / character, glyphOffsets is NULL when the layout holds no offsets at all.  Draw calls QueryInterface on the
  * renderer exactly once (IDWriteTextRenderer1) and never AddRefs it; a successful QI reference is released before Draw returns.
  */
 #include "r2.h"

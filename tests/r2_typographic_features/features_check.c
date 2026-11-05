@@ -1,5 +1,5 @@
 /* IDWriteTextAnalyzer2::CheckTypographicFeature with fonts whose GSUB / GPOS lookups cover known glyph sets (otl.c).
- * Windows 10 facts (DWriteTextAnalyzer::CheckTypographicFeature, FontFeatureCoverage::CheckTypographicFeature,
+ * Windows 10 facts (IDWriteTextAnalyzer::CheckTypographicFeature, CheckTypographicFeature,
  * ReadLookupCoverageRanges, CoverageTableHelper::ReadLookupCoverage):
  *   - featureApplies[0..glyphCount) is cleared first (even on failure); the call fails with E_INVALIDARG only for fontFace NULL or
  *     glyphIndices NULL with a non zero count.

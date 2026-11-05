@@ -86,7 +86,7 @@ TEST(fset_str_id_none_and_14)
     for (i = 0; i < 2; i++) {
         IDWriteStringList *l = (IDWriteStringList *)FS_SENT;
         HRESULT hr = IDWriteFontSet_GetPropertyValues__(s.set, (DWRITE_FONT_PROPERTY_ID)ids[i], &l);
-        /* ids 0..14 are accepted by FontSet::GetPropertyValues */
+        /* ids 0..14 are accepted by GetPropertyValues */
         CHECKF(hr == S_OK, "id %d -> %s", ids[i], dw_hr_name(hr));
         if (SUCCEEDED(hr) && l) t_note("id %d: %u values", ids[i], IDWriteStringList_GetCount(l));
         FS_DROP(l, hr);

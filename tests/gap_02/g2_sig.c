@@ -1,6 +1,6 @@
 /* IDWriteGdiInterop1::GetFontSignature (IDWriteFontFace* and IDWriteFont* overloads).
- * Win10 decompilation (dwrite.dll!0xdb3d0 face overload, !0xdb3b0 font overload): both forward to GetFontSignatureInternal with the
- * address of the embedded FontFaceLight (NULL for a NULL object); it zeroes the 24-byte FONTSIGNATURE, returns E_INVALIDARG for NULL
+ * Win10 probing (face overload and font overload): both forward to a shared signature reader with the
+ * address of the embedded light face object (NULL for a NULL object); it zeroes the 24-byte FONTSIGNATURE, returns E_INVALIDARG for NULL
  * and otherwise copies the face's cached OS/2 ulUnicodeRange1..4 and ulCodePageRange1..2 (fsUsb[0..3], fsCsb[0..1]). Vtable order:
  * the IDWriteFontFace* overload (GetFontSignature_) precedes the IDWriteFont* one. */
 #include "g2.h"

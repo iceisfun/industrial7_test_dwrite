@@ -1,9 +1,9 @@
 /* IDWriteFontFace4::GetGlyphImageFormats(glyph, ppemFirst, ppemLast, *formats) (the range overload, vtable slot 49) and the
  * face-wide GetGlyphImageFormats() (slot 50).
- * Win10 decompilation: DWriteFontFace::GetGlyphImageFormats (dwrite.dll!0xdc920) writes *formats = 0, walks the glyph's linked list of
+ * Win10 probing: IDWriteFontFace::GetGlyphImageFormats writes *formats = 0, walks the glyph's linked list of
  * graphic-data entries and ORs the format byte of every entry whose ppem satisfies  ppemFirst <= ppem <= ppemLast  OR  ppem == 0
  * (size independent data such as COLR layers and SVG); there is no argument validation and the result is always S_OK. The face-wide
- * overload (!0x924e0) returns one cached byte. So, for any glyph:
+ * overload returns one cached byte. So, for any glyph:
  *   result(first, last) always contains the size-independent formats, which are exactly result(first, last) for first > last;
  *   result is monotonic in the range; every result is a subset of the face-wide formats. */
 #include "g2.h"

@@ -1,6 +1,6 @@
 /* IDWriteTextAnalyzer1::JustifyGlyphAdvances and ::GetJustifiedGlyphs.
  *
- * JustifyGlyphAdvances (DWriteTextAnalyzer::JustifyGlyphAdvances -> TextAnalyzer::GetJustifiedGlyphAdvanceAdjustments +
+ * JustifyGlyphAdvances (IDWriteTextAnalyzer::JustifyGlyphAdvances -> TextAnalyzer::GetJustifiedGlyphAdvanceAdjustments +
  * ApplyGlyphAdvanceAdjustments, natural measuring mode):
  *   - lineWidth < 0 or NaN -> E_INVALIDARG; glyphCount == 0 -> S_OK; NULL glyphAdvances / glyphOffsets / opportunities with
  *     glyphCount != 0 -> E_INVALIDARG. The outputs are NOT cleared on failure. The outputs may alias the inputs.
@@ -15,7 +15,7 @@
  *   - The adjustment goes into the glyph advance; with applyToLeadingEdge the leading part (half when both edges apply) is also
  *     added to the glyph's advanceOffset, and following zero-advance glyphs are pulled back by the trailing part.
  *
- * GetJustifiedGlyphs (DWriteTextAnalyzer::GetJustifiedGlyphs):
+ * GetJustifiedGlyphs (IDWriteTextAnalyzer::GetJustifiedGlyphs):
  *   - *actualGlyphCount is cleared first. fontEmSize < 0, NULL clusterMap / modifiedClusterMap with textLength != 0, NULL
  *     modified arrays with maxGlyphCount != 0, or NULL glyph inputs with glyphCount != 0 -> E_INVALIDARG.
  *   - glyphCount == 0 -> S_OK. Otherwise the result copies cluster map / glyph indices / justified advances / justified offsets

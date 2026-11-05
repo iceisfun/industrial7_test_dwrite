@@ -1,7 +1,7 @@
 /* Family structure of a custom collection: GetFontFamilyCount / GetFontFamily / FindFamilyName / family names and grouping.
  *
- * Win10 decomp facts:
- *  - A collection from CreateCustomFontCollection uses the weight-stretch-style family model (FontCollection ctor stores
+ * Win10 observed facts:
+ *  - A collection from CreateCustomFontCollection uses the weight-stretch-style family model (collection construction stores
  *    model 1): fonts are grouped by the WWS family name, i.e. name ID 21 if present, else the legacy family name (ID 1);
  *    typographic names (ID 16/17) do not merge e.g. "Fam Light" into "Fam".
  *  - Every localized family name of every font of a family is entered in the name map, so FindFamilyName succeeds for any

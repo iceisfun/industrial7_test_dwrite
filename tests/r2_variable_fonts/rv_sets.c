@@ -2,7 +2,7 @@
  * (named instances), IDWriteFontSet1::{GetFilteredFonts(axis ranges), GetFirstFontResources, GetFontAxisRanges, CreateFontResource, CreateFontFace,
  * GetFontFaceReference}.
  *
- * Win10 dwrite.dll (DWriteFontSetBuilder::AddFont !0xe36d0): E_INVALIDARG for a NULL file, simulations & ~3, more than 0xFFFF axis values, NULL
+ * Win10 dwrite.dll (IDWriteFontSetBuilder::AddFont): E_INVALIDARG for a NULL file, simulations & ~3, more than 0xFFFF axis values, NULL
  * axis values / ranges / properties together with a non-zero count; otherwise S_OK (the font is not read at this point).  The documented set filters
  * ("endpoint-inclusive", "the subset is always equal to or less than the original set", an empty subset is not an error) are checked as relations.
  */

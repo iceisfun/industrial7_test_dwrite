@@ -1,5 +1,5 @@
 /* IDWriteTextAnalyzer1::GetTextComplexity with synthetic cmaps.
- * Windows 10 (DWriteTextAnalyzer::GetTextComplexity -> FontFace::GetSimpleGlyphs / GetGlyphIndexIfSimple):
+ * Windows 10 (IDWriteTextAnalyzer::GetTextComplexity -> GetSimpleGlyphs / GetGlyphIndexIfSimple):
  *   - isTextSimple and textLengthRead are cleared first; fontFace NULL or (text NULL && length != 0) -> E_INVALIDARG.
  *   - Each UTF-16 code unit is looked up through the font's cmap; the glyph is accepted only when the character is not flagged by
  *     the Unicode property table 8 and the glyph id is below the font's glyph count (and is not 0).
@@ -304,7 +304,7 @@ RT(cx_through_analyzer_object_lifetime) {
 
 /* ---- fonts with layout features: the simple-glyph verdict may depend on the glyph being touched by GSUB lookups ----------------------------------- */
 RT(cx_glyphs_touched_by_layout_features_note) {
-    /* FontFace::GetGlyphIndexIfSimple additionally consults an optional per-glyph bit set; which glyphs it excludes is recorded here for
+    /* GetGlyphIndexIfSimple additionally consults an optional per-glyph bit set; which glyphs it excludes is recorded here for
      * each feature kind (glyph 'A'..'H' = gids 2..9 each covered by a different feature) */
     r2_ctx c; r2_font x; otl_table g, p; unsigned i; int s, l, ft;
     static const char *gsub_tags[] = { "ccmp", "locl", "rlig", "liga", "calt", "smcp" };

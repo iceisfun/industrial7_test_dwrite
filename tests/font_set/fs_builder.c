@@ -10,7 +10,7 @@
  *  - AddFontFile(file): NULL -> E_INVALIDARG, unsupported data -> DWRITE_E_FILEFORMAT (docs), otherwise one entry per face.
  *  - AddFont(file, faceIndex, simulations, axisValues, nAxis, ranges, nRanges, props, nProps): E_INVALIDARG for NULL file,
  *    simulations beyond BOLD|OBLIQUE, nAxis > 0xFFFF, or NULL arrays with non-zero counts.
- *  - CreateFontSet: out zeroed, always a new DWriteFontSet; an empty builder yields an empty set.
+ *  - CreateFontSet: out zeroed, always a new IDWriteFontSet; an empty builder yields an empty set.
  */
 #include "fs.h"
 

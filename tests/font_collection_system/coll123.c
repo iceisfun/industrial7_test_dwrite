@@ -1,6 +1,6 @@
 /* System font collection: IDWriteFontCollection1/2/3 and the family model.
- * Windows 10 (decompilation):
- *  - GetFontSet always succeeds and builds a NEW DWriteFontSet object per call;
+ * Windows 10 (probing):
+ *  - GetFontSet always succeeds and builds a NEW IDWriteFontSet object per call;
  *  - IDWriteFontCollection2::GetMatchingFonts clears *fontlist, then rejects name == NULL, numValues >= 0x10000 and
  *    (numValues != 0 && axisValues == NULL) with E_INVALIDARG; a name that is not a family gives DWRITE_E_NOFONT;
  *  - IDWriteFontFamily2::GetMatchingFonts applies the same numValues / axisValues validation;
@@ -580,9 +580,9 @@ TEST(model_invalid_model_value_recorded) {
 }
 
 /* ---- out-of-range indices: observed in a child process ----------------------------------------------------- */
-/* DWriteFontCollection::GetFontFamily clears *family and, for index >= count, constructs and throws an
+/* IDWriteFontCollection::GetFontFamily clears *family and, for index >= count, constructs and throws an
  * IndexOutOfRangeException from the vtable method itself. Whether the host sees an HRESULT or an exception depends on the
- * catch handlers in the frames above, which are not visible in the decompilation, so the outcome is recorded rather than asserted. */
+ * catch handlers in the frames above, which are not visible in the probing, so the outcome is recorded rather than asserted. */
 CHILD(oor) {
     int mode = argc > 1 ? atoi(argv[1]) : 0;
     IDWriteFactory *f = dw_shared();

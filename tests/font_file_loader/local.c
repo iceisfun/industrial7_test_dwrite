@@ -1,5 +1,5 @@
 /* The built-in local file loader: IDWriteFactory::CreateFontFileReference, IDWriteLocalFontFileLoader and its streams.
- * Basis: DWriteFactory::CreateFontFileReference (out zeroed, NULL path -> E_INVALIDARG, the key is built by
+ * Basis: IDWriteFactory::CreateFontFileReference (out zeroed, NULL path -> E_INVALIDARG, the key is built by
  * LocalFileLoader::SerializeReferenceKeyTo: 8 byte last-write time, optional '*' marker for the Fonts directory, NUL terminated
  * upper-cased path), File::TryOpen + IOException::MapFileOpenError (not found / path not found -> DWRITE_E_FILENOTFOUND,
  * access denied -> DWRITE_E_FILEACCESS), LocalFileLoader::{GetFilePathLengthFromKey, GetFilePathFromKey (E_NOT_SUFFICIENT_BUFFER),

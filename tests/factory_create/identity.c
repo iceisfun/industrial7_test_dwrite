@@ -1,7 +1,7 @@
 /* Object identity, reference counting and lifetime of the factories returned by DWriteCreateFactory.
- * SHARED: GetSharedFactory() lazily builds one DWriteFactory, stores it in a process-wide slot (never cleared) and hands out
+ * SHARED: GetSharedFactory() lazily builds one IDWriteFactory, stores it in a process-wide slot (never cleared) and hands out
  * AddRef'd copies, so every call returns the same object and releasing all of the caller's references never destroys it.
- * ISOLATED: every call builds a fresh DWriteFactory (new private factory id) whose first and only reference is the caller's. */
+ * ISOLATED: every call builds a fresh IDWriteFactory (new private factory id) whose first and only reference is the caller's. */
 #include "fc.h"
 
 static IUnknown *mk(int type) { void *p = NULL; if (FAILED(fc_create(type, &IID_IUnknown, &p))) return NULL; return (IUnknown *)p; }

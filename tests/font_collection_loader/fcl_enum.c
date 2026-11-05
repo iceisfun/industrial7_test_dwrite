@@ -1,10 +1,10 @@
 /* The IDWriteFontCollectionLoader / IDWriteFontFileEnumerator protocol seen from dwrite.dll's side.
  *
- * Win10 decomp (FontCollectionConstructionTask::AddElementData + FontCollectionBuilder::AddFontFiles):
+ * Win10 observed (AddElementData + AddFontFiles):
  *   loader->CreateEnumeratorFromKey(factory, keyCopy, keySize, &e)      failure -> that HRESULT is the result (CallbackException)
  *   loop { e->MoveNext(&has)          failure -> that HRESULT is the result; has==FALSE ends the loop
  *          e->GetCurrentFontFile(&f)  failure (negative) -> the file is silently skipped, the loop continues
- *          f->GetLoader / f->GetReferenceKey, then FontSetBuilder::AddFontFile whose result is ignored (unsupported files vanish)
+ *          f->GetLoader / f->GetReferenceKey, then AddFontFile whose result is ignored (unsupported files vanish)
  *          f->Release }
  *   e->Release
  * No partially built collection is ever returned: *ppCollection is NULL on every failure.

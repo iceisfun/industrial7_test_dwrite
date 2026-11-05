@@ -1,9 +1,9 @@
 /* Font axis values on text formats and layouts: IDWriteFactory6::CreateTextFormat (axis overload), IDWriteTextFormat3::{SetFontAxisValues,
  * GetFontAxisValueCount, GetFontAxisValues, GetAutomaticFontAxes, SetAutomaticFontAxes}, IDWriteTextLayout4 ranged versions.
  *
- * Win10 dwrite.dll (DWriteFactory::CreateTextFormat(axis) !0xd84f0, DWriteTextFormat ctor !0xe4ba4, DWriteTextFormat::SetFontAxisValues !0xe4db0,
- * GetFontAxisValues !0xe4ce0, GetFontAxisValueCount !0x929a0, Set/GetAutomaticFontAxes !0x92ad0/!0x92980; DWriteTextLayout::SetFontAxisValues
- * !0xdf140 (whole) / !0xdf1b0 (range), GetFontAxisValues !0xde100, GetFontAxisValueCount !0xde0a0 / !0x92600, SetAutomaticFontAxes !0xdf030):
+ * Win10 dwrite.dll (IDWriteFactory::CreateTextFormat(axis), text format construction, IDWriteTextFormat::SetFontAxisValues,
+ * GetFontAxisValues, GetFontAxisValueCount, Set/GetAutomaticFontAxes; IDWriteTextLayout::SetFontAxisValues
+ * (whole) / (range), GetFontAxisValues, GetFontAxisValueCount, SetAutomaticFontAxes):
  *   - the axis CreateTextFormat zeroes *format first and returns E_INVALIDARG for a NULL family, a NULL locale, a count > 0xFFFF, NULL values with a
  *     non-zero count, and a size that is <= 0 or NaN; the format it makes has weight 400, style normal, stretch normal;
  *   - the axis values of a format are stored exactly as supplied (no clamping, no canonicalisation, duplicates and unknown tags kept); setting replaces the
@@ -272,7 +272,7 @@ TEST(r2_variable_fonts_fmt_automatic_axes_not_validated_on_format)
     if (t) {
         for (i = 0; i < sizeof v / sizeof v[0]; i++) {
             HRESULT hr = IDWriteTextFormat3_SetAutomaticFontAxes(t, (DWRITE_AUTOMATIC_FONT_AXES)v[i]);
-            CHECKF(hr == S_OK, "0x%x -> %s", v[i], dw_hr_name(hr));         /* DWriteTextFormat::SetAutomaticFontAxes stores the value as is */
+            CHECKF(hr == S_OK, "0x%x -> %s", v[i], dw_hr_name(hr));         /* IDWriteTextFormat::SetAutomaticFontAxes stores the value as is */
             CHECKF((UINT32)IDWriteTextFormat3_GetAutomaticFontAxes(t) == v[i], "0x%x read back as 0x%x", v[i], IDWriteTextFormat3_GetAutomaticFontAxes(t));
         }
         DW_RELEASE(t);

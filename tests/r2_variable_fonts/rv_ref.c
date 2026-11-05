@@ -1,8 +1,8 @@
 /* IDWriteFontFaceReference1 with axis values: IDWriteFontResource::CreateFontFaceReference, IDWriteFactory6::CreateFontFaceReference (file, index,
  * simulations, axis values), IDWriteFontFaceReference1::{GetFontAxisValueCount, GetFontAxisValues, CreateFontFace, Equals}.
  *
- * Win10 dwrite.dll (DWriteFontResource::CreateFontFaceReference !0xe1560, DWriteFactory::CreateFontFaceReference(file, ..., axis values) !0x2bb50 forwarding to
- * !0x2af10, DWriteFontFaceReferenceBase::GetAxisValueCount !0x928e0 / GetFontAxisValues !0xe43b0 / Equals !0xe4240):
+ * Win10 dwrite.dll (IDWriteFontResource::CreateFontFaceReference, IDWriteFactory::CreateFontFaceReference(file, ..., axis values) forwarding to
+ *, IDWriteFontFaceReference::GetAxisValueCount / GetFontAxisValues / Equals):
  *   - both creators zero the output first; they return E_INVALIDARG for simulations & ~3, a count > 0xFFFF, or NULL values with a non-zero count
  *     (the file overload also for a NULL file);
  *   - a reference stores the values AS SUPPLIED (converted to 16.16): no clamping, no canonicalisation, duplicates and unknown tags kept, order kept;

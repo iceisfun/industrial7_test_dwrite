@@ -1,5 +1,5 @@
 /* IDWriteFactory4::TranslateColorGlyphRun(origin, run, desc, desiredGlyphImageFormats, mode, transform, palette, &IDWriteColorGlyphRunEnumerator1)
- * (dwrite.dll!DWriteFactory::TranslateColorGlyphRun 0x1cf40, the same worker the IDWriteFactory2 entry reaches with formats = 7):
+ * (the same worker the IDWriteFactory2 entry reaches with formats = 7):
  *   *layers = NULL first; run == NULL or any bit of desiredGlyphImageFormats outside 0xFF -> E_INVALIDARG; otherwise
  *   used = desired & face formats (COLR dropped for an unknown palette index); no bit of 0xFC left, or no colour glyph -> DWRITE_E_NOCOLOR. */
 #include "cg.h"

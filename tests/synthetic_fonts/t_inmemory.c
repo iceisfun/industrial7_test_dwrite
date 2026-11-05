@@ -1,5 +1,5 @@
 /* The same synthetic font bytes handed to dwrite through IDWriteFactory5::CreateInMemoryFontFileLoader / CreateInMemoryFontFileReference
- * instead of an application loader.  Decomp (MemoryFontFileLoader::CreateInMemoryFontFileReference): *fontFile = NULL first; NULL data or
+ * instead of an application loader.  Observed (CreateInMemoryFontFileReference): *fontFile = NULL first; NULL data or
  * size 0 -> E_INVALIDARG; without an owner object the bytes are copied, with one they are referenced in place and the owner is AddRef'd;
  * each call appends a file entry whose 4-byte reference key is its index, and builds the IDWriteFontFile through
  * IDWriteFactory::CreateCustomFontFileReference with the in-memory loader itself as the loader. */

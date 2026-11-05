@@ -1,5 +1,5 @@
 /* Outline thresholds of GetRecommendedRenderingMode and QueryInterface failure behaviour.
- * The recommended-mode resolver (dwrite.dll!0x71520) switches to OUTLINE when ppem >= 100 for DWRITE_OUTLINE_THRESHOLD_ANTIALIASED (0)
+ * The recommended-mode resolver switches to OUTLINE when ppem >= 100 for DWRITE_OUTLINE_THRESHOLD_ANTIALIASED (0)
  * and when ppem >= 350 for DWRITE_OUTLINE_THRESHOLD_ALIASED (1), with ppem = emSize * dpi / 96 when no rendering parameters override the mode. */
 #include "ffx.h"
 

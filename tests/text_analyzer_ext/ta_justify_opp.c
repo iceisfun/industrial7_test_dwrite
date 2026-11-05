@@ -1,6 +1,6 @@
 /* IDWriteTextAnalyzer1::GetJustificationOpportunities.
  *
- * Windows 10 (DWriteTextAnalyzer::GetJustificationOpportunities -> TextAnalyzer::GetJustificationOpportunities):
+ * Windows 10 (IDWriteTextAnalyzer::GetJustificationOpportunities -> TextAnalyzer::GetJustificationOpportunities):
  *   - fontEmSize < 0 or NaN -> E_INVALIDARG; then glyphCount == 0 -> S_OK (nothing is touched, arrays may be NULL);
  *     otherwise textLength == 0 or a NULL textString / clusterMap / glyphProperties -> E_INVALIDARG (a NULL output array faults).
  *   - fontFace is optional (NULL is accepted: the face only refines the compression limit and Arabic kashida opportunities).

@@ -1,6 +1,6 @@
 /* IDWriteTextLayout::GetClusterMetrics on bidirectional text: buffer protocol, logical order, isRightToLeft, cluster formation.
  *
- * Facts (DWriteTextLayout::GetClusterMetrics -> TextLayout::GetClusterMetrics):
+ * Facts (IDWriteTextLayout::GetClusterMetrics -> GetClusterMetrics):
  *  - *actualClusterCount is zeroed first; a NULL buffer with a non-zero capacity is E_INVALIDARG (count stays 0);
  *  - otherwise the layout is brought up to date, the metrics of up to `capacity` clusters are written and the full count is
  *    returned in *actualClusterCount; capacity < count => HRESULT_FROM_WIN32(ERROR_INSUFFICIENT_BUFFER) (a capacity of 0 with

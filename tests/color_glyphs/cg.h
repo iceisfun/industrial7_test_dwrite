@@ -1,7 +1,7 @@
 /* Shared fixtures and an oracle for the color_glyphs area (IDWriteFactory2/4::TranslateColorGlyphRun, the color glyph run
  * enumerators, ComputeGlyphOrigins and the color related IDWriteFontFace2/4 methods).
  *
- * The oracle (cg_expect) encodes what dwrite.dll!DWriteColorGlyphRunEnumerator::Create / AdvanceToBaseRun / AdvanceToColorRun /
+ * The oracle (cg_expect) encodes what the colour glyph run enumerator creation / AdvanceToBaseRun / AdvanceToColorRun /
  * InitializeColorGlyphPositions (Windows 10 19041) produce for the synthetic COLR fixture:
  *   - the formats actually used are  requested & face-supported; COLR is dropped when the palette index is >= the palette count;
  *     when no bit of 0xFC (COLR, SVG, PNG, JPEG, TIFF, PREMULTIPLIED) remains the call fails with DWRITE_E_NOCOLOR;

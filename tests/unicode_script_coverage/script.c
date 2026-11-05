@@ -1,6 +1,6 @@
 /* IDWriteTextAnalyzer::AnalyzeScript / IDWriteTextAnalyzer1::GetScriptProperties over Unicode script samples.
  *
- * Facts used (decomp of DWriteTextAnalyzer::GetScriptProperties, existing public documentation):
+ * Facts used (observed behaviour of IDWriteTextAnalyzer::GetScriptProperties, existing public documentation):
  *   - DWRITE_SCRIPT_ANALYSIS.script is an index into a 153 entry table (ids >= 0x99 => E_INVALIDARG and the output holds entry 0);
  *   - the properties carry the ISO 15924 alphabetic tag (isoScriptCode, first letter in the lowest byte) and numeric code;
  *   - runs reported by AnalyzeScript are contiguous, ascending and cover the analysed range; Common and Inherited characters

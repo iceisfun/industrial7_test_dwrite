@@ -1,5 +1,5 @@
 /* IDWriteFont::HasCharacter and IDWriteFont1::GetUnicodeRanges.
- * Decomp: DWriteFont::HasCharacter(cp, BOOL*) always returns S_OK and stores CompactCmap::operator[](cp);
+ * Observed: IDWriteFont::HasCharacter(cp, BOOL*) always returns S_OK and stores operator[](cp);
  * GetUnicodeRanges zeroes *count, zero-fills min(maxRangeCount,..) entries, walks the cmap with FindNextCodepoint until a value > 0x10FFFF,
  * counts every range, stores only the first maxRangeCount of them, returns E_NOT_SUFFICIENT_BUFFER (0x8007007A) when count > max and
  * E_INVALIDARG (0x80070057) for (max != 0 && ranges == NULL). */

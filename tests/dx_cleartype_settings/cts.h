@@ -14,7 +14,7 @@
  *  - Without a valid PixelStructure the pixel geometry comes from SPI_GETFONTSMOOTHINGORIENTATION (0x2012): 0 (BGR) => 2, else 1.
  *  - Every DWriteRenderingParams constructor snapshots DetermineCompatibleSmoothingMode (SPI_GETFONTSMOOTHING 0x4A == 0 => aliased;
  *    else SPI_GETFONTSMOOTHINGTYPE 0x200A == 1 => grayscale; else ClearType) and the compatible gamma (SPI 0x200C) at creation.
- *    FontFace::GetRecommendedRenderingMode with a DEFAULT-mode params object and DWRITE_MEASURING_MODE_GDI_CLASSIC uses the
+ *    GetRecommendedRenderingMode with a DEFAULT-mode params object and DWRITE_MEASURING_MODE_GDI_CLASSIC uses the
  *    snapshot of the object; with a NULL params object it asks the system at call time.
  */
 #ifndef CTS_H

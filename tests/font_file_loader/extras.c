@@ -10,7 +10,7 @@ static IDWriteFontFaceReference *face_ref(rig *r) {
     return ref;
 }
 
-/* ---------------- locality: FontFileReference::GetLocality queries the loader for IDWriteRemoteFontFileLoader ---------------- */
+/* ---------------- locality: GetLocality queries the loader for IDWriteRemoteFontFileLoader ---------------- */
 TEST(loc_plain_loader_is_local) {
     rig r; size_t n; uint8_t *b = fx_ttf(&n);
     if (!rig_open(&r, b, n)) { rig_close(&r); free(b); return; }

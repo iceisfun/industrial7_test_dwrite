@@ -1,6 +1,6 @@
 /* IDWriteTextRenderer1 entry points and vertical layouts.
  *
- * TextLayout::Draw asks the renderer for IDWriteTextRenderer1; when it is available every drawing callback goes to the oriented overload
+ * Draw asks the renderer for IDWriteTextRenderer1; when it is available every drawing callback goes to the oriented overload
  * (also for horizontal layouts).  The angle of DrawUnderline / DrawStrikethrough is the layout's vertical flag (0 for horizontal text,
  * DWRITE_GLYPH_ORIENTATION_ANGLE_90_DEGREES for a vertical layout); DrawGlyphRun / DrawInlineObject carry the span's own orientation.
  * A vertical layout drawn with a renderer that does not implement IDWriteTextRenderer1 fails with DWRITE_E_TEXTRENDERERINCOMPATIBLE
