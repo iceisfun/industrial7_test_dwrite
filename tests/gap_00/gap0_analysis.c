@@ -1,7 +1,7 @@
 /* IDWriteTextAnalysisSource / IDWriteTextAnalysisSink (+ Source1 / Sink1) as driven by IDWriteTextAnalyzer.
  *
  * The source and sink are the application's objects, so every expectation here is about what dwrite.dll asks of them and reports to them
- * (Windows 10 build 19041, DWriteTextAnalyzer::Analyze* !0x590f0 !0x911f0 !0xe7570 !0x90fe0 !0xe75f0):
+ * (observed on Windows 10 build 19041):
  *   - NULL source / NULL sink / textPosition + textLength overflowing 32 bits => E_INVALIDARG before any callback;
  *   - GetParagraphReadingDirection is asked once per AnalyzeBidi / AnalyzeNumberSubstitution call and never by script or line-break analysis;
  *   - the first GetTextAtPosition of AnalyzeScript is at textPosition and none is made outside [textPosition, textPosition + textLength];
@@ -246,6 +246,7 @@ TEST(gap0_matrix_bidi)
         }
     AN_CLOSE();
 }
+static int has_cr(const WCHAR *t) { for (; *t; t++) if (*t == 0x0d) return 1; return 0; }
 TEST(gap0_matrix_line_breakpoints)
 {
     AN_OPEN();
@@ -265,7 +266,7 @@ TEST(gap0_matrix_line_breakpoints)
                 /* adjacent characters: the "after" condition of one is the "before" condition of the next unless the boundary belongs to neighbouring text */
                 for (j = pos; j + 1 < pos + len; j++) CHECKF(k->brk[j].breakConditionAfter == k->brk[j + 1].breakConditionBefore, "text %d pos %u: boundary conditions disagree", i, j);
                 if (!first) first = k;
-                else if (has_sur(t)) dwx_release(k);
+                else if (has_sur(t) || has_cr(t)) dwx_release(k);   /* a CR's break conditions depend on whether its LF arrives in the same chunk */
                 else {
                     for (j = pos; j < pos + len; j++)
                         if (first->brk[j].breakConditionBefore != k->brk[j].breakConditionBefore || first->brk[j].breakConditionAfter != k->brk[j].breakConditionAfter) { CHECKF(0, "text %d win %d chunk %u: breakpoints differ at %u", i, w, g_chunks[c], j); break; }

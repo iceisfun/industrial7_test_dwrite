@@ -1,6 +1,6 @@
 /* Shared fixtures for gap_00 / dx_gap_00: callback-driven interfaces observed from dwrite.dll's side
  * (analysis source / sink, collection loader / enumerator) and the HTTP remote font loader, whose stream and async-result
- * objects are implemented by dwrite itself (NetFontLoader / NetFontStream / NetDownload in the Windows 10 build).
+ * objects are implemented by dwrite itself (the HTTP font loader and its streams in the Windows 10 build).
  */
 #ifndef GAP0_H
 #define GAP0_H
