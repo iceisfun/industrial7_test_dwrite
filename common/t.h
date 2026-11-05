@@ -59,10 +59,15 @@ void t_tmpfile(char *out, size_t cap, const char *leaf);
 void t_check(int ok, const char *file, int line, const char *expr, const char *fmt, ...);
 #define CHECK(c)          t_check(!!(c), __FILE__, __LINE__, #c, NULL)
 #define CHECKF(c, ...)    t_check(!!(c), __FILE__, __LINE__, #c, __VA_ARGS__)
-#define EXPECT_EQ(a, b)   t_check((ULONG_PTR)(a) == (ULONG_PTR)(b), __FILE__, __LINE__, #a " == " #b, "got 0x%llx want 0x%llx", (unsigned long long)(ULONG_PTR)(a), (unsigned long long)(ULONG_PTR)(b))
-#define EXPECT_NE(a, b)   t_check((ULONG_PTR)(a) != (ULONG_PTR)(b), __FILE__, __LINE__, #a " != " #b, "got 0x%llx", (unsigned long long)(ULONG_PTR)(a))
-#define EXPECT_STR(a, b)  t_check(!strcmp((a), (b)), __FILE__, __LINE__, #a " == " #b, "got \"%s\" want \"%s\"", (a), (b))
-#define EXPECT_WSTR(a, b) t_check(!lstrcmpW((a), (b)), __FILE__, __LINE__, #a " == " #b, "wide string mismatch")
+/* All value macros evaluate each argument exactly once (temporaries). */
+#define EXPECT_EQ(a, b)   do { ULONG_PTR t_a_ = (ULONG_PTR)(a), t_b_ = (ULONG_PTR)(b); \
+    t_check(t_a_ == t_b_, __FILE__, __LINE__, #a " == " #b, "got 0x%llx want 0x%llx", (unsigned long long)t_a_, (unsigned long long)t_b_); } while (0)
+#define EXPECT_NE(a, b)   do { ULONG_PTR t_a_ = (ULONG_PTR)(a), t_b_ = (ULONG_PTR)(b); \
+    t_check(t_a_ != t_b_, __FILE__, __LINE__, #a " != " #b, "got 0x%llx", (unsigned long long)t_a_); } while (0)
+#define EXPECT_STR(a, b)  do { const char *t_a_ = (a), *t_b_ = (b); \
+    t_check(!strcmp(t_a_, t_b_), __FILE__, __LINE__, #a " == " #b, "got \"%s\" want \"%s\"", t_a_, t_b_); } while (0)
+#define EXPECT_WSTR(a, b) do { const WCHAR *t_a_ = (a), *t_b_ = (b); \
+    t_check(!lstrcmpW(t_a_, t_b_), __FILE__, __LINE__, #a " == " #b, "wide string mismatch"); } while (0)
 /* Check GetLastError right after a call that must fail. */
 #define EXPECT_ERR(err)   do { DWORD e_ = GetLastError(); \
     t_check(e_ == (DWORD)(err), __FILE__, __LINE__, #err, "GetLastError got %lu want %lu", e_, (DWORD)(err)); } while (0)
@@ -73,5 +78,9 @@ void t_check(int ok, const char *file, int line, const char *expr, const char *f
 void t_note(const char *fmt, ...);   /* observed/version-dependent behaviour: logged, never fails */
 void t_skip(const char *fmt, ...);   /* skip the rest of the current test */
 #define REQUIRE(ptr) do { if (!(ptr)) { t_skip("missing export: " #ptr); return; } } while (0)
+/* Run fn(ctx) and trap any exception raised inside it (hardware faults and C++ throws, e.g. 0xE06D7363 from a NULL
+ * argument in a system DLL). Returns 0 when fn returned normally, else the exception code. The test continues. */
+DWORD t_try(void (*fn)(void *), void *ctx);
+#define T_EXC_CPP 0xE06D7363u
 int  t_is_wine(void);                /* true under an emulator exposing wine_get_version */
 #endif

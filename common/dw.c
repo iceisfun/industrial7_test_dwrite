@@ -110,7 +110,7 @@ void dw_qi_check_(IUnknown *obj, const dw_qi_row *rows, int n, const char *file,
         } else {
             if (rows[i].expect == 1) t_check(0, file, line, rows[i].name, "QI failed: %s", dw_hr_name(hr));
             else if (rows[i].expect == 0) {
-                t_check(hr == E_NOINTERFACE, file, line, rows[i].name, "QI failure code %s want E_NOINTERFACE", dw_hr_name(hr));
+                t_check(hr == E_NOINTERFACE || hr == E_NOTIMPL, file, line, rows[i].name, "QI failure code %s want E_NOINTERFACE or E_NOTIMPL", dw_hr_name(hr));
                 t_check(p == NULL, file, line, rows[i].name, "out pointer not zeroed on failure (%p)", p);
             } else t_note("QI %s -> %s", rows[i].name, dw_hr_name(hr));
         }

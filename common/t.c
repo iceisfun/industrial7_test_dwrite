@@ -7,6 +7,8 @@ static int g_pass, g_fail, g_cur_fail, g_cur_skip;
 static const char *g_cur;
 static jmp_buf g_jb;
 static volatile int g_in_test;
+static __thread jmp_buf *g_try_jb;          /* set by t_try on the calling thread */
+static __thread DWORD g_try_code;
 
 HMODULE t_module(const char *dll) { return LoadLibraryA(dll); }   /* refcounted; modules stay loaded */
 FARPROC t_proc_in(const char *dll, const char *name) { HMODULE m = t_module(dll); return m ? GetProcAddress(m, name) : NULL; }
@@ -38,6 +40,7 @@ void t_skip(const char *fmt, ...) { va_list a; va_start(a, fmt); printf("  SKIP 
 /* A crash inside a test is reported as a failure of that test and the run continues. */
 static LONG CALLBACK veh(PEXCEPTION_POINTERS ep) {
     DWORD c = ep->ExceptionRecord->ExceptionCode;
+    if (g_try_jb && (c & 0xF0000000) == 0xC0000000) { g_try_code = c; longjmp(*g_try_jb, 1); }
     if (!g_in_test) return EXCEPTION_CONTINUE_SEARCH;
     if (c == 0x40010006 || c == 0x406D1388 || c == DBG_PRINTEXCEPTION_C || c == 0x4001000A) return EXCEPTION_CONTINUE_SEARCH;
     if ((c & 0xF0000000) != 0xC0000000) return EXCEPTION_CONTINUE_SEARCH;
@@ -46,6 +49,26 @@ static LONG CALLBACK veh(PEXCEPTION_POINTERS ep) {
     g_in_test = 0;
     longjmp(g_jb, 1);
     return EXCEPTION_CONTINUE_SEARCH;
+}
+
+/* C++ throws (0xE06D7363) reach the VEH first-chance even when the DLL catches them itself, so they are only handled
+ * here, once nothing caught them: they fail the current test (or end a t_try) instead of killing the process. */
+static LONG WINAPI uef(PEXCEPTION_POINTERS ep) {
+    DWORD c = ep->ExceptionRecord->ExceptionCode;
+    if (g_try_jb) { g_try_code = c; longjmp(*g_try_jb, 1); }
+    if (!g_in_test) return EXCEPTION_CONTINUE_SEARCH;
+    printf("  FAIL unhandled exception 0x%08lx at %p in %s\n", c, ep->ExceptionRecord->ExceptionAddress, g_cur);
+    g_fail++; g_cur_fail++;
+    g_in_test = 0;
+    longjmp(g_jb, 1);
+    return EXCEPTION_CONTINUE_SEARCH;
+}
+DWORD t_try(void (*fn)(void *), void *ctx) {
+    jmp_buf jb, *saved = g_try_jb; DWORD code = 0;
+    g_try_jb = &jb; g_try_code = 0;
+    if (!setjmp(jb)) fn(ctx); else code = g_try_code;
+    g_try_jb = saved;
+    return code;
 }
 
 const char *t_self_path(void) { static char p[MAX_PATH * 2]; if (!p[0]) GetModuleFileNameA(NULL, p, sizeof p); return p; }
@@ -107,6 +130,7 @@ int main(int argc, char **argv) {
         return 0xC0DE0001;
     }
     AddVectoredExceptionHandler(1, veh);
+    SetUnhandledExceptionFilter(uef);
     if (!t_module(g_mods[0])) { printf("FATAL cannot load %s\n", g_mods[0]); return 2; }
     for (int i = 0; i < g_nt; i++) {
         if (filter && !strstr(g_t[i].n, filter)) continue;

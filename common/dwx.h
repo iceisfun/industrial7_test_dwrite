@@ -53,6 +53,8 @@ typedef struct dwx_mem_stream {
     int lastwrite_notimpl;                                 /* GetLastWriteTime returns E_NOTIMPL */
     struct dwx_mem_loader *loader;
 } dwx_mem_stream;
+/* Capacity of a loader's blob table and of a collection loader's key list. dwx_loader_add returns 0xFFFFFFFF (nothing
+ * stored) once 32 blobs exist; dwx_coll_add_key silently drops keys past 32. Tests needing more must use several loaders. */
 #define DWX_MAX_BLOBS 32
 typedef struct dwx_mem_loader {
     const void *lpVtbl; dwx_base b;                        /* IDWriteFontFileLoader */
@@ -140,7 +142,7 @@ typedef struct dwx_renderer {
     int fail_at;                                           /* 1-based draw call that fails with fail_draw (0 = all) */
     HRESULT fail_snapping, fail_transform, fail_ppd;
     int support_r1;                                        /* QI answers IDWriteTextRenderer1 (default 0) */
-    int recurse_inline;                                    /* DrawInlineObject calls IDWriteInlineObject_Draw (default 0) */
+    int recurse_inline;                                    /* DrawInlineObject calls IDWriteInlineObject_Draw (default 0); applies to both renderer entry points */
     LONG r1_calls;
 } dwx_renderer;
 dwx_renderer *dwx_renderer_new(void);                       /* snapping enabled=FALSE, identity transform, ppd 1.0 */

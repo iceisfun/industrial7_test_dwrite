@@ -330,6 +330,7 @@ static HRESULT WINAPI rd1_Strike(IDWriteTextRenderer1 *This, void *ctx, FLOAT x,
 static HRESULT WINAPI rd1_Inline(IDWriteTextRenderer1 *This, void *ctx, FLOAT x, FLOAT y, DWRITE_GLYPH_ORIENTATION_ANGLE a, IDWriteInlineObject *obj, BOOL sw, BOOL rtl, IUnknown *fx) {
     dwx_renderer *r = (dwx_renderer *)This; dwx_draw *d = rec(r, DWX_DRAW_INLINE, ctx, x, y, fx);
     InterlockedIncrement(&r->r1_calls); d->has_orientation = 1; d->angle = a; d->obj = obj; d->obj_sideways = sw; d->obj_rtl = rtl;
+    if (r->recurse_inline && obj) { int seq = d->seq; HRESULT hr = IDWriteInlineObject_Draw(obj, ctx, (IDWriteTextRenderer *)This, x, y, sw, rtl, fx); if (FAILED(hr)) return hr; return draw_result(r, seq); }
     return draw_result(r, d->seq);
 }
 static const IDWriteTextRenderer1Vtbl rd_vt = { rd_QI, rd_AR, rd_RL, rd_Snap, rd_Xform, rd_Ppd, rd_Glyph, rd_Under, rd_Strike, rd_Inline,
@@ -342,6 +343,7 @@ dwx_renderer *dwx_renderer_new(void) {
 const dwx_draw *dwx_renderer_call(dwx_renderer *r, int i) { return (i >= 0 && i < r->ncalls) ? &r->calls[i] : NULL; }
 const dwx_draw *dwx_renderer_next(dwx_renderer *r, int kind, int *cursor) {
     int i;
+    if (*cursor < 0) *cursor = 0;
     for (i = *cursor; i < r->ncalls; i++) if (r->calls[i].kind == kind) { *cursor = i + 1; return &r->calls[i]; }
     *cursor = r->ncalls; return NULL;
 }

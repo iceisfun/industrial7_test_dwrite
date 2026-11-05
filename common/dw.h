@@ -67,8 +67,8 @@ ULONG dw_refcount(IUnknown *u);                     /* AddRef then Release: retu
 #define EXPECT_REFS(obj, n) do { ULONG r_ = dw_refcount((IUnknown *)(obj)); t_check(r_ == (ULONG)(n), __FILE__, __LINE__, "refcount(" #obj ") == " #n, "got %lu want %lu", r_, (ULONG)(n)); } while (0)
 
 /* ---- QueryInterface matrix ------------------------------------------------------------------ */
-typedef struct { const IID *iid; const char *name; int expect; } dw_qi_row;   /* expect: 1 supported, 0 E_NOINTERFACE, -1 OS dependent (t_note) */
-/* For every row: QI succeeds/fails as expected; failure => E_NOINTERFACE with *ppv == NULL; success => refcount rose by 1 and
+typedef struct { const IID *iid; const char *name; int expect; } dw_qi_row;   /* expect: 1 supported, 0 unsupported (E_NOINTERFACE, or E_NOTIMPL as Win10 font faces answer), -1 OS dependent (t_note) */
+/* For every row: QI succeeds/fails as expected; failure => E_NOINTERFACE or E_NOTIMPL with *ppv == NULL; success => refcount rose by 1 and
  * the pointer's IUnknown identity equals obj's; releases afterwards. Also checks QI(IUnknown) identity, AddRef/Release balance. */
 void dw_qi_check_(IUnknown *obj, const dw_qi_row *rows, int n, const char *file, int line);
 #define DW_CHECK_QI(obj, rows) dw_qi_check_((IUnknown *)(obj), rows, (int)(sizeof(rows) / sizeof((rows)[0])), __FILE__, __LINE__)

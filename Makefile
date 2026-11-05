@@ -15,7 +15,7 @@ build/obj/%.o: common/%.c $(HDRS)
 	@mkdir -p build/obj
 	$(CC) $(CFLAGS) -Icommon -c -o $@ $<
 .SECONDEXPANSION:
-build/%.exe: $$(wildcard tests/$$*/*.c) $(COBJS) $(HDRS)
+build/%.exe: $$(wildcard tests/$$*/*.c) $$(wildcard tests/$$*/*.h) $(COBJS) $(HDRS)
 	@mkdir -p build
 	$(CC) $(CFLAGS) -Icommon -o $@ $(wildcard tests/$*/*.c) $(COBJS) $(LIBS)
 clean: ; rm -rf build
