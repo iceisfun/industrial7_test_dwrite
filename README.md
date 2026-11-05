@@ -1,10 +1,20 @@
 # dwrite.dll conformance corpus
 
-Black-box tests for Windows 10 x64 `dwrite.dll`. The DLL is never linked: each test loads it with `LoadLibrary`,
-resolves entry points with `GetProcAddress` (`U(Name)` gives a pointer typed from the SDK header;
-`UIN("module.dll", Name)` pins one module, which matters for forwarders) and calls through the pointer.
+Black-box conformance tests for Windows 10 (22H2, build 19041) x64 `dwrite.dll` (DirectWrite), written in C and cross-compiled with
+mingw-w64. `dwrite.dll` exports exactly one function, `DWriteCreateFactory`; every other behaviour lives behind the COM vtables of
+the objects it returns and of the objects tests pass in (font loaders, text renderers, inline objects, analysis sources/sinks, ...).
+The DLL is never linked: each test loads it with `LoadLibrary`, resolves `DWriteCreateFactory` with `GetProcAddress`
+(`U(DWriteCreateFactory)`, typed from the SDK header) and then calls interface methods through the vtables.
 
-Modules searched by `U()`: dwrite.dll gdi32.dll user32.dll ole32.dll ntdll.dll kernel32.dll.
+The corpus is meant to help someone *implementing* dwrite.dll: expectations are what real Windows does (callback order, arguments,
+HRESULTs, out-parameter state), established from the Windows 10 decompilation, the documentation and deterministic synthetic fonts.
+
+Helper layer (see `docs/DWRITE_TESTING.md`): `common/dw.*` factory/HRESULT/QI/refcount helpers, `common/dwx.*` recording COM test doubles,
+`common/ttfgen.*` deterministic synthetic TrueType/OpenType builder. `tools/dwrite_interfaces.tsv` is the public interface surface,
+`tools/dw_coverage.py` (`make coverage`) reports interface-method coverage into `COVERAGE.md`.
+
+Modules searched by `U()`: dwrite.dll gdi32.dll user32.dll ole32.dll ntdll.dll kernel32.dll. gdi32/user32 are linked statically only for the
+memory-DC scaffolding in `common/dwx.c`; dwrite is never linked.
 
     make                         # cross-compile build/<area>.exe (mingw-w64)
     build\<area>.exe [substr]    # on Windows; optional test-name filter

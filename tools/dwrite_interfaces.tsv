@@ -1,0 +1,470 @@
+interface	base	method	vtbl_index	introduced_in	header
+IDWriteFontFileStream	IUnknown	ReadFileFragment	3	Win7	dwrite.h
+IDWriteFontFileStream	IUnknown	ReleaseFileFragment	4	Win7	dwrite.h
+IDWriteFontFileStream	IUnknown	GetFileSize	5	Win7	dwrite.h
+IDWriteFontFileStream	IUnknown	GetLastWriteTime	6	Win7	dwrite.h
+IDWriteFontFileLoader	IUnknown	CreateStreamFromKey	3	Win7	dwrite.h
+IDWriteLocalFontFileLoader	IDWriteFontFileLoader	GetFilePathLengthFromKey	4	Win7	dwrite.h
+IDWriteLocalFontFileLoader	IDWriteFontFileLoader	GetFilePathFromKey	5	Win7	dwrite.h
+IDWriteLocalFontFileLoader	IDWriteFontFileLoader	GetLastWriteTimeFromKey	6	Win7	dwrite.h
+IDWriteFontFile	IUnknown	GetReferenceKey	3	Win7	dwrite.h
+IDWriteFontFile	IUnknown	GetLoader	4	Win7	dwrite.h
+IDWriteFontFile	IUnknown	Analyze	5	Win7	dwrite.h
+IDWriteFontFileEnumerator	IUnknown	MoveNext	3	Win7	dwrite.h
+IDWriteFontFileEnumerator	IUnknown	GetCurrentFontFile	4	Win7	dwrite.h
+IDWriteFontCollectionLoader	IUnknown	CreateEnumeratorFromKey	3	Win7	dwrite.h
+IDWriteLocalizedStrings	IUnknown	GetCount	3	Win7	dwrite.h
+IDWriteLocalizedStrings	IUnknown	FindLocaleName	4	Win7	dwrite.h
+IDWriteLocalizedStrings	IUnknown	GetLocaleNameLength	5	Win7	dwrite.h
+IDWriteLocalizedStrings	IUnknown	GetLocaleName	6	Win7	dwrite.h
+IDWriteLocalizedStrings	IUnknown	GetStringLength	7	Win7	dwrite.h
+IDWriteLocalizedStrings	IUnknown	GetString	8	Win7	dwrite.h
+IDWriteRenderingParams	IUnknown	GetGamma	3	Win7	dwrite.h
+IDWriteRenderingParams	IUnknown	GetEnhancedContrast	4	Win7	dwrite.h
+IDWriteRenderingParams	IUnknown	GetClearTypeLevel	5	Win7	dwrite.h
+IDWriteRenderingParams	IUnknown	GetPixelGeometry	6	Win7	dwrite.h
+IDWriteRenderingParams	IUnknown	GetRenderingMode	7	Win7	dwrite.h
+IDWriteFontFace	IUnknown	GetType	3	Win7	dwrite.h
+IDWriteFontFace	IUnknown	GetFiles	4	Win7	dwrite.h
+IDWriteFontFace	IUnknown	GetIndex	5	Win7	dwrite.h
+IDWriteFontFace	IUnknown	GetSimulations	6	Win7	dwrite.h
+IDWriteFontFace	IUnknown	IsSymbolFont	7	Win7	dwrite.h
+IDWriteFontFace	IUnknown	GetMetrics	8	Win7	dwrite.h
+IDWriteFontFace	IUnknown	GetGlyphCount	9	Win7	dwrite.h
+IDWriteFontFace	IUnknown	GetDesignGlyphMetrics	10	Win7	dwrite.h
+IDWriteFontFace	IUnknown	GetGlyphIndices	11	Win7	dwrite.h
+IDWriteFontFace	IUnknown	TryGetFontTable	12	Win7	dwrite.h
+IDWriteFontFace	IUnknown	ReleaseFontTable	13	Win7	dwrite.h
+IDWriteFontFace	IUnknown	GetGlyphRunOutline	14	Win7	dwrite.h
+IDWriteFontFace	IUnknown	GetRecommendedRenderingMode	15	Win7	dwrite.h
+IDWriteFontFace	IUnknown	GetGdiCompatibleMetrics	16	Win7	dwrite.h
+IDWriteFontFace	IUnknown	GetGdiCompatibleGlyphMetrics	17	Win7	dwrite.h
+IDWriteFont	IUnknown	GetFontFamily	3	Win7	dwrite.h
+IDWriteFont	IUnknown	GetWeight	4	Win7	dwrite.h
+IDWriteFont	IUnknown	GetStretch	5	Win7	dwrite.h
+IDWriteFont	IUnknown	GetStyle	6	Win7	dwrite.h
+IDWriteFont	IUnknown	IsSymbolFont	7	Win7	dwrite.h
+IDWriteFont	IUnknown	GetFaceNames	8	Win7	dwrite.h
+IDWriteFont	IUnknown	GetInformationalStrings	9	Win7	dwrite.h
+IDWriteFont	IUnknown	GetSimulations	10	Win7	dwrite.h
+IDWriteFont	IUnknown	GetMetrics	11	Win7	dwrite.h
+IDWriteFont	IUnknown	HasCharacter	12	Win7	dwrite.h
+IDWriteFont	IUnknown	CreateFontFace	13	Win7	dwrite.h
+IDWriteFontList	IUnknown	GetFontCollection	3	Win7	dwrite.h
+IDWriteFontList	IUnknown	GetFontCount	4	Win7	dwrite.h
+IDWriteFontList	IUnknown	GetFont	5	Win7	dwrite.h
+IDWriteFontFamily	IDWriteFontList	GetFamilyNames	6	Win7	dwrite.h
+IDWriteFontFamily	IDWriteFontList	GetFirstMatchingFont	7	Win7	dwrite.h
+IDWriteFontFamily	IDWriteFontList	GetMatchingFonts	8	Win7	dwrite.h
+IDWriteFontCollection	IUnknown	GetFontFamilyCount	3	Win7	dwrite.h
+IDWriteFontCollection	IUnknown	GetFontFamily	4	Win7	dwrite.h
+IDWriteFontCollection	IUnknown	FindFamilyName	5	Win7	dwrite.h
+IDWriteFontCollection	IUnknown	GetFontFromFontFace	6	Win7	dwrite.h
+IDWritePixelSnapping	IUnknown	IsPixelSnappingDisabled	3	Win7	dwrite.h
+IDWritePixelSnapping	IUnknown	GetCurrentTransform	4	Win7	dwrite.h
+IDWritePixelSnapping	IUnknown	GetPixelsPerDip	5	Win7	dwrite.h
+IDWriteTextRenderer	IDWritePixelSnapping	DrawGlyphRun	6	Win7	dwrite.h
+IDWriteTextRenderer	IDWritePixelSnapping	DrawUnderline	7	Win7	dwrite.h
+IDWriteTextRenderer	IDWritePixelSnapping	DrawStrikethrough	8	Win7	dwrite.h
+IDWriteTextRenderer	IDWritePixelSnapping	DrawInlineObject	9	Win7	dwrite.h
+IDWriteInlineObject	IUnknown	Draw	3	Win7	dwrite.h
+IDWriteInlineObject	IUnknown	GetMetrics	4	Win7	dwrite.h
+IDWriteInlineObject	IUnknown	GetOverhangMetrics	5	Win7	dwrite.h
+IDWriteInlineObject	IUnknown	GetBreakConditions	6	Win7	dwrite.h
+IDWriteTextFormat	IUnknown	SetTextAlignment	3	Win7	dwrite.h
+IDWriteTextFormat	IUnknown	SetParagraphAlignment	4	Win7	dwrite.h
+IDWriteTextFormat	IUnknown	SetWordWrapping	5	Win7	dwrite.h
+IDWriteTextFormat	IUnknown	SetReadingDirection	6	Win7	dwrite.h
+IDWriteTextFormat	IUnknown	SetFlowDirection	7	Win7	dwrite.h
+IDWriteTextFormat	IUnknown	SetIncrementalTabStop	8	Win7	dwrite.h
+IDWriteTextFormat	IUnknown	SetTrimming	9	Win7	dwrite.h
+IDWriteTextFormat	IUnknown	SetLineSpacing	10	Win7	dwrite.h
+IDWriteTextFormat	IUnknown	GetTextAlignment	11	Win7	dwrite.h
+IDWriteTextFormat	IUnknown	GetParagraphAlignment	12	Win7	dwrite.h
+IDWriteTextFormat	IUnknown	GetWordWrapping	13	Win7	dwrite.h
+IDWriteTextFormat	IUnknown	GetReadingDirection	14	Win7	dwrite.h
+IDWriteTextFormat	IUnknown	GetFlowDirection	15	Win7	dwrite.h
+IDWriteTextFormat	IUnknown	GetIncrementalTabStop	16	Win7	dwrite.h
+IDWriteTextFormat	IUnknown	GetTrimming	17	Win7	dwrite.h
+IDWriteTextFormat	IUnknown	GetLineSpacing	18	Win7	dwrite.h
+IDWriteTextFormat	IUnknown	GetFontCollection	19	Win7	dwrite.h
+IDWriteTextFormat	IUnknown	GetFontFamilyNameLength	20	Win7	dwrite.h
+IDWriteTextFormat	IUnknown	GetFontFamilyName	21	Win7	dwrite.h
+IDWriteTextFormat	IUnknown	GetFontWeight	22	Win7	dwrite.h
+IDWriteTextFormat	IUnknown	GetFontStyle	23	Win7	dwrite.h
+IDWriteTextFormat	IUnknown	GetFontStretch	24	Win7	dwrite.h
+IDWriteTextFormat	IUnknown	GetFontSize	25	Win7	dwrite.h
+IDWriteTextFormat	IUnknown	GetLocaleNameLength	26	Win7	dwrite.h
+IDWriteTextFormat	IUnknown	GetLocaleName	27	Win7	dwrite.h
+IDWriteTypography	IUnknown	AddFontFeature	3	Win7	dwrite.h
+IDWriteTypography	IUnknown	GetFontFeatureCount	4	Win7	dwrite.h
+IDWriteTypography	IUnknown	GetFontFeature	5	Win7	dwrite.h
+IDWriteBitmapRenderTarget	IUnknown	DrawGlyphRun	3	Win7	dwrite.h
+IDWriteBitmapRenderTarget	IUnknown	GetMemoryDC	4	Win7	dwrite.h
+IDWriteBitmapRenderTarget	IUnknown	GetPixelsPerDip	5	Win7	dwrite.h
+IDWriteBitmapRenderTarget	IUnknown	SetPixelsPerDip	6	Win7	dwrite.h
+IDWriteBitmapRenderTarget	IUnknown	GetCurrentTransform	7	Win7	dwrite.h
+IDWriteBitmapRenderTarget	IUnknown	SetCurrentTransform	8	Win7	dwrite.h
+IDWriteBitmapRenderTarget	IUnknown	GetSize	9	Win7	dwrite.h
+IDWriteBitmapRenderTarget	IUnknown	Resize	10	Win7	dwrite.h
+IDWriteGdiInterop	IUnknown	CreateFontFromLOGFONT	3	Win7	dwrite.h
+IDWriteGdiInterop	IUnknown	ConvertFontToLOGFONT	4	Win7	dwrite.h
+IDWriteGdiInterop	IUnknown	ConvertFontFaceToLOGFONT	5	Win7	dwrite.h
+IDWriteGdiInterop	IUnknown	CreateFontFaceFromHdc	6	Win7	dwrite.h
+IDWriteGdiInterop	IUnknown	CreateBitmapRenderTarget	7	Win7	dwrite.h
+IDWriteTextLayout	IDWriteTextFormat	SetMaxWidth	28	Win7	dwrite.h
+IDWriteTextLayout	IDWriteTextFormat	SetMaxHeight	29	Win7	dwrite.h
+IDWriteTextLayout	IDWriteTextFormat	SetFontCollection	30	Win7	dwrite.h
+IDWriteTextLayout	IDWriteTextFormat	SetFontFamilyName	31	Win7	dwrite.h
+IDWriteTextLayout	IDWriteTextFormat	SetFontWeight	32	Win7	dwrite.h
+IDWriteTextLayout	IDWriteTextFormat	SetFontStyle	33	Win7	dwrite.h
+IDWriteTextLayout	IDWriteTextFormat	SetFontStretch	34	Win7	dwrite.h
+IDWriteTextLayout	IDWriteTextFormat	SetFontSize	35	Win7	dwrite.h
+IDWriteTextLayout	IDWriteTextFormat	SetUnderline	36	Win7	dwrite.h
+IDWriteTextLayout	IDWriteTextFormat	SetStrikethrough	37	Win7	dwrite.h
+IDWriteTextLayout	IDWriteTextFormat	SetDrawingEffect	38	Win7	dwrite.h
+IDWriteTextLayout	IDWriteTextFormat	SetInlineObject	39	Win7	dwrite.h
+IDWriteTextLayout	IDWriteTextFormat	SetTypography	40	Win7	dwrite.h
+IDWriteTextLayout	IDWriteTextFormat	SetLocaleName	41	Win7	dwrite.h
+IDWriteTextLayout	IDWriteTextFormat	GetMaxWidth	42	Win7	dwrite.h
+IDWriteTextLayout	IDWriteTextFormat	GetMaxHeight	43	Win7	dwrite.h
+IDWriteTextLayout	IDWriteTextFormat	GetFontCollection	44	Win7	dwrite.h
+IDWriteTextLayout	IDWriteTextFormat	GetFontFamilyNameLength	45	Win7	dwrite.h
+IDWriteTextLayout	IDWriteTextFormat	GetFontFamilyName	46	Win7	dwrite.h
+IDWriteTextLayout	IDWriteTextFormat	GetFontWeight	47	Win7	dwrite.h
+IDWriteTextLayout	IDWriteTextFormat	GetFontStyle	48	Win7	dwrite.h
+IDWriteTextLayout	IDWriteTextFormat	GetFontStretch	49	Win7	dwrite.h
+IDWriteTextLayout	IDWriteTextFormat	GetFontSize	50	Win7	dwrite.h
+IDWriteTextLayout	IDWriteTextFormat	GetUnderline	51	Win7	dwrite.h
+IDWriteTextLayout	IDWriteTextFormat	GetStrikethrough	52	Win7	dwrite.h
+IDWriteTextLayout	IDWriteTextFormat	GetDrawingEffect	53	Win7	dwrite.h
+IDWriteTextLayout	IDWriteTextFormat	GetInlineObject	54	Win7	dwrite.h
+IDWriteTextLayout	IDWriteTextFormat	GetTypography	55	Win7	dwrite.h
+IDWriteTextLayout	IDWriteTextFormat	GetLocaleNameLength	56	Win7	dwrite.h
+IDWriteTextLayout	IDWriteTextFormat	GetLocaleName	57	Win7	dwrite.h
+IDWriteTextLayout	IDWriteTextFormat	Draw	58	Win7	dwrite.h
+IDWriteTextLayout	IDWriteTextFormat	GetLineMetrics	59	Win7	dwrite.h
+IDWriteTextLayout	IDWriteTextFormat	GetMetrics	60	Win7	dwrite.h
+IDWriteTextLayout	IDWriteTextFormat	GetOverhangMetrics	61	Win7	dwrite.h
+IDWriteTextLayout	IDWriteTextFormat	GetClusterMetrics	62	Win7	dwrite.h
+IDWriteTextLayout	IDWriteTextFormat	DetermineMinWidth	63	Win7	dwrite.h
+IDWriteTextLayout	IDWriteTextFormat	HitTestPoint	64	Win7	dwrite.h
+IDWriteTextLayout	IDWriteTextFormat	HitTestTextPosition	65	Win7	dwrite.h
+IDWriteTextLayout	IDWriteTextFormat	HitTestTextRange	66	Win7	dwrite.h
+IDWriteTextAnalysisSource	IUnknown	GetTextAtPosition	3	Win7	dwrite.h
+IDWriteTextAnalysisSource	IUnknown	GetTextBeforePosition	4	Win7	dwrite.h
+IDWriteTextAnalysisSource	IUnknown	GetParagraphReadingDirection	5	Win7	dwrite.h
+IDWriteTextAnalysisSource	IUnknown	GetLocaleName	6	Win7	dwrite.h
+IDWriteTextAnalysisSource	IUnknown	GetNumberSubstitution	7	Win7	dwrite.h
+IDWriteTextAnalysisSink	IUnknown	SetScriptAnalysis	3	Win7	dwrite.h
+IDWriteTextAnalysisSink	IUnknown	SetLineBreakpoints	4	Win7	dwrite.h
+IDWriteTextAnalysisSink	IUnknown	SetBidiLevel	5	Win7	dwrite.h
+IDWriteTextAnalysisSink	IUnknown	SetNumberSubstitution	6	Win7	dwrite.h
+IDWriteTextAnalyzer	IUnknown	AnalyzeScript	3	Win7	dwrite.h
+IDWriteTextAnalyzer	IUnknown	AnalyzeBidi	4	Win7	dwrite.h
+IDWriteTextAnalyzer	IUnknown	AnalyzeNumberSubstitution	5	Win7	dwrite.h
+IDWriteTextAnalyzer	IUnknown	AnalyzeLineBreakpoints	6	Win7	dwrite.h
+IDWriteTextAnalyzer	IUnknown	GetGlyphs	7	Win7	dwrite.h
+IDWriteTextAnalyzer	IUnknown	GetGlyphPlacements	8	Win7	dwrite.h
+IDWriteTextAnalyzer	IUnknown	GetGdiCompatibleGlyphPlacements	9	Win7	dwrite.h
+IDWriteGlyphRunAnalysis	IUnknown	GetAlphaTextureBounds	3	Win7	dwrite.h
+IDWriteGlyphRunAnalysis	IUnknown	CreateAlphaTexture	4	Win7	dwrite.h
+IDWriteGlyphRunAnalysis	IUnknown	GetAlphaBlendParams	5	Win7	dwrite.h
+IDWriteFactory	IUnknown	GetSystemFontCollection	3	Win7	dwrite.h
+IDWriteFactory	IUnknown	CreateCustomFontCollection	4	Win7	dwrite.h
+IDWriteFactory	IUnknown	RegisterFontCollectionLoader	5	Win7	dwrite.h
+IDWriteFactory	IUnknown	UnregisterFontCollectionLoader	6	Win7	dwrite.h
+IDWriteFactory	IUnknown	CreateFontFileReference	7	Win7	dwrite.h
+IDWriteFactory	IUnknown	CreateCustomFontFileReference	8	Win7	dwrite.h
+IDWriteFactory	IUnknown	CreateFontFace	9	Win7	dwrite.h
+IDWriteFactory	IUnknown	CreateRenderingParams	10	Win7	dwrite.h
+IDWriteFactory	IUnknown	CreateMonitorRenderingParams	11	Win7	dwrite.h
+IDWriteFactory	IUnknown	CreateCustomRenderingParams	12	Win7	dwrite.h
+IDWriteFactory	IUnknown	RegisterFontFileLoader	13	Win7	dwrite.h
+IDWriteFactory	IUnknown	UnregisterFontFileLoader	14	Win7	dwrite.h
+IDWriteFactory	IUnknown	CreateTextFormat	15	Win7	dwrite.h
+IDWriteFactory	IUnknown	CreateTypography	16	Win7	dwrite.h
+IDWriteFactory	IUnknown	GetGdiInterop	17	Win7	dwrite.h
+IDWriteFactory	IUnknown	CreateTextLayout	18	Win7	dwrite.h
+IDWriteFactory	IUnknown	CreateGdiCompatibleTextLayout	19	Win7	dwrite.h
+IDWriteFactory	IUnknown	CreateEllipsisTrimmingSign	20	Win7	dwrite.h
+IDWriteFactory	IUnknown	CreateTextAnalyzer	21	Win7	dwrite.h
+IDWriteFactory	IUnknown	CreateNumberSubstitution	22	Win7	dwrite.h
+IDWriteFactory	IUnknown	CreateGlyphRunAnalysis	23	Win7	dwrite.h
+IDWriteFactory1	IDWriteFactory	GetEudcFontCollection	24	Win7 PU / Win8	dwrite_1.h
+IDWriteFactory1	IDWriteFactory	CreateCustomRenderingParams	25	Win7 PU / Win8	dwrite_1.h
+IDWriteFontFace1	IDWriteFontFace	GetMetrics	18	Win7 PU / Win8	dwrite_1.h
+IDWriteFontFace1	IDWriteFontFace	GetGdiCompatibleMetrics	19	Win7 PU / Win8	dwrite_1.h
+IDWriteFontFace1	IDWriteFontFace	GetCaretMetrics	20	Win7 PU / Win8	dwrite_1.h
+IDWriteFontFace1	IDWriteFontFace	GetUnicodeRanges	21	Win7 PU / Win8	dwrite_1.h
+IDWriteFontFace1	IDWriteFontFace	IsMonospacedFont	22	Win7 PU / Win8	dwrite_1.h
+IDWriteFontFace1	IDWriteFontFace	GetDesignGlyphAdvances	23	Win7 PU / Win8	dwrite_1.h
+IDWriteFontFace1	IDWriteFontFace	GetGdiCompatibleGlyphAdvances	24	Win7 PU / Win8	dwrite_1.h
+IDWriteFontFace1	IDWriteFontFace	GetKerningPairAdjustments	25	Win7 PU / Win8	dwrite_1.h
+IDWriteFontFace1	IDWriteFontFace	HasKerningPairs	26	Win7 PU / Win8	dwrite_1.h
+IDWriteFontFace1	IDWriteFontFace	GetRecommendedRenderingMode	27	Win7 PU / Win8	dwrite_1.h
+IDWriteFontFace1	IDWriteFontFace	GetVerticalGlyphVariants	28	Win7 PU / Win8	dwrite_1.h
+IDWriteFontFace1	IDWriteFontFace	HasVerticalGlyphVariants	29	Win7 PU / Win8	dwrite_1.h
+IDWriteFont1	IDWriteFont	GetMetrics	14	Win7 PU / Win8	dwrite_1.h
+IDWriteFont1	IDWriteFont	GetPanose	15	Win7 PU / Win8	dwrite_1.h
+IDWriteFont1	IDWriteFont	GetUnicodeRanges	16	Win7 PU / Win8	dwrite_1.h
+IDWriteFont1	IDWriteFont	IsMonospacedFont	17	Win7 PU / Win8	dwrite_1.h
+IDWriteRenderingParams1	IDWriteRenderingParams	GetGrayscaleEnhancedContrast	8	Win7 PU / Win8	dwrite_1.h
+IDWriteTextAnalyzer1	IDWriteTextAnalyzer	ApplyCharacterSpacing	10	Win7 PU / Win8	dwrite_1.h
+IDWriteTextAnalyzer1	IDWriteTextAnalyzer	GetBaseline	11	Win7 PU / Win8	dwrite_1.h
+IDWriteTextAnalyzer1	IDWriteTextAnalyzer	AnalyzeVerticalGlyphOrientation	12	Win7 PU / Win8	dwrite_1.h
+IDWriteTextAnalyzer1	IDWriteTextAnalyzer	GetGlyphOrientationTransform	13	Win7 PU / Win8	dwrite_1.h
+IDWriteTextAnalyzer1	IDWriteTextAnalyzer	GetScriptProperties	14	Win7 PU / Win8	dwrite_1.h
+IDWriteTextAnalyzer1	IDWriteTextAnalyzer	GetTextComplexity	15	Win7 PU / Win8	dwrite_1.h
+IDWriteTextAnalyzer1	IDWriteTextAnalyzer	GetJustificationOpportunities	16	Win7 PU / Win8	dwrite_1.h
+IDWriteTextAnalyzer1	IDWriteTextAnalyzer	JustifyGlyphAdvances	17	Win7 PU / Win8	dwrite_1.h
+IDWriteTextAnalyzer1	IDWriteTextAnalyzer	GetJustifiedGlyphs	18	Win7 PU / Win8	dwrite_1.h
+IDWriteTextAnalysisSource1	IDWriteTextAnalysisSource	GetVerticalGlyphOrientation	8	Win7 PU / Win8	dwrite_1.h
+IDWriteTextAnalysisSink1	IDWriteTextAnalysisSink	SetGlyphOrientation	7	Win7 PU / Win8	dwrite_1.h
+IDWriteTextLayout1	IDWriteTextLayout	SetPairKerning	67	Win7 PU / Win8	dwrite_1.h
+IDWriteTextLayout1	IDWriteTextLayout	GetPairKerning	68	Win7 PU / Win8	dwrite_1.h
+IDWriteTextLayout1	IDWriteTextLayout	SetCharacterSpacing	69	Win7 PU / Win8	dwrite_1.h
+IDWriteTextLayout1	IDWriteTextLayout	GetCharacterSpacing	70	Win7 PU / Win8	dwrite_1.h
+IDWriteBitmapRenderTarget1	IDWriteBitmapRenderTarget	GetTextAntialiasMode	11	Win7 PU / Win8	dwrite_1.h
+IDWriteBitmapRenderTarget1	IDWriteBitmapRenderTarget	SetTextAntialiasMode	12	Win7 PU / Win8	dwrite_1.h
+IDWriteTextRenderer1	IDWriteTextRenderer	DrawGlyphRun	10	Win8.1	dwrite_2.h
+IDWriteTextRenderer1	IDWriteTextRenderer	DrawUnderline	11	Win8.1	dwrite_2.h
+IDWriteTextRenderer1	IDWriteTextRenderer	DrawStrikethrough	12	Win8.1	dwrite_2.h
+IDWriteTextRenderer1	IDWriteTextRenderer	DrawInlineObject	13	Win8.1	dwrite_2.h
+IDWriteFontFallback	IUnknown	MapCharacters	3	Win8.1	dwrite_2.h
+IDWriteTextFormat1	IDWriteTextFormat	SetVerticalGlyphOrientation	28	Win8.1	dwrite_2.h
+IDWriteTextFormat1	IDWriteTextFormat	GetVerticalGlyphOrientation	29	Win8.1	dwrite_2.h
+IDWriteTextFormat1	IDWriteTextFormat	SetLastLineWrapping	30	Win8.1	dwrite_2.h
+IDWriteTextFormat1	IDWriteTextFormat	GetLastLineWrapping	31	Win8.1	dwrite_2.h
+IDWriteTextFormat1	IDWriteTextFormat	SetOpticalAlignment	32	Win8.1	dwrite_2.h
+IDWriteTextFormat1	IDWriteTextFormat	GetOpticalAlignment	33	Win8.1	dwrite_2.h
+IDWriteTextFormat1	IDWriteTextFormat	SetFontFallback	34	Win8.1	dwrite_2.h
+IDWriteTextFormat1	IDWriteTextFormat	GetFontFallback	35	Win8.1	dwrite_2.h
+IDWriteTextLayout2	IDWriteTextLayout1	GetMetrics	71	Win8.1	dwrite_2.h
+IDWriteTextLayout2	IDWriteTextLayout1	SetVerticalGlyphOrientation	72	Win8.1	dwrite_2.h
+IDWriteTextLayout2	IDWriteTextLayout1	GetVerticalGlyphOrientation	73	Win8.1	dwrite_2.h
+IDWriteTextLayout2	IDWriteTextLayout1	SetLastLineWrapping	74	Win8.1	dwrite_2.h
+IDWriteTextLayout2	IDWriteTextLayout1	GetLastLineWrapping	75	Win8.1	dwrite_2.h
+IDWriteTextLayout2	IDWriteTextLayout1	SetOpticalAlignment	76	Win8.1	dwrite_2.h
+IDWriteTextLayout2	IDWriteTextLayout1	GetOpticalAlignment	77	Win8.1	dwrite_2.h
+IDWriteTextLayout2	IDWriteTextLayout1	SetFontFallback	78	Win8.1	dwrite_2.h
+IDWriteTextLayout2	IDWriteTextLayout1	GetFontFallback	79	Win8.1	dwrite_2.h
+IDWriteTextAnalyzer2	IDWriteTextAnalyzer1	GetGlyphOrientationTransform	19	Win8.1	dwrite_2.h
+IDWriteTextAnalyzer2	IDWriteTextAnalyzer1	GetTypographicFeatures	20	Win8.1	dwrite_2.h
+IDWriteTextAnalyzer2	IDWriteTextAnalyzer1	CheckTypographicFeature	21	Win8.1	dwrite_2.h
+IDWriteFontFallbackBuilder	IUnknown	AddMapping	3	Win8.1	dwrite_2.h
+IDWriteFontFallbackBuilder	IUnknown	AddMappings	4	Win8.1	dwrite_2.h
+IDWriteFontFallbackBuilder	IUnknown	CreateFontFallback	5	Win8.1	dwrite_2.h
+IDWriteFont2	IDWriteFont1	IsColorFont	18	Win8.1	dwrite_2.h
+IDWriteFontFace2	IDWriteFontFace1	IsColorFont	30	Win8.1	dwrite_2.h
+IDWriteFontFace2	IDWriteFontFace1	GetColorPaletteCount	31	Win8.1	dwrite_2.h
+IDWriteFontFace2	IDWriteFontFace1	GetPaletteEntryCount	32	Win8.1	dwrite_2.h
+IDWriteFontFace2	IDWriteFontFace1	GetPaletteEntries	33	Win8.1	dwrite_2.h
+IDWriteFontFace2	IDWriteFontFace1	GetRecommendedRenderingMode	34	Win8.1	dwrite_2.h
+IDWriteColorGlyphRunEnumerator	IUnknown	MoveNext	3	Win8.1	dwrite_2.h
+IDWriteColorGlyphRunEnumerator	IUnknown	GetCurrentRun	4	Win8.1	dwrite_2.h
+IDWriteRenderingParams2	IDWriteRenderingParams1	GetGridFitMode	9	Win8.1	dwrite_2.h
+IDWriteFactory2	IDWriteFactory1	GetSystemFontFallback	26	Win8.1	dwrite_2.h
+IDWriteFactory2	IDWriteFactory1	CreateFontFallbackBuilder	27	Win8.1	dwrite_2.h
+IDWriteFactory2	IDWriteFactory1	TranslateColorGlyphRun	28	Win8.1	dwrite_2.h
+IDWriteFactory2	IDWriteFactory1	CreateCustomRenderingParams	29	Win8.1	dwrite_2.h
+IDWriteFactory2	IDWriteFactory1	CreateGlyphRunAnalysis	30	Win8.1	dwrite_2.h
+IDWriteFontDownloadListener	IUnknown	DownloadCompleted	3	Win10	dwrite_3.h
+IDWriteFontDownloadQueue	IUnknown	AddListener	3	Win10	dwrite_3.h
+IDWriteFontDownloadQueue	IUnknown	RemoveListener	4	Win10	dwrite_3.h
+IDWriteFontDownloadQueue	IUnknown	IsEmpty	5	Win10	dwrite_3.h
+IDWriteFontDownloadQueue	IUnknown	BeginDownload	6	Win10	dwrite_3.h
+IDWriteFontDownloadQueue	IUnknown	CancelDownload	7	Win10	dwrite_3.h
+IDWriteFontDownloadQueue	IUnknown	GetGenerationCount	8	Win10	dwrite_3.h
+IDWriteRenderingParams3	IDWriteRenderingParams2	GetRenderingMode1	10	Win10	dwrite_3.h
+IDWriteStringList	IUnknown	GetCount	3	Win10	dwrite_3.h
+IDWriteStringList	IUnknown	GetLocaleNameLength	4	Win10	dwrite_3.h
+IDWriteStringList	IUnknown	GetLocaleName	5	Win10	dwrite_3.h
+IDWriteStringList	IUnknown	GetStringLength	6	Win10	dwrite_3.h
+IDWriteStringList	IUnknown	GetString	7	Win10	dwrite_3.h
+IDWriteFontSet	IUnknown	GetFontCount	3	Win10	dwrite_3.h
+IDWriteFontSet	IUnknown	GetFontFaceReference	4	Win10	dwrite_3.h
+IDWriteFontSet	IUnknown	FindFontFaceReference	5	Win10	dwrite_3.h
+IDWriteFontSet	IUnknown	FindFontFace	6	Win10	dwrite_3.h
+IDWriteFontSet	IUnknown	GetPropertyValues__	7	Win10	dwrite_3.h
+IDWriteFontSet	IUnknown	GetPropertyValues_	8	Win10	dwrite_3.h
+IDWriteFontSet	IUnknown	GetPropertyValues	9	Win10	dwrite_3.h
+IDWriteFontSet	IUnknown	GetPropertyOccurrenceCount	10	Win10	dwrite_3.h
+IDWriteFontSet	IUnknown	GetMatchingFonts_	11	Win10	dwrite_3.h
+IDWriteFontSet	IUnknown	GetMatchingFonts	12	Win10	dwrite_3.h
+IDWriteFontResource	IUnknown	GetFontFile	3	Win10	dwrite_3.h
+IDWriteFontResource	IUnknown	GetFontFaceIndex	4	Win10	dwrite_3.h
+IDWriteFontResource	IUnknown	GetFontAxisCount	5	Win10	dwrite_3.h
+IDWriteFontResource	IUnknown	GetDefaultFontAxisValues	6	Win10	dwrite_3.h
+IDWriteFontResource	IUnknown	GetFontAxisRanges	7	Win10	dwrite_3.h
+IDWriteFontResource	IUnknown	GetFontAxisAttributes	8	Win10	dwrite_3.h
+IDWriteFontResource	IUnknown	GetAxisNames	9	Win10	dwrite_3.h
+IDWriteFontResource	IUnknown	GetAxisValueNameCount	10	Win10	dwrite_3.h
+IDWriteFontResource	IUnknown	GetAxisValueNames	11	Win10	dwrite_3.h
+IDWriteFontResource	IUnknown	HasVariations	12	Win10	dwrite_3.h
+IDWriteFontResource	IUnknown	CreateFontFace	13	Win10	dwrite_3.h
+IDWriteFontResource	IUnknown	CreateFontFaceReference	14	Win10	dwrite_3.h
+IDWriteFontSet1	IDWriteFontSet	GetMatchingFonts	13	Win10	dwrite_3.h
+IDWriteFontSet1	IDWriteFontSet	GetFirstFontResources	14	Win10	dwrite_3.h
+IDWriteFontSet1	IDWriteFontSet	GetFilteredFonts__	15	Win10	dwrite_3.h
+IDWriteFontSet1	IDWriteFontSet	GetFilteredFonts_	16	Win10	dwrite_3.h
+IDWriteFontSet1	IDWriteFontSet	GetFilteredFonts	17	Win10	dwrite_3.h
+IDWriteFontSet1	IDWriteFontSet	GetFilteredFontIndices_	18	Win10	dwrite_3.h
+IDWriteFontSet1	IDWriteFontSet	GetFilteredFontIndices	19	Win10	dwrite_3.h
+IDWriteFontSet1	IDWriteFontSet	GetFontAxisRanges_	20	Win10	dwrite_3.h
+IDWriteFontSet1	IDWriteFontSet	GetFontAxisRanges	21	Win10	dwrite_3.h
+IDWriteFontSet1	IDWriteFontSet	GetFontFaceReference	22	Win10	dwrite_3.h
+IDWriteFontSet1	IDWriteFontSet	CreateFontResource	23	Win10	dwrite_3.h
+IDWriteFontSet1	IDWriteFontSet	CreateFontFace	24	Win10	dwrite_3.h
+IDWriteFontSet1	IDWriteFontSet	GetFontLocality	25	Win10	dwrite_3.h
+IDWriteFont3	IDWriteFont2	CreateFontFace	19	Win10	dwrite_3.h
+IDWriteFont3	IDWriteFont2	Equals	20	Win10	dwrite_3.h
+IDWriteFont3	IDWriteFont2	GetFontFaceReference	21	Win10	dwrite_3.h
+IDWriteFont3	IDWriteFont2	HasCharacter	22	Win10	dwrite_3.h
+IDWriteFont3	IDWriteFont2	GetLocality	23	Win10	dwrite_3.h
+IDWriteFontFamily1	IDWriteFontFamily	GetFontLocality	9	Win10	dwrite_3.h
+IDWriteFontFamily1	IDWriteFontFamily	GetFont	10	Win10	dwrite_3.h
+IDWriteFontFamily1	IDWriteFontFamily	GetFontFaceReference	11	Win10	dwrite_3.h
+IDWriteFontFamily2	IDWriteFontFamily1	GetMatchingFonts	12	Win10	dwrite_3.h
+IDWriteFontFamily2	IDWriteFontFamily1	GetFontSet	13	Win10	dwrite_3.h
+IDWriteFontCollection1	IDWriteFontCollection	GetFontSet	7	Win10	dwrite_3.h
+IDWriteFontCollection1	IDWriteFontCollection	GetFontFamily	8	Win10	dwrite_3.h
+IDWriteFontCollection2	IDWriteFontCollection1	GetFontFamily	9	Win10	dwrite_3.h
+IDWriteFontCollection2	IDWriteFontCollection1	GetMatchingFonts	10	Win10	dwrite_3.h
+IDWriteFontCollection2	IDWriteFontCollection1	GetFontFamilyModel	11	Win10	dwrite_3.h
+IDWriteFontCollection2	IDWriteFontCollection1	GetFontSet	12	Win10	dwrite_3.h
+IDWriteFontCollection3	IDWriteFontCollection2	GetExpirationEvent	13	Win10	dwrite_3.h
+IDWriteFontFaceReference	IUnknown	CreateFontFace	3	Win10	dwrite_3.h
+IDWriteFontFaceReference	IUnknown	CreateFontFaceWithSimulations	4	Win10	dwrite_3.h
+IDWriteFontFaceReference	IUnknown	Equals	5	Win10	dwrite_3.h
+IDWriteFontFaceReference	IUnknown	GetFontFaceIndex	6	Win10	dwrite_3.h
+IDWriteFontFaceReference	IUnknown	GetSimulations	7	Win10	dwrite_3.h
+IDWriteFontFaceReference	IUnknown	GetFontFile	8	Win10	dwrite_3.h
+IDWriteFontFaceReference	IUnknown	GetLocalFileSize	9	Win10	dwrite_3.h
+IDWriteFontFaceReference	IUnknown	GetFileSize	10	Win10	dwrite_3.h
+IDWriteFontFaceReference	IUnknown	GetFileTime	11	Win10	dwrite_3.h
+IDWriteFontFaceReference	IUnknown	GetLocality	12	Win10	dwrite_3.h
+IDWriteFontFaceReference	IUnknown	EnqueueFontDownloadRequest	13	Win10	dwrite_3.h
+IDWriteFontFaceReference	IUnknown	EnqueueCharacterDownloadRequest	14	Win10	dwrite_3.h
+IDWriteFontFaceReference	IUnknown	EnqueueGlyphDownloadRequest	15	Win10	dwrite_3.h
+IDWriteFontFaceReference	IUnknown	EnqueueFileFragmentDownloadRequest	16	Win10	dwrite_3.h
+IDWriteFontFaceReference1	IDWriteFontFaceReference	CreateFontFace	17	Win10	dwrite_3.h
+IDWriteFontFaceReference1	IDWriteFontFaceReference	GetFontAxisValueCount	18	Win10	dwrite_3.h
+IDWriteFontFaceReference1	IDWriteFontFaceReference	GetFontAxisValues	19	Win10	dwrite_3.h
+IDWriteFontList1	IDWriteFontList	GetFontLocality	6	Win10	dwrite_3.h
+IDWriteFontList1	IDWriteFontList	GetFont	7	Win10	dwrite_3.h
+IDWriteFontList1	IDWriteFontList	GetFontFaceReference	8	Win10	dwrite_3.h
+IDWriteFontList2	IDWriteFontList1	GetFontSet	9	Win10	dwrite_3.h
+IDWriteFontSet2	IDWriteFontSet1	GetExpirationEvent	26	Win10	dwrite_3.h
+IDWriteFontSet3	IDWriteFontSet2	GetFontSourceType	27	Win10	dwrite_3.h
+IDWriteFontSet3	IDWriteFontSet2	GetFontSourceNameLength	28	Win10	dwrite_3.h
+IDWriteFontSet3	IDWriteFontSet2	GetFontSourceName	29	Win10	dwrite_3.h
+IDWriteFontSet4	IDWriteFontSet3	ConvertWeightStretchStyleToFontAxisValues	30	Win10	dwrite_3.h
+IDWriteFontSet4	IDWriteFontSet3	GetMatchingFonts	31	Win10	dwrite_3.h
+IDWriteFontFace3	IDWriteFontFace2	GetFontFaceReference	35	Win10	dwrite_3.h
+IDWriteFontFace3	IDWriteFontFace2	GetPanose	36	Win10	dwrite_3.h
+IDWriteFontFace3	IDWriteFontFace2	GetWeight	37	Win10	dwrite_3.h
+IDWriteFontFace3	IDWriteFontFace2	GetStretch	38	Win10	dwrite_3.h
+IDWriteFontFace3	IDWriteFontFace2	GetStyle	39	Win10	dwrite_3.h
+IDWriteFontFace3	IDWriteFontFace2	GetFamilyNames	40	Win10	dwrite_3.h
+IDWriteFontFace3	IDWriteFontFace2	GetFaceNames	41	Win10	dwrite_3.h
+IDWriteFontFace3	IDWriteFontFace2	GetInformationalStrings	42	Win10	dwrite_3.h
+IDWriteFontFace3	IDWriteFontFace2	HasCharacter	43	Win10	dwrite_3.h
+IDWriteFontFace3	IDWriteFontFace2	GetRecommendedRenderingMode	44	Win10	dwrite_3.h
+IDWriteFontFace3	IDWriteFontFace2	IsCharacterLocal	45	Win10	dwrite_3.h
+IDWriteFontFace3	IDWriteFontFace2	IsGlyphLocal	46	Win10	dwrite_3.h
+IDWriteFontFace3	IDWriteFontFace2	AreCharactersLocal	47	Win10	dwrite_3.h
+IDWriteFontFace3	IDWriteFontFace2	AreGlyphsLocal	48	Win10	dwrite_3.h
+IDWriteTextFormat2	IDWriteTextFormat1	SetLineSpacing	36	Win10	dwrite_3.h
+IDWriteTextFormat2	IDWriteTextFormat1	GetLineSpacing	37	Win10	dwrite_3.h
+IDWriteTextFormat3	IDWriteTextFormat2	SetFontAxisValues	38	Win10	dwrite_3.h
+IDWriteTextFormat3	IDWriteTextFormat2	GetFontAxisValueCount	39	Win10	dwrite_3.h
+IDWriteTextFormat3	IDWriteTextFormat2	GetFontAxisValues	40	Win10	dwrite_3.h
+IDWriteTextFormat3	IDWriteTextFormat2	GetAutomaticFontAxes	41	Win10	dwrite_3.h
+IDWriteTextFormat3	IDWriteTextFormat2	SetAutomaticFontAxes	42	Win10	dwrite_3.h
+IDWriteTextLayout3	IDWriteTextLayout2	InvalidateLayout	80	Win10	dwrite_3.h
+IDWriteTextLayout3	IDWriteTextLayout2	SetLineSpacing	81	Win10	dwrite_3.h
+IDWriteTextLayout3	IDWriteTextLayout2	GetLineSpacing	82	Win10	dwrite_3.h
+IDWriteTextLayout3	IDWriteTextLayout2	GetLineMetrics	83	Win10	dwrite_3.h
+IDWriteTextLayout4	IDWriteTextLayout3	SetFontAxisValues	84	Win10	dwrite_3.h
+IDWriteTextLayout4	IDWriteTextLayout3	GetFontAxisValueCount	85	Win10	dwrite_3.h
+IDWriteTextLayout4	IDWriteTextLayout3	GetFontAxisValues	86	Win10	dwrite_3.h
+IDWriteTextLayout4	IDWriteTextLayout3	GetAutomaticFontAxes	87	Win10	dwrite_3.h
+IDWriteTextLayout4	IDWriteTextLayout3	SetAutomaticFontAxes	88	Win10	dwrite_3.h
+IDWriteFontFallback1	IDWriteFontFallback	MapCharacters	4	Win10	dwrite_3.h
+IDWriteGdiInterop1	IDWriteGdiInterop	CreateFontFromLOGFONT	8	Win10	dwrite_3.h
+IDWriteGdiInterop1	IDWriteGdiInterop	GetFontSignature_	9	Win10	dwrite_3.h
+IDWriteGdiInterop1	IDWriteGdiInterop	GetFontSignature	10	Win10	dwrite_3.h
+IDWriteGdiInterop1	IDWriteGdiInterop	GetMatchingFontsByLOGFONT	11	Win10	dwrite_3.h
+IDWriteFontSetBuilder	IUnknown	AddFontFaceReference_	3	Win10	dwrite_3.h
+IDWriteFontSetBuilder	IUnknown	AddFontFaceReference	4	Win10	dwrite_3.h
+IDWriteFontSetBuilder	IUnknown	AddFontSet	5	Win10	dwrite_3.h
+IDWriteFontSetBuilder	IUnknown	CreateFontSet	6	Win10	dwrite_3.h
+IDWriteFontSetBuilder1	IDWriteFontSetBuilder	AddFontFile	7	Win10	dwrite_3.h
+IDWriteFontSetBuilder2	IDWriteFontSetBuilder1	AddFont	8	Win10	dwrite_3.h
+IDWriteFontSetBuilder2	IDWriteFontSetBuilder1	AddFontFile	9	Win10	dwrite_3.h
+IDWriteFactory3	IDWriteFactory2	CreateGlyphRunAnalysis	31	Win10 1607	dwrite_3.h
+IDWriteFactory3	IDWriteFactory2	CreateCustomRenderingParams	32	Win10 1607	dwrite_3.h
+IDWriteFactory3	IDWriteFactory2	CreateFontFaceReference_	33	Win10 1607	dwrite_3.h
+IDWriteFactory3	IDWriteFactory2	CreateFontFaceReference	34	Win10 1607	dwrite_3.h
+IDWriteFactory3	IDWriteFactory2	GetSystemFontSet	35	Win10 1607	dwrite_3.h
+IDWriteFactory3	IDWriteFactory2	CreateFontSetBuilder	36	Win10 1607	dwrite_3.h
+IDWriteFactory3	IDWriteFactory2	CreateFontCollectionFromFontSet	37	Win10 1607	dwrite_3.h
+IDWriteFactory3	IDWriteFactory2	GetSystemFontCollection	38	Win10 1607	dwrite_3.h
+IDWriteFactory3	IDWriteFactory2	GetFontDownloadQueue	39	Win10 1607	dwrite_3.h
+IDWriteFontFace4	IDWriteFontFace3	GetGlyphImageFormats_	49	Win10	dwrite_3.h
+IDWriteFontFace4	IDWriteFontFace3	GetGlyphImageFormats	50	Win10	dwrite_3.h
+IDWriteFontFace4	IDWriteFontFace3	GetGlyphImageData	51	Win10	dwrite_3.h
+IDWriteFontFace4	IDWriteFontFace3	ReleaseGlyphImageData	52	Win10	dwrite_3.h
+IDWriteFontFace5	IDWriteFontFace4	GetFontAxisValueCount	53	Win10	dwrite_3.h
+IDWriteFontFace5	IDWriteFontFace4	GetFontAxisValues	54	Win10	dwrite_3.h
+IDWriteFontFace5	IDWriteFontFace4	HasVariations	55	Win10	dwrite_3.h
+IDWriteFontFace5	IDWriteFontFace4	GetFontResource	56	Win10	dwrite_3.h
+IDWriteFontFace5	IDWriteFontFace4	Equals	57	Win10	dwrite_3.h
+IDWriteFontFace6	IDWriteFontFace5	GetFamilyNames	58	Win10	dwrite_3.h
+IDWriteFontFace6	IDWriteFontFace5	GetFaceNames	59	Win10	dwrite_3.h
+IDWritePaintReader	IUnknown	SetCurrentGlyph	3	Win10	dwrite_3.h
+IDWritePaintReader	IUnknown	SetTextColor	4	Win10	dwrite_3.h
+IDWritePaintReader	IUnknown	SetColorPaletteIndex	5	Win10	dwrite_3.h
+IDWritePaintReader	IUnknown	SetCustomColorPalette	6	Win10	dwrite_3.h
+IDWritePaintReader	IUnknown	MoveToFirstChild	7	Win10	dwrite_3.h
+IDWritePaintReader	IUnknown	MoveToNextSibling	8	Win10	dwrite_3.h
+IDWritePaintReader	IUnknown	MoveToParent	9	Win10	dwrite_3.h
+IDWritePaintReader	IUnknown	GetGradientStops	10	Win10	dwrite_3.h
+IDWritePaintReader	IUnknown	GetGradientStopColors	11	Win10	dwrite_3.h
+IDWriteFontFace7	IDWriteFontFace6	GetPaintFeatureLevel	60	Win10	dwrite_3.h
+IDWriteFontFace7	IDWriteFontFace6	CreatePaintReader	61	Win10	dwrite_3.h
+IDWriteColorGlyphRunEnumerator1	IDWriteColorGlyphRunEnumerator	GetCurrentRun	5	Win10	dwrite_3.h
+IDWriteFactory4	IDWriteFactory3	TranslateColorGlyphRun	40	Win10 1703	dwrite_3.h
+IDWriteFactory4	IDWriteFactory3	ComputeGlyphOrigins_	41	Win10 1703	dwrite_3.h
+IDWriteFactory4	IDWriteFactory3	ComputeGlyphOrigins	42	Win10 1703	dwrite_3.h
+IDWriteAsyncResult	IUnknown	GetWaitHandle	3	Win10	dwrite_3.h
+IDWriteAsyncResult	IUnknown	GetResult	4	Win10	dwrite_3.h
+IDWriteRemoteFontFileStream	IDWriteFontFileStream	GetLocalFileSize	7	Win10	dwrite_3.h
+IDWriteRemoteFontFileStream	IDWriteFontFileStream	GetFileFragmentLocality	8	Win10	dwrite_3.h
+IDWriteRemoteFontFileStream	IDWriteFontFileStream	GetLocality	9	Win10	dwrite_3.h
+IDWriteRemoteFontFileStream	IDWriteFontFileStream	BeginDownload	10	Win10	dwrite_3.h
+IDWriteRemoteFontFileLoader	IDWriteFontFileLoader	CreateRemoteStreamFromKey	4	Win10	dwrite_3.h
+IDWriteRemoteFontFileLoader	IDWriteFontFileLoader	GetLocalityFromKey	5	Win10	dwrite_3.h
+IDWriteRemoteFontFileLoader	IDWriteFontFileLoader	CreateFontFileReferenceFromUrl	6	Win10	dwrite_3.h
+IDWriteInMemoryFontFileLoader	IDWriteFontFileLoader	CreateInMemoryFontFileReference	4	Win10	dwrite_3.h
+IDWriteInMemoryFontFileLoader	IDWriteFontFileLoader	GetFileCount	5	Win10	dwrite_3.h
+IDWriteFactory5	IDWriteFactory4	CreateFontSetBuilder	43	Win10 1709	dwrite_3.h
+IDWriteFactory5	IDWriteFactory4	CreateInMemoryFontFileLoader	44	Win10 1709	dwrite_3.h
+IDWriteFactory5	IDWriteFactory4	CreateHttpFontFileLoader	45	Win10 1709	dwrite_3.h
+IDWriteFactory5	IDWriteFactory4	AnalyzeContainerType	46	Win10 1709	dwrite_3.h
+IDWriteFactory5	IDWriteFactory4	UnpackFontFile	47	Win10 1709	dwrite_3.h
+IDWriteFactory6	IDWriteFactory5	CreateFontFaceReference	48	Win10 1809	dwrite_3.h
+IDWriteFactory6	IDWriteFactory5	CreateFontResource	49	Win10 1809	dwrite_3.h
+IDWriteFactory6	IDWriteFactory5	GetSystemFontSet	50	Win10 1809	dwrite_3.h
+IDWriteFactory6	IDWriteFactory5	GetSystemFontCollection	51	Win10 1809	dwrite_3.h
+IDWriteFactory6	IDWriteFactory5	CreateFontCollectionFromFontSet	52	Win10 1809	dwrite_3.h
+IDWriteFactory6	IDWriteFactory5	CreateFontSetBuilder	53	Win10 1809	dwrite_3.h
+IDWriteFactory6	IDWriteFactory5	CreateTextFormat	54	Win10 1809	dwrite_3.h
+IDWriteFactory7	IDWriteFactory6	GetSystemFontSet	55	Win10 2004	dwrite_3.h
+IDWriteFactory7	IDWriteFactory6	GetSystemFontCollection	56	Win10 2004	dwrite_3.h
+IDWriteFactory8	IDWriteFactory7	TranslateColorGlyphRun	57	Win11	dwrite_3.h
+IDWriteBitmapRenderTarget2	IDWriteBitmapRenderTarget1	GetBitmapData	13	Win10	dwrite_3.h
+IDWriteBitmapRenderTarget3	IDWriteBitmapRenderTarget2	GetPaintFeatureLevel	14	Win10	dwrite_3.h
+IDWriteBitmapRenderTarget3	IDWriteBitmapRenderTarget2	DrawPaintGlyphRun	15	Win10	dwrite_3.h
+IDWriteBitmapRenderTarget3	IDWriteBitmapRenderTarget2	DrawGlyphRunWithColorSupport	16	Win10	dwrite_3.h
