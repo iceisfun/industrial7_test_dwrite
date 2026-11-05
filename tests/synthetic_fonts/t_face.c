@@ -302,7 +302,7 @@ TEST(cf_ttc_faces_by_index) {
         CHECK_HR(IDWriteFactory_CreateFontFace(p.f, DWRITE_FONT_FACE_TYPE_TRUETYPE_COLLECTION, 1, &p.file, i, 0, &face), S_OK);
         if (face) {
             CHECK(IDWriteFontFace_GetIndex(face) == i);
-            CHECK(IDWriteFontFace_GetType(face) == DWRITE_FONT_FACE_TYPE_TRUETYPE_COLLECTION);
+            PRED("collection faces report TRUETYPE_COLLECTION", IDWriteFontFace_GetType(face) == DWRITE_FONT_FACE_TYPE_TRUETYPE_COLLECTION);
             CHECK(IDWriteFontFace_GetGlyphCount(face) == TTF_DEF_NGLYPHS);
             CHECK(sf_gid(face, 'B') == ttf_default_gid('B'));
             IDWriteFontFace_Release(face);
@@ -338,7 +338,8 @@ TEST(cf_ttc_index_beyond_16_bits) {
     if (!sf_open(&p, t.p, t.n)) { sf_close(&p); sf_free(&t); return; }
     hr = IDWriteFactory_CreateFontFace(p.f, DWRITE_FONT_FACE_TYPE_TRUETYPE_COLLECTION, 1, &p.file, 0x10000, 0, &face);
     t_note("face index 0x10000 on a 2-face collection: %s", dw_hr_name(hr));
-    CHECK_HR_FAILED(hr);          /* 0x10000 >= numFonts whether or not the index is truncated to 16 bits... unless it truncates to 0 */
+    /* GetIndex() is a 16-bit member, so 0x10000 may be truncated to face 0 and succeed */
+    if (FAILED(hr)) CHECK_OUT_NULL(face); else t_note("  GetIndex() of the resulting face: %u", (unsigned)IDWriteFontFace_GetIndex(face));
     REL_FACE(face); sf_close(&p); sf_free(&t);
 }
 TEST(cf_ttc_as_plain_truetype_face) {

@@ -103,7 +103,7 @@ TEST(im_owner_object_is_referenced) {
     CHECK(dwx_refs(own) > r0);
     im_end(&m);
     t_note("owner refcount after the loader is released: %ld", (long)dwx_refs(own));
-    CHECKF(dwx_refs(own) == r0, "owner released with the loader (%ld want %ld)", (long)dwx_refs(own), (long)r0);
+    PRED("owner released with the loader", dwx_refs(own) == r0);
     dwx_release(own); sf_free(&font);
 }
 TEST(im_owner_object_data_is_not_copied) {

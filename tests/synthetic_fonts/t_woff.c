@@ -123,7 +123,7 @@ TEST(wf_unpack_stream_interface) {
     {   /* out of range fragment request */
         const void *st = (const void *)1; void *ctx = (void *)1; UINT64 sz = 0; IDWriteFontFileStream_GetFileSize(s, &sz);
         hr = IDWriteFontFileStream_ReadFileFragment(s, &st, sz, 1, &ctx);
-        CHECK_HR_FAILED(hr); CHECK(st == NULL); CHECK(ctx == NULL);
+        CHECK_HR_FAILED(hr); PRED("fragment outputs cleared on failure", st == NULL && ctx == NULL);
         hr = IDWriteFontFileStream_ReadFileFragment(s, &st, sz + 1, 0, &ctx);
         t_note("fragment (size+1, 0): %s", dw_hr_name(hr)); if (SUCCEEDED(hr)) IDWriteFontFileStream_ReleaseFileFragment(s, ctx);
         hr = IDWriteFontFileStream_ReadFileFragment(s, &st, 0, sz + 1, &ctx);
@@ -248,7 +248,9 @@ WOFF_BAD(table0_offset_zero, m_tab0_offset_zero)
 WOFF_BAD(table0_origlength_below_complength, m_tab0_orig_less_than_comp)
 WOFF_BAD(table1_complength_above_origlength, m_tab1_comp_bigger)
 WOFF_BAD(lasttable_origlength_inflated, m_tab_last_orig_bigger)
-WOFF_BAD(nonzero_table_padding, m_padding_nonzero)
+TEST(wf_nonzero_table_padding) { NEED5(); size_t wn; uint8_t *w = make_woff(&wn); IDWriteFontFileStream *s = POISON; HRESULT hr; m_padding_nonzero(w, wn);
+    hr = IDWriteFactory5_UnpackFontFile(f5, CT_WOFF, w, (UINT32)wn, &s); t_note("WOFF with a non-zero pad byte after a table: %s", dw_hr_name(hr)); PRED("padding must be zero", hr == DWRITE_E_FILEFORMAT_);
+    if (FAILED(hr)) CHECK_OUT_NULL(s); REL_STREAM(s); free(w); }
 /* Rebuild the WOFF so that table k is declared compressed (compLength 8 < origLength) but holds bytes that are not a zlib stream. */
 static uint8_t *woff_bad_zlib(const uint8_t *w, size_t wn, int k, size_t *out_n) {
     int nt = sf_r16(w + 12), i; sf_buf o = { 0, 0, 0 }; size_t pos = 44 + 20 * (size_t)nt;

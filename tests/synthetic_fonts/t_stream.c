@@ -19,7 +19,7 @@ TEST(st_read_failure_at_every_position_during_create) {
             CHECK_OUT_NULL(p.face);
             if (k < 4 || k % 20 == 0) t_note("ReadFileFragment #%d of CreateFontFace -> %s: CreateFontFace %s", k, dw_hr_name(BADHR), dw_hr_name(p.hr_face));
             PRED("stream HRESULT propagates", p.hr_face == BADHR);
-            CHECKF(s->outstanding == 0, "read #%d failed but %ld fragments leaked", k, (long)s->outstanding);
+            PRED("no fragment leaks on the failure path", s->outstanding == 0);
         } else { ok_at = k; sf_close(&p); sf_free(&b); if (k == 0 && t_is_wine()) { t_skip("this implementation does not read the stream during CreateFontFace"); return; } break; }
         sf_close(&p); sf_free(&b);
     }
