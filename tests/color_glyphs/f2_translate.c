@@ -517,3 +517,46 @@ TEST(f2_system_fonts_without_color) {
         cg_close(&x);
     }
 }
+
+static void big_run(cgfont *x, const char *tag, int n, int adv, int bidi, UINT32 pal, int seed) {
+    DWRITE_GLYPH_RUN run; UINT16 *g = (UINT16 *)malloc(sizeof(UINT16) * n); float *a = (float *)malloc(sizeof(float) * n); int i;
+    for (i = 0; i < n; i++) { unsigned v = (unsigned)(i * 2654435761u + seed) >> 7; g[i] = (UINT16)(v % 69); a[i] = (float)(5 + (v % 13)); }
+    memset(&run, 0, sizeof run); run.fontFace = x->face; run.fontEmSize = 16.0f; run.glyphCount = (UINT32)n; run.glyphIndices = g; run.glyphAdvances = adv ? a : NULL; run.bidiLevel = bidi;
+    cg_check_f2(cg_f2(), tag, &run, 7, 9, DWRITE_MEASURING_MODE_NATURAL, NULL, pal, FACE_FMT_COLR);
+    free(g); free(a);
+}
+TEST(f2_long_runs_pseudo_random_glyphs) {
+    CG_NEED_F2(f); CG_OPEN(x, CGFX_COLR); static const int len[] = { 100, 255, 256, 257, 300, 512, 1000, 2048 }; int i, pal;
+    for (pal = 0; pal < 2; pal++) for (i = 0; i < 8; i++) { char tag[40]; snprintf(tag, sizeof tag, "n=%d pal %d", len[i], pal); big_run(&x, tag, len[i], 1, 0, pal, i); big_run(&x, tag, len[i], 0, 1, pal, i + 9); }
+    cg_close(&x);
+}
+TEST(f2_long_run_of_one_colour_glyph) {
+    CG_NEED_F2(f); CG_OPEN(x, CGFX_COLR); DWRITE_GLYPH_RUN run; int n = 1500; UINT16 *g = (UINT16 *)malloc(sizeof(UINT16) * n); int i;
+    for (i = 0; i < n; i++) g[i] = GID_A;
+    memset(&run, 0, sizeof run); run.fontFace = x.face; run.fontEmSize = 2.0f; run.glyphCount = n; run.glyphIndices = g;
+    cg_check_f2(f, "1500 x A", &run, 0, 0, DWRITE_MEASURING_MODE_NATURAL, NULL, 0, FACE_FMT_COLR);
+    free(g); cg_close(&x);
+}
+TEST(f2_private_factory_refcount_is_balanced) {
+    IDWriteFactory *nf = dw_new_factory(DWRITE_FACTORY_TYPE_ISOLATED); IDWriteFactory2 *f = NULL; if (!nf) { t_skip("cannot create a factory"); return; }
+    if (FAILED(IDWriteFactory_QueryInterface(nf, &IID_IDWriteFactory2, (void **)&f))) { IDWriteFactory_Release(nf); t_skip("no IDWriteFactory2"); return; }
+    dwx_font h; size_t n = 0; uint8_t *b = cg_build_fx(CGFX_COLR, &n);
+    if (SUCCEEDED(dwx_font_open(&h, nf, b, n, 0, DWRITE_FONT_SIMULATIONS_NONE)) && h.face) {
+        UINT16 g[] = { GID_A, GID_B }; cgrun r; IDWriteColorGlyphRunEnumerator *e = NULL; ULONG before, held, after; int i;
+        cg_mkrun(&r, h.face, 20.0f, g, 2, 0, 0, FALSE, 0);
+        before = dw_refcount((IUnknown *)nf);
+        for (i = 0; i < 20; i++) { e = NULL; CHECK_HR_OK(IDWriteFactory2_TranslateColorGlyphRun(f, 0, 0, &r.run, NULL, DWRITE_MEASURING_MODE_NATURAL, NULL, 0, &e)); held = dw_refcount((IUnknown *)nf); DW_RELEASE(e); }
+        after = dw_refcount((IUnknown *)nf);
+        t_note("private factory refs: before %lu, with enumerator %lu, after %lu", before, held, after);
+        EXPECT_EQ(after, before);
+    } else t_skip("cannot open font in a private factory");
+    dwx_font_close(&h); free(b); IDWriteFactory2_Release(f); IDWriteFactory_Release(nf);
+}
+TEST(f2_iterate_without_releasing_between_runs) {
+    CG_NEED_F2(f); CG_OPEN(x, CGFX_COLR); UINT16 g[] = { GID_a, GID_a, GID_a }; cgrun r; IDWriteColorGlyphRunEnumerator *e = NULL; BOOL has; int k = 0;
+    const DWRITE_COLOR_GLYPH_RUN *keep[20]; cg_mkrun(&r, x.face, 20.0f, g, 3, 0, 0, FALSE, 0);
+    CHECK_HR_OK(IDWriteFactory2_TranslateColorGlyphRun(f, 0, 0, &r.run, NULL, DWRITE_MEASURING_MODE_NATURAL, NULL, 0, &e));
+    while (e && SUCCEEDED(IDWriteColorGlyphRunEnumerator_MoveNext(e, &has)) && has && k < 20) { IDWriteColorGlyphRunEnumerator_GetCurrentRun(e, &keep[k]); k++; }
+    EXPECT_EQ(k, 1 + 4 * 3);
+    DW_RELEASE(e); cg_close(&x);
+}

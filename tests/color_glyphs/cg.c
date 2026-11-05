@@ -169,9 +169,9 @@ static int m_layers(const cg_model *m, unsigned gid, const ttf_colr_layer **laye
 }
 int cg_expect(const DWRITE_GLYPH_RUN *run, float ox, float oy, UINT32 req, UINT32 face_formats, UINT32 palette, cg_exp *out) {
     const cg_model *m = cg_model_override ? cg_model_override : &cg_fixture_model;
-    UINT32 used = req & face_formats, n = run->glyphCount, i, ncolor = 0, nout = 0; int kind[64]; float adv[64], cum[65], nan = (float)NAN; int unknown_adv;
+    UINT32 used = req & face_formats, n = run->glyphCount, i, ncolor = 0, nout = 0; static int kind[2048]; static float adv[2048], cum[2049]; float nan = (float)NAN; int unknown_adv;
     if (palette >= (UINT32)m->npal) used &= ~(UINT32)CGF_COLR;
-    if (!(used & 0xFC) || n == 0 || n > 64) return 0;
+    if (!(used & 0xFC) || n == 0 || n > 2048) return 0;
     for (i = 0; i < n; i++) {
         unsigned gid = run->glyphIndices[i];
         kind[i] = 0;

@@ -102,7 +102,7 @@ int  cg_design_adv(unsigned gid);              /* default synthetic font advance
 typedef struct cg_exp {
     int base; UINT32 n; UINT16 gl[8]; float adv[8]; float x, y; float c[4]; UINT16 pal; UINT32 fmt; int first_glyph; int svg; unsigned advmask; /* bit k: adv[k] is checked */
 } cg_exp;
-#define CG_MAXEXP 160
+#define CG_MAXEXP 4096
 /* face_formats: formats the face reports (TRUETYPE|COLR [|SVG]); palette: requested palette index. Returns the number of
  * expected runs, or 0 when the call must fail with DWRITE_E_NOCOLOR. */
 int cg_expect(const DWRITE_GLYPH_RUN *run, float ox, float oy, UINT32 req_formats, UINT32 face_formats, UINT32 palette, cg_exp *out);
