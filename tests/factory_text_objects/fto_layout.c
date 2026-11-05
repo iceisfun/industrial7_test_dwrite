@@ -24,7 +24,7 @@ static UINT32 text_len(IDWriteTextLayout *l) {
     UINT32 n = 0, i, total = 0;
     DWRITE_LINE_METRICS *lm;
     HRESULT hr = IDWriteTextLayout_GetLineMetrics(l, NULL, 0, &n);
-    if (hr != FTO_E_NOT_SUFFICIENT_BUFFER && hr != S_OK) return (UINT32)-1;
+    if (hr != FTO_E_NOT_SUFFICIENT_BUFFER && hr != S_OK) { t_note("GetLineMetrics(NULL,0) -> %s n=%u", dw_hr_name(hr), n); return (UINT32)-1; }
     if (n == 0) return 0;
     lm = (DWRITE_LINE_METRICS *)calloc(n, sizeof *lm);
     if (!lm) return (UINT32)-1;
