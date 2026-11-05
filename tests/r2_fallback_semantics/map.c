@@ -512,7 +512,7 @@ RT(locale_filter_table)
     CHECK_HR_OK(r2_add(b, 0x3040, 0x30ff, R2_CJK, X.coll, L"ja-JP", NULL, 1.0f));
     fb = r2_fb(b);
     for (i = 0; fb && i < sizeof rows / sizeof rows[0]; i++) {
-        if (t_is_wine() && !rows[i].mapped) continue;           /* Wine crashes in MapCharacters when no mapping applies */
+        if (t_is_wine() && !rows[i].hard) continue;           /* Wine crashes in MapCharacters when no mapping applies */
         r2_defaults(&a, &X); a.locale = rows[i].src;
         CHECK_HR_OK(r2_map(fb, L"\x3042", 1, &a, &r, NULL));
         if (rows[i].hard) CHECKF((r.font != NULL) == rows[i].mapped, "source locale \"%ls\": mapped=%d", rows[i].src, r.font != NULL);
