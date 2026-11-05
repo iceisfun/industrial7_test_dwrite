@@ -76,4 +76,12 @@ static int fcs_same(void *a, void *b) { return dw_same_identity((IUnknown *)a, (
 
 /* Family count of a collection without macros colliding on the versioned names. */
 static UINT32 fcs_count(IDWriteFontCollection *c) { return IDWriteFontCollection_GetFontFamilyCount(c); }
+/* Iterate families [0, min(count, lim)) of collection c; never `continue` inside, END_FAMILY releases. */
+#define FOREACH_FAMILY(c, i, fam, lim) \
+    for (UINT32 i = 0, n_##i = fcs_count(c); i < n_##i && i < (UINT32)(lim); i++) { \
+        IDWriteFontFamily *fam = NULL; \
+        HRESULT hrf_##i = IDWriteFontCollection_GetFontFamily((c), i, &fam); \
+        t_check(hrf_##i == S_OK && fam != NULL, __FILE__, __LINE__, "GetFontFamily(i) S_OK", "index %u hr %s", i, dw_hr_name(hrf_##i)); \
+        if (fam) {
+#define END_FAMILY(fam) IDWriteFontFamily_Release(fam); } }
 #endif
