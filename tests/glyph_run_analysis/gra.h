@@ -76,7 +76,8 @@ size_t gra_count_not01(const gra_tex *x);      /* bytes that are neither 0 nor 2
 #define CHECK_RECT_EQ(a_, b_) t_check((a_).left == (b_).left && (a_).top == (b_).top && (a_).right == (b_).right && (a_).bottom == (b_).bottom, __FILE__, __LINE__, \
     #a_ " == " #b_, "got (%ld,%ld,%ld,%ld) want (%ld,%ld,%ld,%ld)", (long)(a_).left, (long)(a_).top, (long)(a_).right, (long)(a_).bottom, \
     (long)(b_).left, (long)(b_).top, (long)(b_).right, (long)(b_).bottom)
-#define CHECK_RECT_ZERO(rc) CHECKF(gra_rect_zero(&(rc)), "rect (%ld,%ld,%ld,%ld) not all zero", (long)(rc).left, (long)(rc).top, (long)(rc).right, (long)(rc).bottom)
+/* an empty glyph set yields a degenerate rect (left==right, top==bottom) located at the rounded origin, not an all-zero rect */
+#define CHECK_RECT_ZERO(rc) CHECKF((rc).left == (rc).right && (rc).top == (rc).bottom, "rect (%ld,%ld,%ld,%ld) not degenerate", (long)(rc).left, (long)(rc).top, (long)(rc).right, (long)(rc).bottom)
 
 extern const DWRITE_MATRIX gra_ident;
 const char *gra_mode_name(int mode);

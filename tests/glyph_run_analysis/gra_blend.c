@@ -457,7 +457,14 @@ TEST(gra_sys_fonts_texture_roundtrip_note) {
             if (ok) {
                 t_note("%ls %s: %dx%d type %d, nonzero %zu", fam[i], gra_mode_name(mode), t.w, t.h, tt, gra_count_nz(&t));
                 CHECK(gra_count_nz(&t) > 0);
-                CHECK(gra_count_eq(&t, 0xCD) == 0);
+                {   /* 0xCD is a legal coverage value: detect untouched bytes by refilling with a different pattern */
+                    BYTE *q = (BYTE *)malloc(t.n);
+                    if (q) {
+                        memset(q, 0x32, t.n);
+                        if (SUCCEEDED(IDWriteGlyphRunAnalysis_CreateAlphaTexture(a, tt, &t.rc, q, (UINT32)t.n))) CHECK(!memcmp(q, t.p, t.n));
+                        free(q);
+                    }
+                }
                 gra_tex_free(&t);
             }
             IDWriteGlyphRunAnalysis_Release(a); a = NULL;

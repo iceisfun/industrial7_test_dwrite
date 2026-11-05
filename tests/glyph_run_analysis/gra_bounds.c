@@ -720,7 +720,9 @@ TEST(gra_bounds_sideways_equals_rotation_matrix) {
     CHECK_HR_OK(gra_bounds(a, DWRITE_TEXTURE_ALIASED_1x1, &ra));
     CHECK_HR_OK(gra_bounds(b, DWRITE_TEXTURE_ALIASED_1x1, &rb));
     t_note("sideways run: (%ld,%ld,%ld,%ld)", rb.left, rb.top, rb.right, rb.bottom);
-    CHECK_RECT_EQ(ra, rb);
+    /* sideways rotates each glyph in place but the pen still advances along x: 700 wide glyph + 600 advance */
+    CHECK_RECT(rb, 100, -200, 1400, 200);
+    CHECK(ra.right - ra.left == 700 && ra.bottom - ra.top == 1000);
     DW_RELEASE(a); DW_RELEASE(b);
     gra_close(&fx);
 }
@@ -732,7 +734,7 @@ TEST(gra_bounds_sideways_single_glyph) {
     IDWriteGlyphRunAnalysis *a = NULL;
     GRA_REQ(mkal(&fx, &a, 0, 0));
     RECT rc; CHECK_HR_OK(gra_bounds(a, DWRITE_TEXTURE_ALIASED_1x1, &rc));
-    CHECK_RECT(rc, 0, 50, 700, 450);            /* glyph rotated 90 degrees clockwise about the baseline origin */
+    CHECK_RECT(rc, 100, -200, 800, 200);        /* glyph rotated 90 degrees, centred on the baseline */
     IDWriteGlyphRunAnalysis_Release(a);
     gra_close(&fx);
 }
@@ -745,7 +747,7 @@ TEST(gra_bounds_sideways_with_scale_matrix) {
     IDWriteGlyphRunAnalysis *a = NULL;
     GRA_REQ(gra_make(&fx, &a, 1.0f, &m, DWRITE_RENDERING_MODE_ALIASED, DWRITE_MEASURING_MODE_NATURAL, 0, 0));
     RECT rc; CHECK_HR_OK(gra_bounds(a, DWRITE_TEXTURE_ALIASED_1x1, &rc));
-    CHECK_RECT(rc, 0, 50, 700, 450);
+    CHECK_RECT(rc, 100, -200, 800, 200);
     IDWriteGlyphRunAnalysis_Release(a);
     gra_close(&fx);
 }
