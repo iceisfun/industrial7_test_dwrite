@@ -380,7 +380,8 @@ TEST(res_bahnschrift_axes_match_fvar) {
     UINT32 fl = 0; uint8_t *fv = dw_face_table(x.f0, DW_TAG('f','v','a','r'), &fl);
     if (r && fv && fl >= 16) {
         UINT32 na = IDWriteFontResource_GetFontAxisCount(r);
-        EXPECT_EQ(na, ffx_getu16(fv, 8));
+        /* DirectWrite also reports registered axes (ital/slnt) that fvar does not carry: fvar axes are a subset */
+        t_check(na >= ffx_getu16(fv, 8), __FILE__, __LINE__, "axis count", "dwrite %u fvar %u", na, ffx_getu16(fv, 8));
         EXPECT_EQ(IDWriteFontResource_HasVariations(r), TRUE);
         if (na > 0 && na <= 8) {
             DWRITE_FONT_AXIS_VALUE def[8]; DWRITE_FONT_AXIS_RANGE rg[8]; UINT32 i;
@@ -391,7 +392,7 @@ TEST(res_bahnschrift_axes_match_fvar) {
                 if (fvar_find(fv, fl, def[i].axisTag, &mn, &df, &mx, &n2)) {
                     t_check(fabsf(def[i].value - df) < 0.01f, __FILE__, __LINE__, "default", "axis %u default %g fvar %g", i, def[i].value, df);
                     t_check(rg[i].axisTag == def[i].axisTag && fabsf(rg[i].minValue - mn) < 0.01f && fabsf(rg[i].maxValue - mx) < 0.01f, __FILE__, __LINE__, "range", "axis %u [%g,%g] fvar [%g,%g]", i, rg[i].minValue, rg[i].maxValue, mn, mx);
-                } else t_check(0, __FILE__, __LINE__, "fvar", "axis tag %08X missing in fvar", def[i].axisTag);
+                } else t_check(def[i].axisTag == DWRITE_FONT_AXIS_TAG_ITALIC || def[i].axisTag == DWRITE_FONT_AXIS_TAG_SLANT, __FILE__, __LINE__, "fvar", "axis tag %08X missing in fvar", def[i].axisTag);
                 t_note("axis %u: tag 0x%08X default %g range [%g, %g]", i, def[i].axisTag, def[i].value, rg[i].minValue, rg[i].maxValue);
             }
         }

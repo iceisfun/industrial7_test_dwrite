@@ -156,7 +156,7 @@ static void check_sys_color(const WCHAR *fam, int want_color) {
     if (want_color >= 0) EXPECT_EQ(color, want_color);
     if (colr && cpal && plen >= 12) {
         EXPECT_EQ(color, TRUE);
-        EXPECT_EQ(pc, ffx_getu16(cpal, 4 + 0) ? ffx_getu16(cpal, 4 + 0) * 0 + ffx_getu16(cpal, 6) : 0);   /* CPAL numPalettes at +4 */
+        EXPECT_EQ(pc, ffx_getu16(cpal, 4));                                                                 /* CPAL numPalettes at +4 */
         EXPECT_EQ(ec, ffx_getu16(cpal, 2));                                                                 /* numPaletteEntries at +2 */
         if (pc > 0 && ec > 0) {
             DWRITE_COLOR_F *c = (DWRITE_COLOR_F *)calloc(ec, sizeof *c); UINT32 i; int bad = 0;
