@@ -1,0 +1,3880 @@
+[
+{
+"name": null,
+"ordinal": 800,
+"rva": 22464,
+"forwarder": null,
+"ref": "ole32.dll!0x57c0"
+},
+{
+"name": null,
+"ordinal": 801,
+"rva": 518912,
+"forwarder": null,
+"ref": "ole32.dll!0x7eb00"
+},
+{
+"name": "OleGetPackageClipboardOwner",
+"ordinal": 802,
+"rva": 520416,
+"forwarder": null,
+"ref": "ole32.dll!0x7f0e0"
+},
+{
+"name": null,
+"ordinal": 803,
+"rva": 155104,
+"forwarder": null,
+"ref": "ole32.dll!0x25de0"
+},
+{
+"name": null,
+"ordinal": 804,
+"rva": 518752,
+"forwarder": null,
+"ref": "ole32.dll!0x7ea60"
+},
+{
+"name": "CLIPFORMAT_UserFreeExt",
+"ordinal": 805,
+"rva": 779552,
+"forwarder": null,
+"ref": "ole32.dll!0xbe520"
+},
+{
+"name": "CLIPFORMAT_UserMarshalExt",
+"ordinal": 806,
+"rva": 779584,
+"forwarder": null,
+"ref": "ole32.dll!0xbe540"
+},
+{
+"name": "CLIPFORMAT_UserSizeExt",
+"ordinal": 807,
+"rva": 779616,
+"forwarder": null,
+"ref": "ole32.dll!0xbe560"
+},
+{
+"name": "CLIPFORMAT_UserUnmarshalExt",
+"ordinal": 808,
+"rva": 779648,
+"forwarder": null,
+"ref": "ole32.dll!0xbe580"
+},
+{
+"name": "ClipboardProcessUninitialize",
+"ordinal": 809,
+"rva": 50880,
+"forwarder": null,
+"ref": "ole32.dll!0xc6c0"
+},
+{
+"name": "HPALETTE_UserFreeExt",
+"ordinal": 810,
+"rva": 779680,
+"forwarder": null,
+"ref": "ole32.dll!0xbe5a0"
+},
+{
+"name": "HPALETTE_UserMarshalExt",
+"ordinal": 811,
+"rva": 779712,
+"forwarder": null,
+"ref": "ole32.dll!0xbe5c0"
+},
+{
+"name": "HPALETTE_UserSizeExt",
+"ordinal": 812,
+"rva": 779744,
+"forwarder": null,
+"ref": "ole32.dll!0xbe5e0"
+},
+{
+"name": "HPALETTE_UserUnmarshalExt",
+"ordinal": 813,
+"rva": 779776,
+"forwarder": null,
+"ref": "ole32.dll!0xbe600"
+},
+{
+"name": "HWND_UserFree64Ext",
+"ordinal": 814,
+"rva": 779808,
+"forwarder": null,
+"ref": "ole32.dll!0xbe620"
+},
+{
+"name": "HWND_UserFreeExt",
+"ordinal": 815,
+"rva": 779840,
+"forwarder": null,
+"ref": "ole32.dll!0xbe640"
+},
+{
+"name": "HWND_UserMarshal64Ext",
+"ordinal": 816,
+"rva": 779872,
+"forwarder": null,
+"ref": "ole32.dll!0xbe660"
+},
+{
+"name": "HWND_UserMarshalExt",
+"ordinal": 817,
+"rva": 779904,
+"forwarder": null,
+"ref": "ole32.dll!0xbe680"
+},
+{
+"name": "HWND_UserSize64Ext",
+"ordinal": 818,
+"rva": 779936,
+"forwarder": null,
+"ref": "ole32.dll!0xbe6a0"
+},
+{
+"name": "HWND_UserSizeExt",
+"ordinal": 819,
+"rva": 779968,
+"forwarder": null,
+"ref": "ole32.dll!0xbe6c0"
+},
+{
+"name": null,
+"ordinal": 820,
+"rva": 575840,
+"forwarder": null,
+"ref": "ole32.dll!0x8c960"
+},
+{
+"name": null,
+"ordinal": 821,
+"rva": 576144,
+"forwarder": null,
+"ref": "ole32.dll!0x8ca90"
+},
+{
+"name": null,
+"ordinal": 822,
+"rva": 575792,
+"forwarder": null,
+"ref": "ole32.dll!0x8c930"
+},
+{
+"name": null,
+"ordinal": 823,
+"rva": 576432,
+"forwarder": null,
+"ref": "ole32.dll!0x8cbb0"
+},
+{
+"name": "HWND_UserUnmarshal64Ext",
+"ordinal": 824,
+"rva": 780000,
+"forwarder": null,
+"ref": "ole32.dll!0xbe6e0"
+},
+{
+"name": "HWND_UserUnmarshalExt",
+"ordinal": 825,
+"rva": 780032,
+"forwarder": null,
+"ref": "ole32.dll!0xbe700"
+},
+{
+"name": "MonikerLoadTypeLib",
+"ordinal": 826,
+"rva": 780064,
+"forwarder": null,
+"ref": "ole32.dll!0xbe720"
+},
+{
+"name": "ReadStorageProperties",
+"ordinal": 827,
+"rva": 139568,
+"forwarder": null,
+"ref": "ole32.dll!0x22130"
+},
+{
+"name": "STGMEDIUM_UserFreeExt",
+"ordinal": 828,
+"rva": 780288,
+"forwarder": null,
+"ref": "ole32.dll!0xbe800"
+},
+{
+"name": "STGMEDIUM_UserMarshalExt",
+"ordinal": 829,
+"rva": 780320,
+"forwarder": null,
+"ref": "ole32.dll!0xbe820"
+},
+{
+"name": "STGMEDIUM_UserSizeExt",
+"ordinal": 830,
+"rva": 780352,
+"forwarder": null,
+"ref": "ole32.dll!0xbe840"
+},
+{
+"name": "STGMEDIUM_UserUnmarshalExt",
+"ordinal": 831,
+"rva": 780384,
+"forwarder": null,
+"ref": "ole32.dll!0xbe860"
+},
+{
+"name": "SetOleautModule",
+"ordinal": 832,
+"rva": 43136,
+"forwarder": null,
+"ref": "ole32.dll!0xa880"
+},
+{
+"name": "StdTypesGetClassObject",
+"ordinal": 833,
+"rva": 714960,
+"forwarder": null,
+"ref": "ole32.dll!0xae8d0"
+},
+{
+"name": "StdTypesRegisterServer",
+"ordinal": 834,
+"rva": 715088,
+"forwarder": null,
+"ref": "ole32.dll!0xae950"
+},
+{
+"name": "WriteStorageProperties",
+"ordinal": 835,
+"rva": 780416,
+"forwarder": null,
+"ref": "ole32.dll!0xbe880"
+},
+{
+"name": "BindMoniker",
+"ordinal": 836,
+"rva": 25712,
+"forwarder": null,
+"ref": "ole32.dll!0x6470"
+},
+{
+"name": "CLIPFORMAT_UserFree",
+"ordinal": 837,
+"rva": 997665,
+"forwarder": "COMBASE.CLIPFORMAT_UserFree",
+"ref": null
+},
+{
+"name": "CLIPFORMAT_UserFree64",
+"ordinal": 838,
+"rva": 997715,
+"forwarder": "COMBASE.CLIPFORMAT_UserFree64",
+"ref": null
+},
+{
+"name": "CLIPFORMAT_UserMarshal",
+"ordinal": 839,
+"rva": 997768,
+"forwarder": "COMBASE.CLIPFORMAT_UserMarshal",
+"ref": null
+},
+{
+"name": "CLIPFORMAT_UserMarshal64",
+"ordinal": 840,
+"rva": 997824,
+"forwarder": "COMBASE.CLIPFORMAT_UserMarshal64",
+"ref": null
+},
+{
+"name": "CLIPFORMAT_UserSize",
+"ordinal": 841,
+"rva": 997877,
+"forwarder": "COMBASE.CLIPFORMAT_UserSize",
+"ref": null
+},
+{
+"name": "CLIPFORMAT_UserSize64",
+"ordinal": 842,
+"rva": 997927,
+"forwarder": "COMBASE.CLIPFORMAT_UserSize64",
+"ref": null
+},
+{
+"name": "CLIPFORMAT_UserUnmarshal",
+"ordinal": 843,
+"rva": 997982,
+"forwarder": "COMBASE.CLIPFORMAT_UserUnmarshal",
+"ref": null
+},
+{
+"name": "CLIPFORMAT_UserUnmarshal64",
+"ordinal": 844,
+"rva": 998042,
+"forwarder": "COMBASE.CLIPFORMAT_UserUnmarshal64",
+"ref": null
+},
+{
+"name": "CLSIDFromOle1Class",
+"ordinal": 845,
+"rva": 998096,
+"forwarder": "api-ms-win-core-com-private-l1-1-1.CLSIDFromOle1Class",
+"ref": null
+},
+{
+"name": "CLSIDFromProgID",
+"ordinal": 846,
+"rva": 998166,
+"forwarder": "api-ms-win-core-com-l1-1-0.CLSIDFromProgID",
+"ref": null
+},
+{
+"name": "CLSIDFromProgIDEx",
+"ordinal": 847,
+"rva": 998227,
+"forwarder": "api-ms-win-core-com-l1-1-2.CLSIDFromProgIDEx",
+"ref": null
+},
+{
+"name": "CLSIDFromString",
+"ordinal": 848,
+"rva": 998288,
+"forwarder": "api-ms-win-core-com-l1-1-0.CLSIDFromString",
+"ref": null
+},
+{
+"name": "CStdAsyncStubBuffer2_Connect",
+"ordinal": 849,
+"rva": 998360,
+"forwarder": "api-ms-win-core-com-midlproxystub-l1-1-0.CStdAsyncStubBuffer2_Connect",
+"ref": null
+},
+{
+"name": "CStdAsyncStubBuffer2_Disconnect",
+"ordinal": 850,
+"rva": 998462,
+"forwarder": "api-ms-win-core-com-midlproxystub-l1-1-0.CStdAsyncStubBuffer2_Disconnect",
+"ref": null
+},
+{
+"name": "CStdAsyncStubBuffer2_Release",
+"ordinal": 851,
+"rva": 998564,
+"forwarder": "api-ms-win-core-com-midlproxystub-l1-1-0.CStdAsyncStubBuffer2_Release",
+"ref": null
+},
+{
+"name": "CStdAsyncStubBuffer_AddRef",
+"ordinal": 852,
+"rva": 998661,
+"forwarder": "api-ms-win-core-com-midlproxystub-l1-1-0.CStdAsyncStubBuffer_AddRef",
+"ref": null
+},
+{
+"name": "CStdAsyncStubBuffer_Connect",
+"ordinal": 853,
+"rva": 998757,
+"forwarder": "api-ms-win-core-com-midlproxystub-l1-1-0.CStdAsyncStubBuffer_Connect",
+"ref": null
+},
+{
+"name": "CStdAsyncStubBuffer_Disconnect",
+"ordinal": 854,
+"rva": 998857,
+"forwarder": "api-ms-win-core-com-midlproxystub-l1-1-0.CStdAsyncStubBuffer_Disconnect",
+"ref": null
+},
+{
+"name": "CStdAsyncStubBuffer_Invoke",
+"ordinal": 855,
+"rva": 998956,
+"forwarder": "api-ms-win-core-com-midlproxystub-l1-1-0.CStdAsyncStubBuffer_Invoke",
+"ref": null
+},
+{
+"name": "CStdAsyncStubBuffer_QueryInterface",
+"ordinal": 856,
+"rva": 999059,
+"forwarder": "api-ms-win-core-com-midlproxystub-l1-1-0.CStdAsyncStubBuffer_QueryInterface",
+"ref": null
+},
+{
+"name": "CStdAsyncStubBuffer_Release",
+"ordinal": 857,
+"rva": 999163,
+"forwarder": "api-ms-win-core-com-midlproxystub-l1-1-0.CStdAsyncStubBuffer_Release",
+"ref": null
+},
+{
+"name": "CStdStubBuffer2_Connect",
+"ordinal": 858,
+"rva": 999256,
+"forwarder": "api-ms-win-core-com-midlproxystub-l1-1-0.CStdStubBuffer2_Connect",
+"ref": null
+},
+{
+"name": "CStdStubBuffer2_CountRefs",
+"ordinal": 859,
+"rva": 999347,
+"forwarder": "api-ms-win-core-com-midlproxystub-l1-1-0.CStdStubBuffer2_CountRefs",
+"ref": null
+},
+{
+"name": "CStdStubBuffer2_Disconnect",
+"ordinal": 860,
+"rva": 999441,
+"forwarder": "api-ms-win-core-com-midlproxystub-l1-1-0.CStdStubBuffer2_Disconnect",
+"ref": null
+},
+{
+"name": "CStdStubBuffer2_QueryInterface",
+"ordinal": 861,
+"rva": 999540,
+"forwarder": "api-ms-win-core-com-midlproxystub-l1-1-0.CStdStubBuffer2_QueryInterface",
+"ref": null
+},
+{
+"name": "CheckInitDde",
+"ordinal": 862,
+"rva": 67152,
+"forwarder": null,
+"ref": "ole32.dll!0x10650"
+},
+{
+"name": "CleanROTForApartment",
+"ordinal": 863,
+"rva": 49872,
+"forwarder": null,
+"ref": "ole32.dll!0xc2d0"
+},
+{
+"name": "CoAddRefServerProcess",
+"ordinal": 864,
+"rva": 999668,
+"forwarder": "api-ms-win-core-com-l1-1-0.CoAddRefServerProcess",
+"ref": null
+},
+{
+"name": "CoAicGetTokenForCOM",
+"ordinal": 865,
+"rva": 20784,
+"forwarder": null,
+"ref": "ole32.dll!0x5130"
+},
+{
+"name": "CoAllowSetForegroundWindow",
+"ordinal": 866,
+"rva": 17424,
+"forwarder": null,
+"ref": "ole32.dll!0x4410"
+},
+{
+"name": "CoAllowUnmarshalerCLSID",
+"ordinal": 867,
+"rva": 999788,
+"forwarder": "api-ms-win-core-com-l1-1-0.CoAllowUnmarshalerCLSID",
+"ref": null
+},
+{
+"name": "CoBuildVersion",
+"ordinal": 868,
+"rva": 329856,
+"forwarder": null,
+"ref": "ole32.dll!0x50880"
+},
+{
+"name": "CoCancelCall",
+"ordinal": 869,
+"rva": 999867,
+"forwarder": "api-ms-win-core-com-l1-1-0.CoCancelCall",
+"ref": null
+},
+{
+"name": "CoCheckElevationEnabled",
+"ordinal": 870,
+"rva": 276224,
+"forwarder": null,
+"ref": "ole32.dll!0x43700"
+},
+{
+"name": "CoCopyProxy",
+"ordinal": 871,
+"rva": 999943,
+"forwarder": "api-ms-win-core-com-l1-1-0.CoCopyProxy",
+"ref": null
+},
+{
+"name": "CoCreateFreeThreadedMarshaler",
+"ordinal": 872,
+"rva": 1000012,
+"forwarder": "api-ms-win-core-com-l1-1-0.CoCreateFreeThreadedMarshaler",
+"ref": null
+},
+{
+"name": "CoCreateGuid",
+"ordinal": 873,
+"rva": 1000082,
+"forwarder": "api-ms-win-core-com-l1-1-0.CoCreateGuid",
+"ref": null
+},
+{
+"name": "CoCreateInstance",
+"ordinal": 874,
+"rva": 1000139,
+"forwarder": "api-ms-win-core-com-l1-1-0.CoCreateInstance",
+"ref": null
+},
+{
+"name": "CoCreateInstanceEx",
+"ordinal": 875,
+"rva": 1000202,
+"forwarder": "api-ms-win-core-com-l1-1-0.CoCreateInstanceEx",
+"ref": null
+},
+{
+"name": "CoCreateInstanceFromApp",
+"ordinal": 876,
+"rva": 1000272,
+"forwarder": "api-ms-win-core-com-l1-1-0.CoCreateInstanceFromApp",
+"ref": null
+},
+{
+"name": "CoCreateObjectInContext",
+"ordinal": 877,
+"rva": 1000347,
+"forwarder": "api-ms-win-core-com-private-l1-1-1.CoCreateObjectInContext",
+"ref": null
+},
+{
+"name": "CoDeactivateObject",
+"ordinal": 878,
+"rva": 1000425,
+"forwarder": "api-ms-win-core-com-private-l1-1-1.CoDeactivateObject",
+"ref": null
+},
+{
+"name": "CoDecodeProxy",
+"ordinal": 879,
+"rva": 1000493,
+"forwarder": "COMBASE.CoDecodeProxy",
+"ref": null
+},
+{
+"name": "CoDecrementMTAUsage",
+"ordinal": 880,
+"rva": 1000535,
+"forwarder": "api-ms-win-core-com-l1-1-0.CoDecrementMTAUsage",
+"ref": null
+},
+{
+"name": "CoDisableCallCancellation",
+"ordinal": 881,
+"rva": 1000608,
+"forwarder": "api-ms-win-core-com-l1-1-0.CoDisableCallCancellation",
+"ref": null
+},
+{
+"name": "CoDisconnectContext",
+"ordinal": 882,
+"rva": 1000681,
+"forwarder": "api-ms-win-core-com-l1-1-0.CoDisconnectContext",
+"ref": null
+},
+{
+"name": "CoDisconnectObject",
+"ordinal": 883,
+"rva": 1000747,
+"forwarder": "api-ms-win-core-com-l1-1-0.CoDisconnectObject",
+"ref": null
+},
+{
+"name": "CoDosDateTimeToFileTime",
+"ordinal": 884,
+"rva": 338624,
+"forwarder": null,
+"ref": "ole32.dll!0x52ac0"
+},
+{
+"name": "CoEnableCallCancellation",
+"ordinal": 885,
+"rva": 1000842,
+"forwarder": "api-ms-win-core-com-l1-1-0.CoEnableCallCancellation",
+"ref": null
+},
+{
+"name": "CoFileTimeNow",
+"ordinal": 886,
+"rva": 1000908,
+"forwarder": "api-ms-win-core-com-l1-1-2.CoFileTimeNow",
+"ref": null
+},
+{
+"name": "CoFileTimeToDosDateTime",
+"ordinal": 887,
+"rva": 338800,
+"forwarder": null,
+"ref": "ole32.dll!0x52b70"
+},
+{
+"name": "CoFreeAllLibraries",
+"ordinal": 888,
+"rva": 84720,
+"forwarder": null,
+"ref": "ole32.dll!0x14af0"
+},
+{
+"name": "CoFreeLibrary",
+"ordinal": 889,
+"rva": 329872,
+"forwarder": null,
+"ref": "ole32.dll!0x50890"
+},
+{
+"name": "CoFreeUnusedLibraries",
+"ordinal": 890,
+"rva": 1001028,
+"forwarder": "api-ms-win-core-com-l1-1-0.CoFreeUnusedLibraries",
+"ref": null
+},
+{
+"name": "CoFreeUnusedLibrariesEx",
+"ordinal": 891,
+"rva": 1001101,
+"forwarder": "api-ms-win-core-com-l1-1-0.CoFreeUnusedLibrariesEx",
+"ref": null
+},
+{
+"name": "CoGetActivationState",
+"ordinal": 892,
+"rva": 1001173,
+"forwarder": "api-ms-win-core-com-private-l1-1-1.CoGetActivationState",
+"ref": null
+},
+{
+"name": "CoGetApartmentID",
+"ordinal": 893,
+"rva": 1001246,
+"forwarder": "api-ms-win-core-com-private-l1-1-1.CoGetApartmentID",
+"ref": null
+},
+{
+"name": "CoGetApartmentType",
+"ordinal": 894,
+"rva": 1001317,
+"forwarder": "api-ms-win-core-com-l1-1-0.CoGetApartmentType",
+"ref": null
+},
+{
+"name": "CoGetCallContext",
+"ordinal": 895,
+"rva": 1001380,
+"forwarder": "api-ms-win-core-com-l1-1-0.CoGetCallContext",
+"ref": null
+},
+{
+"name": "CoGetCallState",
+"ordinal": 896,
+"rva": 1001439,
+"forwarder": "api-ms-win-core-com-private-l1-1-1.CoGetCallState",
+"ref": null
+},
+{
+"name": "CoGetCallerTID",
+"ordinal": 897,
+"rva": 1001504,
+"forwarder": "api-ms-win-core-com-l1-1-0.CoGetCallerTID",
+"ref": null
+},
+{
+"name": "CoGetCancelObject",
+"ordinal": 898,
+"rva": 1001564,
+"forwarder": "api-ms-win-core-com-l1-1-0.CoGetCancelObject",
+"ref": null
+},
+{
+"name": "CoGetClassObject",
+"ordinal": 899,
+"rva": 1001626,
+"forwarder": "api-ms-win-core-com-l1-1-0.CoGetClassObject",
+"ref": null
+},
+{
+"name": "CoGetClassVersion",
+"ordinal": 900,
+"rva": 1001688,
+"forwarder": "api-ms-win-core-com-private-l1-1-1.CoGetClassVersion",
+"ref": null
+},
+{
+"name": "CoGetComCatalog",
+"ordinal": 901,
+"rva": 1001757,
+"forwarder": "api-ms-win-core-com-private-l1-1-1.GetCatalogHelper",
+"ref": null
+},
+{
+"name": "CoGetContextToken",
+"ordinal": 902,
+"rva": 1001827,
+"forwarder": "api-ms-win-core-com-l1-1-0.CoGetContextToken",
+"ref": null
+},
+{
+"name": "CoGetCurrentLogicalThreadId",
+"ordinal": 903,
+"rva": 1001900,
+"forwarder": "api-ms-win-core-com-l1-1-0.CoGetCurrentLogicalThreadId",
+"ref": null
+},
+{
+"name": "CoGetCurrentProcess",
+"ordinal": 904,
+"rva": 1001975,
+"forwarder": "api-ms-win-core-com-l1-1-0.CoGetCurrentProcess",
+"ref": null
+},
+{
+"name": "CoGetDefaultContext",
+"ordinal": 905,
+"rva": 1002042,
+"forwarder": "api-ms-win-core-com-l1-1-0.CoGetDefaultContext",
+"ref": null
+},
+{
+"name": "CoGetInstanceFromFile",
+"ordinal": 906,
+"rva": 1002111,
+"forwarder": "api-ms-win-core-com-private-l1-1-1.CoGetInstanceFromFile",
+"ref": null
+},
+{
+"name": "CoGetInstanceFromIStorage",
+"ordinal": 907,
+"rva": 1002194,
+"forwarder": "api-ms-win-core-com-private-l1-1-1.CoGetInstanceFromIStorage",
+"ref": null
+},
+{
+"name": "CoGetInterceptor",
+"ordinal": 908,
+"rva": 345728,
+"forwarder": null,
+"ref": "ole32.dll!0x54680"
+},
+{
+"name": "CoGetInterceptorForOle32",
+"ordinal": 909,
+"rva": 69728,
+"forwarder": null,
+"ref": "ole32.dll!0x11060"
+},
+{
+"name": "CoGetInterceptorFromTypeInfo",
+"ordinal": 910,
+"rva": 144800,
+"forwarder": null,
+"ref": "ole32.dll!0x235a0"
+},
+{
+"name": "CoGetInterfaceAndReleaseStream",
+"ordinal": 911,
+"rva": 1002357,
+"forwarder": "api-ms-win-core-com-l1-1-0.CoGetInterfaceAndReleaseStream",
+"ref": null
+},
+{
+"name": "CoGetMalloc",
+"ordinal": 912,
+"rva": 1002427,
+"forwarder": "api-ms-win-core-com-l1-1-0.CoGetMalloc",
+"ref": null
+},
+{
+"name": "CoGetMarshalSizeMax",
+"ordinal": 913,
+"rva": 1002486,
+"forwarder": "api-ms-win-core-com-l1-1-0.CoGetMarshalSizeMax",
+"ref": null
+},
+{
+"name": "CoGetModuleType",
+"ordinal": 914,
+"rva": 1002549,
+"forwarder": "api-ms-win-core-com-private-l1-1-1.CoGetModuleType",
+"ref": null
+},
+{
+"name": "CoGetObject",
+"ordinal": 915,
+"rva": 57712,
+"forwarder": null,
+"ref": "ole32.dll!0xe170"
+},
+{
+"name": "CoGetObjectContext",
+"ordinal": 916,
+"rva": 1002631,
+"forwarder": "api-ms-win-core-com-l1-1-0.CoGetObjectContext",
+"ref": null
+},
+{
+"name": "CoGetPSClsid",
+"ordinal": 917,
+"rva": 1002690,
+"forwarder": "api-ms-win-core-com-l1-1-0.CoGetPSClsid",
+"ref": null
+},
+{
+"name": "CoGetProcessIdentifier",
+"ordinal": 918,
+"rva": 1002753,
+"forwarder": "api-ms-win-core-com-private-l1-1-1.CoGetProcessIdentifier",
+"ref": null
+},
+{
+"name": "CoGetStandardMarshal",
+"ordinal": 919,
+"rva": 1002832,
+"forwarder": "api-ms-win-core-com-l1-1-0.CoGetStandardMarshal",
+"ref": null
+},
+{
+"name": "CoGetStdMarshalEx",
+"ordinal": 920,
+"rva": 1002898,
+"forwarder": "api-ms-win-core-com-l1-1-0.CoGetStdMarshalEx",
+"ref": null
+},
+{
+"name": "CoGetSystemSecurityPermissions",
+"ordinal": 921,
+"rva": 1002974,
+"forwarder": "api-ms-win-core-com-private-l1-1-1.CoGetSystemSecurityPermissions",
+"ref": null
+},
+{
+"name": "CoGetSystemWow64DirectoryW",
+"ordinal": 922,
+"rva": 276256,
+"forwarder": null,
+"ref": "ole32.dll!0x43720"
+},
+{
+"name": "CoGetTreatAsClass",
+"ordinal": 923,
+"rva": 1003085,
+"forwarder": "api-ms-win-core-com-l1-1-0.CoGetTreatAsClass",
+"ref": null
+},
+{
+"name": "CoHandlePriorityEventsFromMessagePump",
+"ordinal": 924,
+"rva": 1003168,
+"forwarder": "COMBASE.#111",
+"ref": null
+},
+{
+"name": "CoImpersonateClient",
+"ordinal": 925,
+"rva": 1003201,
+"forwarder": "api-ms-win-core-com-l1-1-0.CoImpersonateClient",
+"ref": null
+},
+{
+"name": "CoIncrementMTAUsage",
+"ordinal": 926,
+"rva": 1003268,
+"forwarder": "api-ms-win-core-com-l1-1-0.CoIncrementMTAUsage",
+"ref": null
+},
+{
+"name": "CoInitialize",
+"ordinal": 927,
+"rva": 37152,
+"forwarder": null,
+"ref": "ole32.dll!0x9120"
+},
+{
+"name": "CoInitializeEx",
+"ordinal": 928,
+"rva": 1003343,
+"forwarder": "api-ms-win-core-com-l1-1-0.CoInitializeEx",
+"ref": null
+},
+{
+"name": "CoInitializeSecurity",
+"ordinal": 929,
+"rva": 1003406,
+"forwarder": "api-ms-win-core-com-l1-1-0.CoInitializeSecurity",
+"ref": null
+},
+{
+"name": "CoInitializeWOW",
+"ordinal": 930,
+"rva": 164320,
+"forwarder": null,
+"ref": "ole32.dll!0x281e0"
+},
+{
+"name": "CoInstall",
+"ordinal": 931,
+"rva": 329888,
+"forwarder": null,
+"ref": "ole32.dll!0x508a0"
+},
+{
+"name": "CoInvalidateRemoteMachineBindings",
+"ordinal": 932,
+"rva": 1003514,
+"forwarder": "api-ms-win-core-com-private-l1-1-1.CoInvalidateRemoteMachineBindings",
+"ref": null
+},
+{
+"name": "CoIsHandlerConnected",
+"ordinal": 933,
+"rva": 1003604,
+"forwarder": "api-ms-win-core-com-l1-1-0.CoIsHandlerConnected",
+"ref": null
+},
+{
+"name": "CoIsOle1Class",
+"ordinal": 934,
+"rva": 336832,
+"forwarder": null,
+"ref": "ole32.dll!0x523c0"
+},
+{
+"name": "CoLoadLibrary",
+"ordinal": 935,
+"rva": 330096,
+"forwarder": null,
+"ref": "ole32.dll!0x50970"
+},
+{
+"name": "CoLockObjectExternal",
+"ordinal": 936,
+"rva": 1003701,
+"forwarder": "api-ms-win-core-com-l1-1-0.CoLockObjectExternal",
+"ref": null
+},
+{
+"name": "CoMarshalHresult",
+"ordinal": 937,
+"rva": 1003766,
+"forwarder": "api-ms-win-core-com-l1-1-0.CoMarshalHresult",
+"ref": null
+},
+{
+"name": "CoMarshalInterThreadInterfaceInStream",
+"ordinal": 938,
+"rva": 1003848,
+"forwarder": "api-ms-win-core-com-l1-1-0.CoMarshalInterThreadInterfaceInStream",
+"ref": null
+},
+{
+"name": "CoMarshalInterface",
+"ordinal": 939,
+"rva": 1003932,
+"forwarder": "api-ms-win-core-com-l1-1-0.CoMarshalInterface",
+"ref": null
+},
+{
+"name": "CoPopServiceDomain",
+"ordinal": 940,
+"rva": 1003997,
+"forwarder": "api-ms-win-core-com-private-l1-1-1.CoPopServiceDomain",
+"ref": null
+},
+{
+"name": "CoPushServiceDomain",
+"ordinal": 941,
+"rva": 1004071,
+"forwarder": "api-ms-win-core-com-private-l1-1-1.CoPushServiceDomain",
+"ref": null
+},
+{
+"name": "CoQueryAuthenticationServices",
+"ordinal": 942,
+"rva": 1004156,
+"forwarder": "api-ms-win-core-com-l1-1-0.CoQueryAuthenticationServices",
+"ref": null
+},
+{
+"name": "CoQueryClientBlanket",
+"ordinal": 943,
+"rva": 1004234,
+"forwarder": "api-ms-win-core-com-l1-1-0.CoQueryClientBlanket",
+"ref": null
+},
+{
+"name": "CoQueryProxyBlanket",
+"ordinal": 944,
+"rva": 1004302,
+"forwarder": "api-ms-win-core-com-l1-1-0.CoQueryProxyBlanket",
+"ref": null
+},
+{
+"name": "CoQueryReleaseObject",
+"ordinal": 945,
+"rva": 84800,
+"forwarder": null,
+"ref": "ole32.dll!0x14b40"
+},
+{
+"name": "CoReactivateObject",
+"ordinal": 946,
+"rva": 1004389,
+"forwarder": "api-ms-win-core-com-private-l1-1-1.CoReactivateObject",
+"ref": null
+},
+{
+"name": "CoRegisterActivationFilter",
+"ordinal": 947,
+"rva": 1004470,
+"forwarder": "api-ms-win-core-com-l1-1-0.CoRegisterActivationFilter",
+"ref": null
+},
+{
+"name": "CoRegisterChannelHook",
+"ordinal": 948,
+"rva": 1004546,
+"forwarder": "COMBASE.#112",
+"ref": null
+},
+{
+"name": "CoRegisterClassObject",
+"ordinal": 949,
+"rva": 1004581,
+"forwarder": "api-ms-win-core-com-l1-1-0.CoRegisterClassObject",
+"ref": null
+},
+{
+"name": "CoRegisterInitializeSpy",
+"ordinal": 950,
+"rva": 1004654,
+"forwarder": "api-ms-win-core-com-private-l1-1-1.CoRegisterInitializeSpy",
+"ref": null
+},
+{
+"name": "CoRegisterMallocSpy",
+"ordinal": 951,
+"rva": 1004733,
+"forwarder": "api-ms-win-core-com-private-l1-1-1.CoRegisterMallocSpy",
+"ref": null
+},
+{
+"name": "CoRegisterMessageFilter",
+"ordinal": 952,
+"rva": 164480,
+"forwarder": null,
+"ref": "ole32.dll!0x28280"
+},
+{
+"name": "CoRegisterPSClsid",
+"ordinal": 953,
+"rva": 1004830,
+"forwarder": "api-ms-win-core-com-l1-1-0.CoRegisterPSClsid",
+"ref": null
+},
+{
+"name": "CoRegisterSurrogate",
+"ordinal": 954,
+"rva": 1004895,
+"forwarder": "api-ms-win-core-com-l1-1-0.CoRegisterSurrogate",
+"ref": null
+},
+{
+"name": "CoRegisterSurrogateEx",
+"ordinal": 955,
+"rva": 164512,
+"forwarder": null,
+"ref": "ole32.dll!0x282a0"
+},
+{
+"name": "CoReleaseMarshalData",
+"ordinal": 956,
+"rva": 1004985,
+"forwarder": "api-ms-win-core-com-l1-1-0.CoReleaseMarshalData",
+"ref": null
+},
+{
+"name": "CoReleaseServerProcess",
+"ordinal": 957,
+"rva": 1005056,
+"forwarder": "api-ms-win-core-com-l1-1-0.CoReleaseServerProcess",
+"ref": null
+},
+{
+"name": "CoResumeClassObjects",
+"ordinal": 958,
+"rva": 1005127,
+"forwarder": "api-ms-win-core-com-l1-1-0.CoResumeClassObjects",
+"ref": null
+},
+{
+"name": "CoRetireServer",
+"ordinal": 959,
+"rva": 1005190,
+"forwarder": "api-ms-win-core-com-private-l1-1-1.CoRetireServer",
+"ref": null
+},
+{
+"name": "CoRevertToSelf",
+"ordinal": 960,
+"rva": 1005255,
+"forwarder": "api-ms-win-core-com-l1-1-0.CoRevertToSelf",
+"ref": null
+},
+{
+"name": "CoRevokeClassObject",
+"ordinal": 961,
+"rva": 1005317,
+"forwarder": "api-ms-win-core-com-l1-1-0.CoRevokeClassObject",
+"ref": null
+},
+{
+"name": "CoRevokeInitializeSpy",
+"ordinal": 962,
+"rva": 1005386,
+"forwarder": "api-ms-win-core-com-private-l1-1-1.CoRevokeInitializeSpy",
+"ref": null
+},
+{
+"name": "CoRevokeMallocSpy",
+"ordinal": 963,
+"rva": 1005461,
+"forwarder": "api-ms-win-core-com-private-l1-1-1.CoRevokeMallocSpy",
+"ref": null
+},
+{
+"name": "CoSetCancelObject",
+"ordinal": 964,
+"rva": 1005532,
+"forwarder": "api-ms-win-core-com-l1-1-0.CoSetCancelObject",
+"ref": null
+},
+{
+"name": "CoSetMessageDispatcher",
+"ordinal": 965,
+"rva": 1005600,
+"forwarder": "COMBASE.#110",
+"ref": null
+},
+{
+"name": "CoSetProxyBlanket",
+"ordinal": 966,
+"rva": 1005631,
+"forwarder": "api-ms-win-core-com-l1-1-0.CoSetProxyBlanket",
+"ref": null
+},
+{
+"name": "CoSetState",
+"ordinal": 967,
+"rva": 84672,
+"forwarder": null,
+"ref": "ole32.dll!0x14ac0"
+},
+{
+"name": "CoSuspendClassObjects",
+"ordinal": 968,
+"rva": 1005709,
+"forwarder": "api-ms-win-core-com-l1-1-0.CoSuspendClassObjects",
+"ref": null
+},
+{
+"name": "CoSwitchCallContext",
+"ordinal": 969,
+"rva": 1005778,
+"forwarder": "api-ms-win-core-com-l1-1-0.CoSwitchCallContext",
+"ref": null
+},
+{
+"name": "CoTaskMemAlloc",
+"ordinal": 970,
+"rva": 1005840,
+"forwarder": "api-ms-win-core-com-l1-1-0.CoTaskMemAlloc",
+"ref": null
+},
+{
+"name": "CoTaskMemFree",
+"ordinal": 971,
+"rva": 1005896,
+"forwarder": "api-ms-win-core-com-l1-1-0.CoTaskMemFree",
+"ref": null
+},
+{
+"name": "CoTaskMemRealloc",
+"ordinal": 972,
+"rva": 1005954,
+"forwarder": "api-ms-win-core-com-l1-1-0.CoTaskMemRealloc",
+"ref": null
+},
+{
+"name": "CoTestCancel",
+"ordinal": 973,
+"rva": 1006011,
+"forwarder": "api-ms-win-core-com-l1-1-0.CoTestCancel",
+"ref": null
+},
+{
+"name": "CoTreatAsClass",
+"ordinal": 974,
+"rva": 336864,
+"forwarder": null,
+"ref": "ole32.dll!0x523e0"
+},
+{
+"name": "CoUninitialize",
+"ordinal": 975,
+"rva": 1006081,
+"forwarder": "api-ms-win-core-com-l1-1-0.CoUninitialize",
+"ref": null
+},
+{
+"name": "CoUnloadingWOW",
+"ordinal": 976,
+"rva": 164544,
+"forwarder": null,
+"ref": "ole32.dll!0x282c0"
+},
+{
+"name": "CoUnmarshalHresult",
+"ordinal": 977,
+"rva": 1006157,
+"forwarder": "api-ms-win-core-com-l1-1-0.CoUnmarshalHresult",
+"ref": null
+},
+{
+"name": "CoUnmarshalInterface",
+"ordinal": 978,
+"rva": 1006224,
+"forwarder": "api-ms-win-core-com-l1-1-0.CoUnmarshalInterface",
+"ref": null
+},
+{
+"name": "CoVrfCheckThreadState",
+"ordinal": 979,
+"rva": 1006294,
+"forwarder": "api-ms-win-core-com-private-l1-1-1.CoVrfCheckThreadState",
+"ref": null
+},
+{
+"name": "CoVrfGetThreadState",
+"ordinal": 980,
+"rva": 1006371,
+"forwarder": "api-ms-win-core-com-private-l1-1-1.CoVrfGetThreadState",
+"ref": null
+},
+{
+"name": "CoVrfReleaseThreadState",
+"ordinal": 981,
+"rva": 1006450,
+"forwarder": "api-ms-win-core-com-private-l1-1-1.CoVrfReleaseThreadState",
+"ref": null
+},
+{
+"name": "CoWaitForMultipleHandles",
+"ordinal": 982,
+"rva": 1006534,
+"forwarder": "api-ms-win-core-com-l1-1-0.CoWaitForMultipleHandles",
+"ref": null
+},
+{
+"name": "CoWaitForMultipleObjects",
+"ordinal": 983,
+"rva": 1006611,
+"forwarder": "api-ms-win-core-com-l1-1-0.CoWaitForMultipleObjects",
+"ref": null
+},
+{
+"name": "ComPs_NdrDllCanUnloadNow",
+"ordinal": 984,
+"rva": 84800,
+"forwarder": null,
+"ref": "ole32.dll!0x14b40"
+},
+{
+"name": "ComPs_NdrDllGetClassObject",
+"ordinal": 985,
+"rva": 346384,
+"forwarder": null,
+"ref": "ole32.dll!0x54910"
+},
+{
+"name": "ComPs_NdrDllRegisterProxy",
+"ordinal": 986,
+"rva": 348048,
+"forwarder": null,
+"ref": "ole32.dll!0x54f90"
+},
+{
+"name": "ComPs_NdrDllUnregisterProxy",
+"ordinal": 987,
+"rva": 348112,
+"forwarder": null,
+"ref": "ole32.dll!0x54fd0"
+},
+{
+"name": "CreateAntiMoniker",
+"ordinal": 988,
+"rva": 282864,
+"forwarder": null,
+"ref": "ole32.dll!0x450f0"
+},
+{
+"name": "CreateBindCtx",
+"ordinal": 989,
+"rva": 59264,
+"forwarder": null,
+"ref": "ole32.dll!0xe780"
+},
+{
+"name": "CreateClassMoniker",
+"ordinal": 990,
+"rva": 288592,
+"forwarder": null,
+"ref": "ole32.dll!0x46750"
+},
+{
+"name": "CreateDataAdviseHolder",
+"ordinal": 991,
+"rva": 84496,
+"forwarder": null,
+"ref": "ole32.dll!0x14a10"
+},
+{
+"name": "CreateDataCache",
+"ordinal": 992,
+"rva": 484240,
+"forwarder": null,
+"ref": "ole32.dll!0x76390"
+},
+{
+"name": "CreateErrorInfo",
+"ordinal": 993,
+"rva": 1006875,
+"forwarder": "api-ms-win-core-com-private-l1-1-1.CoCreateErrorInfo",
+"ref": null
+},
+{
+"name": "CreateFileMoniker",
+"ordinal": 994,
+"rva": 95728,
+"forwarder": null,
+"ref": "ole32.dll!0x175f0"
+},
+{
+"name": "CreateGenericComposite",
+"ordinal": 995,
+"rva": 65232,
+"forwarder": null,
+"ref": "ole32.dll!0xfed0"
+},
+{
+"name": "CreateILockBytesOnHGlobal",
+"ordinal": 996,
+"rva": 276432,
+"forwarder": null,
+"ref": "ole32.dll!0x437d0"
+},
+{
+"name": "CreateItemMoniker",
+"ordinal": 997,
+"rva": 19488,
+"forwarder": null,
+"ref": "ole32.dll!0x4c20"
+},
+{
+"name": "CreateObjrefMoniker",
+"ordinal": 998,
+"rva": 282944,
+"forwarder": null,
+"ref": "ole32.dll!0x45140"
+},
+{
+"name": "CreateOleAdviseHolder",
+"ordinal": 999,
+"rva": 25888,
+"forwarder": null,
+"ref": "ole32.dll!0x6520"
+},
+{
+"name": "CreatePointerMoniker",
+"ordinal": 1000,
+"rva": 24336,
+"forwarder": null,
+"ref": "ole32.dll!0x5f10"
+},
+{
+"name": "CreateStdProgressIndicator",
+"ordinal": 1001,
+"rva": 140832,
+"forwarder": null,
+"ref": "ole32.dll!0x22620"
+},
+{
+"name": "CreateStreamOnHGlobal",
+"ordinal": 1002,
+"rva": 1007125,
+"forwarder": "api-ms-win-core-com-l1-1-0.CreateStreamOnHGlobal",
+"ref": null
+},
+{
+"name": "DcomChannelSetHResult",
+"ordinal": 1003,
+"rva": 1007196,
+"forwarder": "COMBASE.DcomChannelSetHResult",
+"ref": null
+},
+{
+"name": "DdeBindToObject",
+"ordinal": 1004,
+"rva": 399680,
+"forwarder": null,
+"ref": "ole32.dll!0x61940"
+},
+{
+"name": "DeletePatternAndExtensionTables",
+"ordinal": 1005,
+"rva": 276288,
+"forwarder": null,
+"ref": "ole32.dll!0x43740"
+},
+{
+"name": "DestroyRunningObjectTable",
+"ordinal": 1006,
+"rva": 27680,
+"forwarder": null,
+"ref": "ole32.dll!0x6c20"
+},
+{
+"name": "DllDebugObjectRPCHook",
+"ordinal": 1007,
+"rva": 1007322,
+"forwarder": "api-ms-win-core-com-private-l1-1-1.DllDebugObjectRPCHook",
+"ref": null
+},
+{
+"name": "DllGetClassObject",
+"ordinal": 1008,
+"rva": 65520,
+"forwarder": null,
+"ref": "ole32.dll!0xfff0"
+},
+{
+"name": "DllGetClassObjectWOW",
+"ordinal": 1009,
+"rva": 65520,
+"forwarder": null,
+"ref": "ole32.dll!0xfff0"
+},
+{
+"name": "DllRegisterServer",
+"ordinal": 1010,
+"rva": 84672,
+"forwarder": null,
+"ref": "ole32.dll!0x14ac0"
+},
+{
+"name": "DoDragDrop",
+"ordinal": 1011,
+"rva": 575232,
+"forwarder": null,
+"ref": "ole32.dll!0x8c700"
+},
+{
+"name": "DragDropSetFDT",
+"ordinal": 1012,
+"rva": 575648,
+"forwarder": null,
+"ref": "ole32.dll!0x8c8a0"
+},
+{
+"name": "EnableHookObject",
+"ordinal": 1013,
+"rva": 1007479,
+"forwarder": "api-ms-win-core-com-private-l1-1-1.EnableHookObject",
+"ref": null
+},
+{
+"name": "FindExt",
+"ordinal": 1014,
+"rva": 311264,
+"forwarder": null,
+"ref": "ole32.dll!0x4bfe0"
+},
+{
+"name": "FmtIdToPropStgName",
+"ordinal": 1015,
+"rva": 276464,
+"forwarder": null,
+"ref": "ole32.dll!0x437f0"
+},
+{
+"name": "FreePropVariantArray",
+"ordinal": 1016,
+"rva": 155936,
+"forwarder": null,
+"ref": "ole32.dll!0x26120"
+},
+{
+"name": "GetActiveObjectExt",
+"ordinal": 1017,
+"rva": 780672,
+"forwarder": null,
+"ref": "ole32.dll!0xbe980"
+},
+{
+"name": "GetClassFile",
+"ordinal": 1018,
+"rva": 311424,
+"forwarder": null,
+"ref": "ole32.dll!0x4c080"
+},
+{
+"name": "GetConvertStg",
+"ordinal": 1019,
+"rva": 276496,
+"forwarder": null,
+"ref": "ole32.dll!0x43810"
+},
+{
+"name": "GetDocumentBitStg",
+"ordinal": 1020,
+"rva": 276528,
+"forwarder": null,
+"ref": "ole32.dll!0x43830"
+},
+{
+"name": "GetErrorInfo",
+"ordinal": 1021,
+"rva": 1007656,
+"forwarder": "api-ms-win-core-com-private-l1-1-1.CoGetErrorInfo",
+"ref": null
+},
+{
+"name": "GetHGlobalFromILockBytes",
+"ordinal": 1022,
+"rva": 276560,
+"forwarder": null,
+"ref": "ole32.dll!0x43850"
+},
+{
+"name": "GetHGlobalFromStream",
+"ordinal": 1023,
+"rva": 1007752,
+"forwarder": "api-ms-win-core-com-l1-1-0.GetHGlobalFromStream",
+"ref": null
+},
+{
+"name": "GetHookInterface",
+"ordinal": 1024,
+"rva": 1007817,
+"forwarder": "api-ms-win-core-com-private-l1-1-1.GetHookInterface",
+"ref": null
+},
+{
+"name": "GetObjectFromRotByPath",
+"ordinal": 1025,
+"rva": 397472,
+"forwarder": null,
+"ref": "ole32.dll!0x610a0"
+},
+{
+"name": "GetRunningObjectTable",
+"ordinal": 1026,
+"rva": 49232,
+"forwarder": null,
+"ref": "ole32.dll!0xc050"
+},
+{
+"name": "HACCEL_UserFree",
+"ordinal": 1027,
+"rva": 1007930,
+"forwarder": "COMBASE.HACCEL_UserFree",
+"ref": null
+},
+{
+"name": "HACCEL_UserFree64",
+"ordinal": 1028,
+"rva": 1007972,
+"forwarder": "COMBASE.HACCEL_UserFree64",
+"ref": null
+},
+{
+"name": "HACCEL_UserMarshal",
+"ordinal": 1029,
+"rva": 1008017,
+"forwarder": "COMBASE.HACCEL_UserMarshal",
+"ref": null
+},
+{
+"name": "HACCEL_UserMarshal64",
+"ordinal": 1030,
+"rva": 1008065,
+"forwarder": "COMBASE.HACCEL_UserMarshal64",
+"ref": null
+},
+{
+"name": "HACCEL_UserSize",
+"ordinal": 1031,
+"rva": 1008110,
+"forwarder": "COMBASE.HACCEL_UserSize",
+"ref": null
+},
+{
+"name": "HACCEL_UserSize64",
+"ordinal": 1032,
+"rva": 1008152,
+"forwarder": "COMBASE.HACCEL_UserSize64",
+"ref": null
+},
+{
+"name": "HACCEL_UserUnmarshal",
+"ordinal": 1033,
+"rva": 1008199,
+"forwarder": "COMBASE.HACCEL_UserUnmarshal",
+"ref": null
+},
+{
+"name": "HACCEL_UserUnmarshal64",
+"ordinal": 1034,
+"rva": 1008251,
+"forwarder": "COMBASE.HACCEL_UserUnmarshal64",
+"ref": null
+},
+{
+"name": "HBITMAP_UserFree",
+"ordinal": 1035,
+"rva": 1008299,
+"forwarder": "COMBASE.HBITMAP_UserFree",
+"ref": null
+},
+{
+"name": "HBITMAP_UserFree64",
+"ordinal": 1036,
+"rva": 1008343,
+"forwarder": "COMBASE.HBITMAP_UserFree64",
+"ref": null
+},
+{
+"name": "HBITMAP_UserMarshal",
+"ordinal": 1037,
+"rva": 1008390,
+"forwarder": "COMBASE.HBITMAP_UserMarshal",
+"ref": null
+},
+{
+"name": "HBITMAP_UserMarshal64",
+"ordinal": 1038,
+"rva": 1008440,
+"forwarder": "COMBASE.HBITMAP_UserMarshal64",
+"ref": null
+},
+{
+"name": "HBITMAP_UserSize",
+"ordinal": 1039,
+"rva": 1008487,
+"forwarder": "COMBASE.HBITMAP_UserSize",
+"ref": null
+},
+{
+"name": "HBITMAP_UserSize64",
+"ordinal": 1040,
+"rva": 1008531,
+"forwarder": "COMBASE.HBITMAP_UserSize64",
+"ref": null
+},
+{
+"name": "HBITMAP_UserUnmarshal",
+"ordinal": 1041,
+"rva": 1008580,
+"forwarder": "COMBASE.HBITMAP_UserUnmarshal",
+"ref": null
+},
+{
+"name": "HBITMAP_UserUnmarshal64",
+"ordinal": 1042,
+"rva": 1008634,
+"forwarder": "COMBASE.HBITMAP_UserUnmarshal64",
+"ref": null
+},
+{
+"name": "HBRUSH_UserFree",
+"ordinal": 1043,
+"rva": 1008682,
+"forwarder": "COMBASE.HBRUSH_UserFree",
+"ref": null
+},
+{
+"name": "HBRUSH_UserFree64",
+"ordinal": 1044,
+"rva": 1008724,
+"forwarder": "COMBASE.HBRUSH_UserFree64",
+"ref": null
+},
+{
+"name": "HBRUSH_UserMarshal",
+"ordinal": 1045,
+"rva": 1008769,
+"forwarder": "COMBASE.HBRUSH_UserMarshal",
+"ref": null
+},
+{
+"name": "HBRUSH_UserMarshal64",
+"ordinal": 1046,
+"rva": 1008817,
+"forwarder": "COMBASE.HBRUSH_UserMarshal64",
+"ref": null
+},
+{
+"name": "HBRUSH_UserSize",
+"ordinal": 1047,
+"rva": 1008862,
+"forwarder": "COMBASE.HBRUSH_UserSize",
+"ref": null
+},
+{
+"name": "HBRUSH_UserSize64",
+"ordinal": 1048,
+"rva": 1008904,
+"forwarder": "COMBASE.HBRUSH_UserSize64",
+"ref": null
+},
+{
+"name": "HBRUSH_UserUnmarshal",
+"ordinal": 1049,
+"rva": 1008951,
+"forwarder": "COMBASE.HBRUSH_UserUnmarshal",
+"ref": null
+},
+{
+"name": "HBRUSH_UserUnmarshal64",
+"ordinal": 1050,
+"rva": 1009003,
+"forwarder": "COMBASE.HBRUSH_UserUnmarshal64",
+"ref": null
+},
+{
+"name": "HDC_UserFree",
+"ordinal": 1051,
+"rva": 1009047,
+"forwarder": "COMBASE.HDC_UserFree",
+"ref": null
+},
+{
+"name": "HDC_UserFree64",
+"ordinal": 1052,
+"rva": 1009083,
+"forwarder": "COMBASE.HDC_UserFree64",
+"ref": null
+},
+{
+"name": "HDC_UserMarshal",
+"ordinal": 1053,
+"rva": 1009122,
+"forwarder": "COMBASE.HDC_UserMarshal",
+"ref": null
+},
+{
+"name": "HDC_UserMarshal64",
+"ordinal": 1054,
+"rva": 1009164,
+"forwarder": "COMBASE.HDC_UserMarshal64",
+"ref": null
+},
+{
+"name": "HDC_UserSize",
+"ordinal": 1055,
+"rva": 1009203,
+"forwarder": "COMBASE.HDC_UserSize",
+"ref": null
+},
+{
+"name": "HDC_UserSize64",
+"ordinal": 1056,
+"rva": 1009239,
+"forwarder": "COMBASE.HDC_UserSize64",
+"ref": null
+},
+{
+"name": "HDC_UserUnmarshal",
+"ordinal": 1057,
+"rva": 1009280,
+"forwarder": "COMBASE.HDC_UserUnmarshal",
+"ref": null
+},
+{
+"name": "HDC_UserUnmarshal64",
+"ordinal": 1058,
+"rva": 1009326,
+"forwarder": "COMBASE.HDC_UserUnmarshal64",
+"ref": null
+},
+{
+"name": "HENHMETAFILE_UserFree",
+"ordinal": 1059,
+"rva": 166496,
+"forwarder": null,
+"ref": "ole32.dll!0x28a60"
+},
+{
+"name": "HENHMETAFILE_UserFree64",
+"ordinal": 1060,
+"rva": 166512,
+"forwarder": null,
+"ref": "ole32.dll!0x28a70"
+},
+{
+"name": "HENHMETAFILE_UserMarshal",
+"ordinal": 1061,
+"rva": 166528,
+"forwarder": null,
+"ref": "ole32.dll!0x28a80"
+},
+{
+"name": "HENHMETAFILE_UserMarshal64",
+"ordinal": 1062,
+"rva": 166544,
+"forwarder": null,
+"ref": "ole32.dll!0x28a90"
+},
+{
+"name": "HENHMETAFILE_UserSize",
+"ordinal": 1063,
+"rva": 166560,
+"forwarder": null,
+"ref": "ole32.dll!0x28aa0"
+},
+{
+"name": "HENHMETAFILE_UserSize64",
+"ordinal": 1064,
+"rva": 166576,
+"forwarder": null,
+"ref": "ole32.dll!0x28ab0"
+},
+{
+"name": "HENHMETAFILE_UserUnmarshal",
+"ordinal": 1065,
+"rva": 166592,
+"forwarder": null,
+"ref": "ole32.dll!0x28ac0"
+},
+{
+"name": "HENHMETAFILE_UserUnmarshal64",
+"ordinal": 1066,
+"rva": 166608,
+"forwarder": null,
+"ref": "ole32.dll!0x28ad0"
+},
+{
+"name": "HGLOBAL_UserFree",
+"ordinal": 1067,
+"rva": 1009571,
+"forwarder": "COMBASE.HGLOBAL_UserFree",
+"ref": null
+},
+{
+"name": "HGLOBAL_UserFree64",
+"ordinal": 1068,
+"rva": 1009615,
+"forwarder": "COMBASE.HGLOBAL_UserFree64",
+"ref": null
+},
+{
+"name": "HGLOBAL_UserMarshal",
+"ordinal": 1069,
+"rva": 1009662,
+"forwarder": "COMBASE.HGLOBAL_UserMarshal",
+"ref": null
+},
+{
+"name": "HGLOBAL_UserMarshal64",
+"ordinal": 1070,
+"rva": 1009712,
+"forwarder": "COMBASE.HGLOBAL_UserMarshal64",
+"ref": null
+},
+{
+"name": "HGLOBAL_UserSize",
+"ordinal": 1071,
+"rva": 1009759,
+"forwarder": "COMBASE.HGLOBAL_UserSize",
+"ref": null
+},
+{
+"name": "HGLOBAL_UserSize64",
+"ordinal": 1072,
+"rva": 1009803,
+"forwarder": "COMBASE.HGLOBAL_UserSize64",
+"ref": null
+},
+{
+"name": "HGLOBAL_UserUnmarshal",
+"ordinal": 1073,
+"rva": 1009852,
+"forwarder": "COMBASE.HGLOBAL_UserUnmarshal",
+"ref": null
+},
+{
+"name": "HGLOBAL_UserUnmarshal64",
+"ordinal": 1074,
+"rva": 1009906,
+"forwarder": "COMBASE.HGLOBAL_UserUnmarshal64",
+"ref": null
+},
+{
+"name": "HICON_UserFree",
+"ordinal": 1075,
+"rva": 1009953,
+"forwarder": "COMBASE.HICON_UserFree",
+"ref": null
+},
+{
+"name": "HICON_UserFree64",
+"ordinal": 1076,
+"rva": 1009993,
+"forwarder": "COMBASE.HICON_UserFree64",
+"ref": null
+},
+{
+"name": "HICON_UserMarshal",
+"ordinal": 1077,
+"rva": 1010036,
+"forwarder": "COMBASE.HICON_UserMarshal",
+"ref": null
+},
+{
+"name": "HICON_UserMarshal64",
+"ordinal": 1078,
+"rva": 1010082,
+"forwarder": "COMBASE.HICON_UserMarshal64",
+"ref": null
+},
+{
+"name": "HICON_UserSize",
+"ordinal": 1079,
+"rva": 1010125,
+"forwarder": "COMBASE.HICON_UserSize",
+"ref": null
+},
+{
+"name": "HICON_UserSize64",
+"ordinal": 1080,
+"rva": 1010165,
+"forwarder": "COMBASE.HICON_UserSize64",
+"ref": null
+},
+{
+"name": "HICON_UserUnmarshal",
+"ordinal": 1081,
+"rva": 1010210,
+"forwarder": "COMBASE.HICON_UserUnmarshal",
+"ref": null
+},
+{
+"name": "HICON_UserUnmarshal64",
+"ordinal": 1082,
+"rva": 1010260,
+"forwarder": "COMBASE.HICON_UserUnmarshal64",
+"ref": null
+},
+{
+"name": "HMENU_UserFree",
+"ordinal": 1083,
+"rva": 1010305,
+"forwarder": "COMBASE.HMENU_UserFree",
+"ref": null
+},
+{
+"name": "HMENU_UserFree64",
+"ordinal": 1084,
+"rva": 1010345,
+"forwarder": "COMBASE.HMENU_UserFree64",
+"ref": null
+},
+{
+"name": "HMENU_UserMarshal",
+"ordinal": 1085,
+"rva": 1010388,
+"forwarder": "COMBASE.HMENU_UserMarshal",
+"ref": null
+},
+{
+"name": "HMENU_UserMarshal64",
+"ordinal": 1086,
+"rva": 1010434,
+"forwarder": "COMBASE.HMENU_UserMarshal64",
+"ref": null
+},
+{
+"name": "HMENU_UserSize",
+"ordinal": 1087,
+"rva": 1010477,
+"forwarder": "COMBASE.HMENU_UserSize",
+"ref": null
+},
+{
+"name": "HMENU_UserSize64",
+"ordinal": 1088,
+"rva": 1010517,
+"forwarder": "COMBASE.HMENU_UserSize64",
+"ref": null
+},
+{
+"name": "HMENU_UserUnmarshal",
+"ordinal": 1089,
+"rva": 1010562,
+"forwarder": "COMBASE.HMENU_UserUnmarshal",
+"ref": null
+},
+{
+"name": "HMENU_UserUnmarshal64",
+"ordinal": 1090,
+"rva": 1010612,
+"forwarder": "COMBASE.HMENU_UserUnmarshal64",
+"ref": null
+},
+{
+"name": "HMETAFILEPICT_UserFree",
+"ordinal": 1091,
+"rva": 166624,
+"forwarder": null,
+"ref": "ole32.dll!0x28ae0"
+},
+{
+"name": "HMETAFILEPICT_UserFree64",
+"ordinal": 1092,
+"rva": 166640,
+"forwarder": null,
+"ref": "ole32.dll!0x28af0"
+},
+{
+"name": "HMETAFILEPICT_UserMarshal",
+"ordinal": 1093,
+"rva": 166656,
+"forwarder": null,
+"ref": "ole32.dll!0x28b00"
+},
+{
+"name": "HMETAFILEPICT_UserMarshal64",
+"ordinal": 1094,
+"rva": 166672,
+"forwarder": null,
+"ref": "ole32.dll!0x28b10"
+},
+{
+"name": "HMETAFILEPICT_UserSize",
+"ordinal": 1095,
+"rva": 166688,
+"forwarder": null,
+"ref": "ole32.dll!0x28b20"
+},
+{
+"name": "HMETAFILEPICT_UserSize64",
+"ordinal": 1096,
+"rva": 166704,
+"forwarder": null,
+"ref": "ole32.dll!0x28b30"
+},
+{
+"name": "HMETAFILEPICT_UserUnmarshal",
+"ordinal": 1097,
+"rva": 166720,
+"forwarder": null,
+"ref": "ole32.dll!0x28b40"
+},
+{
+"name": "HMETAFILEPICT_UserUnmarshal64",
+"ordinal": 1098,
+"rva": 166736,
+"forwarder": null,
+"ref": "ole32.dll!0x28b50"
+},
+{
+"name": "HMETAFILE_UserFree",
+"ordinal": 1099,
+"rva": 166752,
+"forwarder": null,
+"ref": "ole32.dll!0x28b60"
+},
+{
+"name": "HMETAFILE_UserFree64",
+"ordinal": 1100,
+"rva": 166768,
+"forwarder": null,
+"ref": "ole32.dll!0x28b70"
+},
+{
+"name": "HMETAFILE_UserMarshal",
+"ordinal": 1101,
+"rva": 166784,
+"forwarder": null,
+"ref": "ole32.dll!0x28b80"
+},
+{
+"name": "HMETAFILE_UserMarshal64",
+"ordinal": 1102,
+"rva": 166800,
+"forwarder": null,
+"ref": "ole32.dll!0x28b90"
+},
+{
+"name": "HMETAFILE_UserSize",
+"ordinal": 1103,
+"rva": 166816,
+"forwarder": null,
+"ref": "ole32.dll!0x28ba0"
+},
+{
+"name": "HMETAFILE_UserSize64",
+"ordinal": 1104,
+"rva": 166832,
+"forwarder": null,
+"ref": "ole32.dll!0x28bb0"
+},
+{
+"name": "HMETAFILE_UserUnmarshal",
+"ordinal": 1105,
+"rva": 166848,
+"forwarder": null,
+"ref": "ole32.dll!0x28bc0"
+},
+{
+"name": "HMETAFILE_UserUnmarshal64",
+"ordinal": 1106,
+"rva": 166864,
+"forwarder": null,
+"ref": "ole32.dll!0x28bd0"
+},
+{
+"name": "HMONITOR_UserFree",
+"ordinal": 1107,
+"rva": 1011044,
+"forwarder": "COMBASE.HMONITOR_UserFree",
+"ref": null
+},
+{
+"name": "HMONITOR_UserFree64",
+"ordinal": 1108,
+"rva": 1011090,
+"forwarder": "COMBASE.HMONITOR_UserFree64",
+"ref": null
+},
+{
+"name": "HMONITOR_UserMarshal",
+"ordinal": 1109,
+"rva": 1011139,
+"forwarder": "COMBASE.HMONITOR_UserMarshal",
+"ref": null
+},
+{
+"name": "HMONITOR_UserMarshal64",
+"ordinal": 1110,
+"rva": 1011191,
+"forwarder": "COMBASE.HMONITOR_UserMarshal64",
+"ref": null
+},
+{
+"name": "HMONITOR_UserSize",
+"ordinal": 1111,
+"rva": 1011240,
+"forwarder": "COMBASE.HMONITOR_UserSize",
+"ref": null
+},
+{
+"name": "HMONITOR_UserSize64",
+"ordinal": 1112,
+"rva": 1011286,
+"forwarder": "COMBASE.HMONITOR_UserSize64",
+"ref": null
+},
+{
+"name": "HMONITOR_UserUnmarshal",
+"ordinal": 1113,
+"rva": 1011337,
+"forwarder": "COMBASE.HMONITOR_UserUnmarshal",
+"ref": null
+},
+{
+"name": "HMONITOR_UserUnmarshal64",
+"ordinal": 1114,
+"rva": 1011393,
+"forwarder": "COMBASE.HMONITOR_UserUnmarshal64",
+"ref": null
+},
+{
+"name": "HPALETTE_UserFree",
+"ordinal": 1115,
+"rva": 1011444,
+"forwarder": "COMBASE.HPALETTE_UserFree",
+"ref": null
+},
+{
+"name": "HPALETTE_UserFree64",
+"ordinal": 1116,
+"rva": 1011490,
+"forwarder": "COMBASE.HPALETTE_UserFree64",
+"ref": null
+},
+{
+"name": "HPALETTE_UserMarshal",
+"ordinal": 1117,
+"rva": 1011539,
+"forwarder": "COMBASE.HPALETTE_UserMarshal",
+"ref": null
+},
+{
+"name": "HPALETTE_UserMarshal64",
+"ordinal": 1118,
+"rva": 1011591,
+"forwarder": "COMBASE.HPALETTE_UserMarshal64",
+"ref": null
+},
+{
+"name": "HPALETTE_UserSize",
+"ordinal": 1119,
+"rva": 1011640,
+"forwarder": "COMBASE.HPALETTE_UserSize",
+"ref": null
+},
+{
+"name": "HPALETTE_UserSize64",
+"ordinal": 1120,
+"rva": 1011686,
+"forwarder": "COMBASE.HPALETTE_UserSize64",
+"ref": null
+},
+{
+"name": "HPALETTE_UserUnmarshal",
+"ordinal": 1121,
+"rva": 1011737,
+"forwarder": "COMBASE.HPALETTE_UserUnmarshal",
+"ref": null
+},
+{
+"name": "HPALETTE_UserUnmarshal64",
+"ordinal": 1122,
+"rva": 1011793,
+"forwarder": "COMBASE.HPALETTE_UserUnmarshal64",
+"ref": null
+},
+{
+"name": "HRGN_UserFree",
+"ordinal": 1123,
+"rva": 1011840,
+"forwarder": "COMBASE.HRGN_UserFree",
+"ref": null
+},
+{
+"name": "HRGN_UserMarshal",
+"ordinal": 1124,
+"rva": 1011879,
+"forwarder": "COMBASE.HRGN_UserMarshal",
+"ref": null
+},
+{
+"name": "HRGN_UserSize",
+"ordinal": 1125,
+"rva": 1011918,
+"forwarder": "COMBASE.HRGN_UserSize",
+"ref": null
+},
+{
+"name": "HRGN_UserUnmarshal",
+"ordinal": 1126,
+"rva": 1011959,
+"forwarder": "COMBASE.HRGN_UserUnmarshal",
+"ref": null
+},
+{
+"name": "HWND_UserFree",
+"ordinal": 1127,
+"rva": 1012000,
+"forwarder": "COMBASE.HWND_UserFree",
+"ref": null
+},
+{
+"name": "HWND_UserFree64",
+"ordinal": 1128,
+"rva": 1012038,
+"forwarder": "COMBASE.HWND_UserFree64",
+"ref": null
+},
+{
+"name": "HWND_UserMarshal",
+"ordinal": 1129,
+"rva": 1012079,
+"forwarder": "COMBASE.HWND_UserMarshal",
+"ref": null
+},
+{
+"name": "HWND_UserMarshal64",
+"ordinal": 1130,
+"rva": 1012123,
+"forwarder": "COMBASE.HWND_UserMarshal64",
+"ref": null
+},
+{
+"name": "HWND_UserSize",
+"ordinal": 1131,
+"rva": 1012164,
+"forwarder": "COMBASE.HWND_UserSize",
+"ref": null
+},
+{
+"name": "HWND_UserSize64",
+"ordinal": 1132,
+"rva": 1012202,
+"forwarder": "COMBASE.HWND_UserSize64",
+"ref": null
+},
+{
+"name": "HWND_UserUnmarshal",
+"ordinal": 1133,
+"rva": 1012245,
+"forwarder": "COMBASE.HWND_UserUnmarshal",
+"ref": null
+},
+{
+"name": "HWND_UserUnmarshal64",
+"ordinal": 1134,
+"rva": 1012293,
+"forwarder": "COMBASE.HWND_UserUnmarshal64",
+"ref": null
+},
+{
+"name": "HkOleRegisterObject",
+"ordinal": 1135,
+"rva": 1012342,
+"forwarder": "api-ms-win-core-com-private-l1-1-1.HkOleRegisterObject",
+"ref": null
+},
+{
+"name": "IIDFromString",
+"ordinal": 1136,
+"rva": 1012411,
+"forwarder": "api-ms-win-core-com-l1-1-0.IIDFromString",
+"ref": null
+},
+{
+"name": "IsAccelerator",
+"ordinal": 1137,
+"rva": 583616,
+"forwarder": null,
+"ref": "ole32.dll!0x8e7c0"
+},
+{
+"name": "IsEqualGUID",
+"ordinal": 1138,
+"rva": 66176,
+"forwarder": null,
+"ref": "ole32.dll!0x10280"
+},
+{
+"name": "IsRoInitializeASTAAllowedInDesktop",
+"ordinal": 1139,
+"rva": 155168,
+"forwarder": null,
+"ref": "ole32.dll!0x25e20"
+},
+{
+"name": "IsValidIid",
+"ordinal": 1140,
+"rva": 84800,
+"forwarder": null,
+"ref": "ole32.dll!0x14b40"
+},
+{
+"name": "IsValidInterface",
+"ordinal": 1141,
+"rva": 63536,
+"forwarder": null,
+"ref": "ole32.dll!0xf830"
+},
+{
+"name": "IsValidPtrIn",
+"ordinal": 1142,
+"rva": 84800,
+"forwarder": null,
+"ref": "ole32.dll!0x14b40"
+},
+{
+"name": "IsValidPtrOut",
+"ordinal": 1143,
+"rva": 84800,
+"forwarder": null,
+"ref": "ole32.dll!0x14b40"
+},
+{
+"name": "MkParseDisplayName",
+"ordinal": 1144,
+"rva": 61120,
+"forwarder": null,
+"ref": "ole32.dll!0xeec0"
+},
+{
+"name": "MonikerCommonPrefixWith",
+"ordinal": 1145,
+"rva": 297424,
+"forwarder": null,
+"ref": "ole32.dll!0x489d0"
+},
+{
+"name": "MonikerRelativePathTo",
+"ordinal": 1146,
+"rva": 297584,
+"forwarder": null,
+"ref": "ole32.dll!0x48a70"
+},
+{
+"name": "NdrOleInitializeExtension",
+"ordinal": 1147,
+"rva": 1012659,
+"forwarder": "api-ms-win-core-com-private-l1-1-1.NdrOleInitializeExtension",
+"ref": null
+},
+{
+"name": "NdrProxyForwardingFunction10",
+"ordinal": 1148,
+"rva": 1012749,
+"forwarder": "api-ms-win-core-com-midlproxystub-l1-1-0.NdrProxyForwardingFunction10",
+"ref": null
+},
+{
+"name": "NdrProxyForwardingFunction11",
+"ordinal": 1149,
+"rva": 1012848,
+"forwarder": "api-ms-win-core-com-midlproxystub-l1-1-0.NdrProxyForwardingFunction11",
+"ref": null
+},
+{
+"name": "NdrProxyForwardingFunction12",
+"ordinal": 1150,
+"rva": 1012947,
+"forwarder": "api-ms-win-core-com-midlproxystub-l1-1-0.NdrProxyForwardingFunction12",
+"ref": null
+},
+{
+"name": "NdrProxyForwardingFunction13",
+"ordinal": 1151,
+"rva": 1013046,
+"forwarder": "api-ms-win-core-com-midlproxystub-l1-1-0.NdrProxyForwardingFunction13",
+"ref": null
+},
+{
+"name": "NdrProxyForwardingFunction14",
+"ordinal": 1152,
+"rva": 1013145,
+"forwarder": "api-ms-win-core-com-midlproxystub-l1-1-0.NdrProxyForwardingFunction14",
+"ref": null
+},
+{
+"name": "NdrProxyForwardingFunction15",
+"ordinal": 1153,
+"rva": 1013244,
+"forwarder": "api-ms-win-core-com-midlproxystub-l1-1-0.NdrProxyForwardingFunction15",
+"ref": null
+},
+{
+"name": "NdrProxyForwardingFunction16",
+"ordinal": 1154,
+"rva": 1013343,
+"forwarder": "api-ms-win-core-com-midlproxystub-l1-1-0.NdrProxyForwardingFunction16",
+"ref": null
+},
+{
+"name": "NdrProxyForwardingFunction17",
+"ordinal": 1155,
+"rva": 1013442,
+"forwarder": "api-ms-win-core-com-midlproxystub-l1-1-0.NdrProxyForwardingFunction17",
+"ref": null
+},
+{
+"name": "NdrProxyForwardingFunction18",
+"ordinal": 1156,
+"rva": 1013541,
+"forwarder": "api-ms-win-core-com-midlproxystub-l1-1-0.NdrProxyForwardingFunction18",
+"ref": null
+},
+{
+"name": "NdrProxyForwardingFunction19",
+"ordinal": 1157,
+"rva": 1013640,
+"forwarder": "api-ms-win-core-com-midlproxystub-l1-1-0.NdrProxyForwardingFunction19",
+"ref": null
+},
+{
+"name": "NdrProxyForwardingFunction20",
+"ordinal": 1158,
+"rva": 1013739,
+"forwarder": "api-ms-win-core-com-midlproxystub-l1-1-0.NdrProxyForwardingFunction20",
+"ref": null
+},
+{
+"name": "NdrProxyForwardingFunction21",
+"ordinal": 1159,
+"rva": 1013838,
+"forwarder": "api-ms-win-core-com-midlproxystub-l1-1-0.NdrProxyForwardingFunction21",
+"ref": null
+},
+{
+"name": "NdrProxyForwardingFunction22",
+"ordinal": 1160,
+"rva": 1013937,
+"forwarder": "api-ms-win-core-com-midlproxystub-l1-1-0.NdrProxyForwardingFunction22",
+"ref": null
+},
+{
+"name": "NdrProxyForwardingFunction23",
+"ordinal": 1161,
+"rva": 1014036,
+"forwarder": "api-ms-win-core-com-midlproxystub-l1-1-0.NdrProxyForwardingFunction23",
+"ref": null
+},
+{
+"name": "NdrProxyForwardingFunction24",
+"ordinal": 1162,
+"rva": 1014135,
+"forwarder": "api-ms-win-core-com-midlproxystub-l1-1-0.NdrProxyForwardingFunction24",
+"ref": null
+},
+{
+"name": "NdrProxyForwardingFunction25",
+"ordinal": 1163,
+"rva": 1014234,
+"forwarder": "api-ms-win-core-com-midlproxystub-l1-1-0.NdrProxyForwardingFunction25",
+"ref": null
+},
+{
+"name": "NdrProxyForwardingFunction26",
+"ordinal": 1164,
+"rva": 1014333,
+"forwarder": "api-ms-win-core-com-midlproxystub-l1-1-0.NdrProxyForwardingFunction26",
+"ref": null
+},
+{
+"name": "NdrProxyForwardingFunction27",
+"ordinal": 1165,
+"rva": 1014432,
+"forwarder": "api-ms-win-core-com-midlproxystub-l1-1-0.NdrProxyForwardingFunction27",
+"ref": null
+},
+{
+"name": "NdrProxyForwardingFunction28",
+"ordinal": 1166,
+"rva": 1014531,
+"forwarder": "api-ms-win-core-com-midlproxystub-l1-1-0.NdrProxyForwardingFunction28",
+"ref": null
+},
+{
+"name": "NdrProxyForwardingFunction29",
+"ordinal": 1167,
+"rva": 1014630,
+"forwarder": "api-ms-win-core-com-midlproxystub-l1-1-0.NdrProxyForwardingFunction29",
+"ref": null
+},
+{
+"name": "NdrProxyForwardingFunction3",
+"ordinal": 1168,
+"rva": 1014728,
+"forwarder": "api-ms-win-core-com-midlproxystub-l1-1-0.NdrProxyForwardingFunction3",
+"ref": null
+},
+{
+"name": "NdrProxyForwardingFunction30",
+"ordinal": 1169,
+"rva": 1014826,
+"forwarder": "api-ms-win-core-com-midlproxystub-l1-1-0.NdrProxyForwardingFunction30",
+"ref": null
+},
+{
+"name": "NdrProxyForwardingFunction31",
+"ordinal": 1170,
+"rva": 1014925,
+"forwarder": "api-ms-win-core-com-midlproxystub-l1-1-0.NdrProxyForwardingFunction31",
+"ref": null
+},
+{
+"name": "NdrProxyForwardingFunction32",
+"ordinal": 1171,
+"rva": 1015024,
+"forwarder": "api-ms-win-core-com-midlproxystub-l1-1-0.NdrProxyForwardingFunction32",
+"ref": null
+},
+{
+"name": "NdrProxyForwardingFunction4",
+"ordinal": 1172,
+"rva": 1015122,
+"forwarder": "api-ms-win-core-com-midlproxystub-l1-1-0.NdrProxyForwardingFunction4",
+"ref": null
+},
+{
+"name": "NdrProxyForwardingFunction5",
+"ordinal": 1173,
+"rva": 1015219,
+"forwarder": "api-ms-win-core-com-midlproxystub-l1-1-0.NdrProxyForwardingFunction5",
+"ref": null
+},
+{
+"name": "NdrProxyForwardingFunction6",
+"ordinal": 1174,
+"rva": 1015316,
+"forwarder": "api-ms-win-core-com-midlproxystub-l1-1-0.NdrProxyForwardingFunction6",
+"ref": null
+},
+{
+"name": "NdrProxyForwardingFunction7",
+"ordinal": 1175,
+"rva": 1015413,
+"forwarder": "api-ms-win-core-com-midlproxystub-l1-1-0.NdrProxyForwardingFunction7",
+"ref": null
+},
+{
+"name": "NdrProxyForwardingFunction8",
+"ordinal": 1176,
+"rva": 1015510,
+"forwarder": "api-ms-win-core-com-midlproxystub-l1-1-0.NdrProxyForwardingFunction8",
+"ref": null
+},
+{
+"name": "NdrProxyForwardingFunction9",
+"ordinal": 1177,
+"rva": 1015607,
+"forwarder": "api-ms-win-core-com-midlproxystub-l1-1-0.NdrProxyForwardingFunction9",
+"ref": null
+},
+{
+"name": "ObjectStublessClient10",
+"ordinal": 1178,
+"rva": 1015699,
+"forwarder": "api-ms-win-core-com-midlproxystub-l1-1-0.ObjectStublessClient10",
+"ref": null
+},
+{
+"name": "ObjectStublessClient11",
+"ordinal": 1179,
+"rva": 1015786,
+"forwarder": "api-ms-win-core-com-midlproxystub-l1-1-0.ObjectStublessClient11",
+"ref": null
+},
+{
+"name": "ObjectStublessClient12",
+"ordinal": 1180,
+"rva": 1015873,
+"forwarder": "api-ms-win-core-com-midlproxystub-l1-1-0.ObjectStublessClient12",
+"ref": null
+},
+{
+"name": "ObjectStublessClient13",
+"ordinal": 1181,
+"rva": 1015960,
+"forwarder": "api-ms-win-core-com-midlproxystub-l1-1-0.ObjectStublessClient13",
+"ref": null
+},
+{
+"name": "ObjectStublessClient14",
+"ordinal": 1182,
+"rva": 1016047,
+"forwarder": "api-ms-win-core-com-midlproxystub-l1-1-0.ObjectStublessClient14",
+"ref": null
+},
+{
+"name": "ObjectStublessClient15",
+"ordinal": 1183,
+"rva": 1016134,
+"forwarder": "api-ms-win-core-com-midlproxystub-l1-1-0.ObjectStublessClient15",
+"ref": null
+},
+{
+"name": "ObjectStublessClient16",
+"ordinal": 1184,
+"rva": 1016221,
+"forwarder": "api-ms-win-core-com-midlproxystub-l1-1-0.ObjectStublessClient16",
+"ref": null
+},
+{
+"name": "ObjectStublessClient17",
+"ordinal": 1185,
+"rva": 1016308,
+"forwarder": "api-ms-win-core-com-midlproxystub-l1-1-0.ObjectStublessClient17",
+"ref": null
+},
+{
+"name": "ObjectStublessClient18",
+"ordinal": 1186,
+"rva": 1016395,
+"forwarder": "api-ms-win-core-com-midlproxystub-l1-1-0.ObjectStublessClient18",
+"ref": null
+},
+{
+"name": "ObjectStublessClient19",
+"ordinal": 1187,
+"rva": 1016482,
+"forwarder": "api-ms-win-core-com-midlproxystub-l1-1-0.ObjectStublessClient19",
+"ref": null
+},
+{
+"name": "ObjectStublessClient20",
+"ordinal": 1188,
+"rva": 1016569,
+"forwarder": "api-ms-win-core-com-midlproxystub-l1-1-0.ObjectStublessClient20",
+"ref": null
+},
+{
+"name": "ObjectStublessClient21",
+"ordinal": 1189,
+"rva": 1016656,
+"forwarder": "api-ms-win-core-com-midlproxystub-l1-1-0.ObjectStublessClient21",
+"ref": null
+},
+{
+"name": "ObjectStublessClient22",
+"ordinal": 1190,
+"rva": 1016743,
+"forwarder": "api-ms-win-core-com-midlproxystub-l1-1-0.ObjectStublessClient22",
+"ref": null
+},
+{
+"name": "ObjectStublessClient23",
+"ordinal": 1191,
+"rva": 1016830,
+"forwarder": "api-ms-win-core-com-midlproxystub-l1-1-0.ObjectStublessClient23",
+"ref": null
+},
+{
+"name": "ObjectStublessClient24",
+"ordinal": 1192,
+"rva": 1016917,
+"forwarder": "api-ms-win-core-com-midlproxystub-l1-1-0.ObjectStublessClient24",
+"ref": null
+},
+{
+"name": "ObjectStublessClient25",
+"ordinal": 1193,
+"rva": 1017004,
+"forwarder": "api-ms-win-core-com-midlproxystub-l1-1-0.ObjectStublessClient25",
+"ref": null
+},
+{
+"name": "ObjectStublessClient26",
+"ordinal": 1194,
+"rva": 1017091,
+"forwarder": "api-ms-win-core-com-midlproxystub-l1-1-0.ObjectStublessClient26",
+"ref": null
+},
+{
+"name": "ObjectStublessClient27",
+"ordinal": 1195,
+"rva": 1017178,
+"forwarder": "api-ms-win-core-com-midlproxystub-l1-1-0.ObjectStublessClient27",
+"ref": null
+},
+{
+"name": "ObjectStublessClient28",
+"ordinal": 1196,
+"rva": 1017265,
+"forwarder": "api-ms-win-core-com-midlproxystub-l1-1-0.ObjectStublessClient28",
+"ref": null
+},
+{
+"name": "ObjectStublessClient29",
+"ordinal": 1197,
+"rva": 1017352,
+"forwarder": "api-ms-win-core-com-midlproxystub-l1-1-0.ObjectStublessClient29",
+"ref": null
+},
+{
+"name": "ObjectStublessClient3",
+"ordinal": 1198,
+"rva": 1017438,
+"forwarder": "api-ms-win-core-com-midlproxystub-l1-1-0.ObjectStublessClient3",
+"ref": null
+},
+{
+"name": "ObjectStublessClient30",
+"ordinal": 1199,
+"rva": 1017524,
+"forwarder": "api-ms-win-core-com-midlproxystub-l1-1-0.ObjectStublessClient30",
+"ref": null
+},
+{
+"name": "ObjectStublessClient31",
+"ordinal": 1200,
+"rva": 1017611,
+"forwarder": "api-ms-win-core-com-midlproxystub-l1-1-0.ObjectStublessClient31",
+"ref": null
+},
+{
+"name": "ObjectStublessClient32",
+"ordinal": 1201,
+"rva": 1017698,
+"forwarder": "api-ms-win-core-com-midlproxystub-l1-1-0.ObjectStublessClient32",
+"ref": null
+},
+{
+"name": "ObjectStublessClient4",
+"ordinal": 1202,
+"rva": 1017784,
+"forwarder": "api-ms-win-core-com-midlproxystub-l1-1-0.ObjectStublessClient4",
+"ref": null
+},
+{
+"name": "ObjectStublessClient5",
+"ordinal": 1203,
+"rva": 1017869,
+"forwarder": "api-ms-win-core-com-midlproxystub-l1-1-0.ObjectStublessClient5",
+"ref": null
+},
+{
+"name": "ObjectStublessClient6",
+"ordinal": 1204,
+"rva": 1017954,
+"forwarder": "api-ms-win-core-com-midlproxystub-l1-1-0.ObjectStublessClient6",
+"ref": null
+},
+{
+"name": "ObjectStublessClient7",
+"ordinal": 1205,
+"rva": 1018039,
+"forwarder": "api-ms-win-core-com-midlproxystub-l1-1-0.ObjectStublessClient7",
+"ref": null
+},
+{
+"name": "ObjectStublessClient8",
+"ordinal": 1206,
+"rva": 1018124,
+"forwarder": "api-ms-win-core-com-midlproxystub-l1-1-0.ObjectStublessClient8",
+"ref": null
+},
+{
+"name": "ObjectStublessClient9",
+"ordinal": 1207,
+"rva": 1018209,
+"forwarder": "api-ms-win-core-com-midlproxystub-l1-1-0.ObjectStublessClient9",
+"ref": null
+},
+{
+"name": "Ole32DllGetClassObject",
+"ordinal": 1208,
+"rva": 65504,
+"forwarder": null,
+"ref": "ole32.dll!0xffe0"
+},
+{
+"name": "OleBuildVersion",
+"ordinal": 1209,
+"rva": 329856,
+"forwarder": null,
+"ref": "ole32.dll!0x50880"
+},
+{
+"name": "OleConvertIStorageToOLESTREAM",
+"ordinal": 1210,
+"rva": 656336,
+"forwarder": null,
+"ref": "ole32.dll!0xa03d0"
+},
+{
+"name": "OleConvertIStorageToOLESTREAMEx",
+"ordinal": 1211,
+"rva": 656480,
+"forwarder": null,
+"ref": "ole32.dll!0xa0460"
+},
+{
+"name": "OleConvertOLESTREAMToIStorage",
+"ordinal": 1212,
+"rva": 657008,
+"forwarder": null,
+"ref": "ole32.dll!0xa0670"
+},
+{
+"name": "OleConvertOLESTREAMToIStorageEx",
+"ordinal": 1213,
+"rva": 657152,
+"forwarder": null,
+"ref": "ole32.dll!0xa0700"
+},
+{
+"name": "OleCreate",
+"ordinal": 1214,
+"rva": 470176,
+"forwarder": null,
+"ref": "ole32.dll!0x72ca0"
+},
+{
+"name": "OleCreateDefaultHandler",
+"ordinal": 1215,
+"rva": 592768,
+"forwarder": null,
+"ref": "ole32.dll!0x90b80"
+},
+{
+"name": "OleCreateEmbeddingHelper",
+"ordinal": 1216,
+"rva": 100608,
+"forwarder": null,
+"ref": "ole32.dll!0x18900"
+},
+{
+"name": "OleCreateEx",
+"ordinal": 1217,
+"rva": 470320,
+"forwarder": null,
+"ref": "ole32.dll!0x72d30"
+},
+{
+"name": "OleCreateFontIndirectExt",
+"ordinal": 1218,
+"rva": 18432,
+"forwarder": null,
+"ref": "ole32.dll!0x4800"
+},
+{
+"name": "OleCreateFromData",
+"ordinal": 1219,
+"rva": 470880,
+"forwarder": null,
+"ref": "ole32.dll!0x72f60"
+},
+{
+"name": "OleCreateFromDataEx",
+"ordinal": 1220,
+"rva": 471024,
+"forwarder": null,
+"ref": "ole32.dll!0x72ff0"
+},
+{
+"name": "OleCreateFromFile",
+"ordinal": 1221,
+"rva": 471648,
+"forwarder": null,
+"ref": "ole32.dll!0x73260"
+},
+{
+"name": "OleCreateFromFileEx",
+"ordinal": 1222,
+"rva": 471808,
+"forwarder": null,
+"ref": "ole32.dll!0x73300"
+},
+{
+"name": "OleCreateLink",
+"ordinal": 1223,
+"rva": 472448,
+"forwarder": null,
+"ref": "ole32.dll!0x73580"
+},
+{
+"name": "OleCreateLinkEx",
+"ordinal": 1224,
+"rva": 472592,
+"forwarder": null,
+"ref": "ole32.dll!0x73610"
+},
+{
+"name": "OleCreateLinkFromData",
+"ordinal": 1225,
+"rva": 473024,
+"forwarder": null,
+"ref": "ole32.dll!0x737c0"
+},
+{
+"name": "OleCreateLinkFromDataEx",
+"ordinal": 1226,
+"rva": 473168,
+"forwarder": null,
+"ref": "ole32.dll!0x73850"
+},
+{
+"name": "OleCreateLinkToFile",
+"ordinal": 1227,
+"rva": 473904,
+"forwarder": null,
+"ref": "ole32.dll!0x73b30"
+},
+{
+"name": "OleCreateLinkToFileEx",
+"ordinal": 1228,
+"rva": 474048,
+"forwarder": null,
+"ref": "ole32.dll!0x73bc0"
+},
+{
+"name": "OleCreateMenuDescriptor",
+"ordinal": 1229,
+"rva": 584176,
+"forwarder": null,
+"ref": "ole32.dll!0x8e9f0"
+},
+{
+"name": "OleCreatePictureIndirectExt",
+"ordinal": 1230,
+"rva": 17648,
+"forwarder": null,
+"ref": "ole32.dll!0x44f0"
+},
+{
+"name": "OleCreatePropertyFrameIndirectExt",
+"ordinal": 1231,
+"rva": 757936,
+"forwarder": null,
+"ref": "ole32.dll!0xb90b0"
+},
+{
+"name": "OleCreateStaticFromData",
+"ordinal": 1232,
+"rva": 119680,
+"forwarder": null,
+"ref": "ole32.dll!0x1d380"
+},
+{
+"name": "OleDestroyMenuDescriptor",
+"ordinal": 1233,
+"rva": 584576,
+"forwarder": null,
+"ref": "ole32.dll!0x8eb80"
+},
+{
+"name": "OleDoAutoConvert",
+"ordinal": 1234,
+"rva": 99648,
+"forwarder": null,
+"ref": "ole32.dll!0x18540"
+},
+{
+"name": "OleDraw",
+"ordinal": 1235,
+"rva": 134064,
+"forwarder": null,
+"ref": "ole32.dll!0x20bb0"
+},
+{
+"name": "OleDuplicateData",
+"ordinal": 1236,
+"rva": 123424,
+"forwarder": null,
+"ref": "ole32.dll!0x1e220"
+},
+{
+"name": "OleFlushClipboard",
+"ordinal": 1237,
+"rva": 509072,
+"forwarder": null,
+"ref": "ole32.dll!0x7c490"
+},
+{
+"name": "OleGetAutoConvert",
+"ordinal": 1238,
+"rva": 97792,
+"forwarder": null,
+"ref": "ole32.dll!0x17e00"
+},
+{
+"name": "OleGetClipboard",
+"ordinal": 1239,
+"rva": 67376,
+"forwarder": null,
+"ref": "ole32.dll!0x10730"
+},
+{
+"name": "OleGetClipboardWithEnterpriseInfo",
+"ordinal": 1240,
+"rva": 509328,
+"forwarder": null,
+"ref": "ole32.dll!0x7c590"
+},
+{
+"name": "OleGetIconOfClass",
+"ordinal": 1241,
+"rva": 597680,
+"forwarder": null,
+"ref": "ole32.dll!0x91eb0"
+},
+{
+"name": "OleGetIconOfFile",
+"ordinal": 1242,
+"rva": 598048,
+"forwarder": null,
+"ref": "ole32.dll!0x92020"
+},
+{
+"name": "OleIconToCursorExt",
+"ordinal": 1243,
+"rva": 748496,
+"forwarder": null,
+"ref": "ole32.dll!0xb6bd0"
+},
+{
+"name": "OleInitialize",
+"ordinal": 1244,
+"rva": 53520,
+"forwarder": null,
+"ref": "ole32.dll!0xd110"
+},
+{
+"name": "OleInitializeWOW",
+"ordinal": 1245,
+"rva": 477472,
+"forwarder": null,
+"ref": "ole32.dll!0x74920"
+},
+{
+"name": "OleIsCurrentClipboard",
+"ordinal": 1246,
+"rva": 93808,
+"forwarder": null,
+"ref": "ole32.dll!0x16e70"
+},
+{
+"name": "OleIsRunning",
+"ordinal": 1247,
+"rva": 476096,
+"forwarder": null,
+"ref": "ole32.dll!0x743c0"
+},
+{
+"name": "OleLoad",
+"ordinal": 1248,
+"rva": 110768,
+"forwarder": null,
+"ref": "ole32.dll!0x1b0b0"
+},
+{
+"name": "OleLoadFromStream",
+"ordinal": 1249,
+"rva": 284176,
+"forwarder": null,
+"ref": "ole32.dll!0x45610"
+},
+{
+"name": "OleLoadPictureExt",
+"ordinal": 1250,
+"rva": 749744,
+"forwarder": null,
+"ref": "ole32.dll!0xb70b0"
+},
+{
+"name": "OleLoadPictureFileExt",
+"ordinal": 1251,
+"rva": 759072,
+"forwarder": null,
+"ref": "ole32.dll!0xb9520"
+},
+{
+"name": "OleLoadPicturePathExt",
+"ordinal": 1252,
+"rva": 750032,
+"forwarder": null,
+"ref": "ole32.dll!0xb71d0"
+},
+{
+"name": "OleLockRunning",
+"ordinal": 1253,
+"rva": 27216,
+"forwarder": null,
+"ref": "ole32.dll!0x6a50"
+},
+{
+"name": "OleMetafilePictFromIconAndLabel",
+"ordinal": 1254,
+"rva": 598896,
+"forwarder": null,
+"ref": "ole32.dll!0x92370"
+},
+{
+"name": "OleNoteObjectVisible",
+"ordinal": 1255,
+"rva": 476224,
+"forwarder": null,
+"ref": "ole32.dll!0x74440"
+},
+{
+"name": "OleQueryCreateFromData",
+"ordinal": 1256,
+"rva": 474720,
+"forwarder": null,
+"ref": "ole32.dll!0x73e60"
+},
+{
+"name": "OleQueryLinkFromData",
+"ordinal": 1257,
+"rva": 474800,
+"forwarder": null,
+"ref": "ole32.dll!0x73eb0"
+},
+{
+"name": "OleRegEnumFormatEtc",
+"ordinal": 1258,
+"rva": 606944,
+"forwarder": null,
+"ref": "ole32.dll!0x942e0"
+},
+{
+"name": "OleRegEnumVerbs",
+"ordinal": 1259,
+"rva": 609200,
+"forwarder": null,
+"ref": "ole32.dll!0x94bb0"
+},
+{
+"name": "OleRegGetMiscStatus",
+"ordinal": 1260,
+"rva": 83232,
+"forwarder": null,
+"ref": "ole32.dll!0x14520"
+},
+{
+"name": "OleRegGetUserType",
+"ordinal": 1261,
+"rva": 99200,
+"forwarder": null,
+"ref": "ole32.dll!0x18380"
+},
+{
+"name": "OleReleaseEnumVerbCache",
+"ordinal": 1262,
+"rva": 43376,
+"forwarder": null,
+"ref": "ole32.dll!0xa970"
+},
+{
+"name": "OleRun",
+"ordinal": 1263,
+"rva": 53824,
+"forwarder": null,
+"ref": "ole32.dll!0xd240"
+},
+{
+"name": "OleSave",
+"ordinal": 1264,
+"rva": 137344,
+"forwarder": null,
+"ref": "ole32.dll!0x21880"
+},
+{
+"name": "OleSavePictureFileExt",
+"ordinal": 1265,
+"rva": 759392,
+"forwarder": null,
+"ref": "ole32.dll!0xb9660"
+},
+{
+"name": "OleSaveToStream",
+"ordinal": 1266,
+"rva": 154848,
+"forwarder": null,
+"ref": "ole32.dll!0x25ce0"
+},
+{
+"name": "OleSetAutoConvert",
+"ordinal": 1267,
+"rva": 593968,
+"forwarder": null,
+"ref": "ole32.dll!0x91030"
+},
+{
+"name": "OleSetClipboard",
+"ordinal": 1268,
+"rva": 86848,
+"forwarder": null,
+"ref": "ole32.dll!0x15340"
+},
+{
+"name": "OleSetContainedObject",
+"ordinal": 1269,
+"rva": 136032,
+"forwarder": null,
+"ref": "ole32.dll!0x21360"
+},
+{
+"name": "OleSetMenuDescriptor",
+"ordinal": 1270,
+"rva": 584672,
+"forwarder": null,
+"ref": "ole32.dll!0x8ebe0"
+},
+{
+"name": "OleTranslateAccelerator",
+"ordinal": 1271,
+"rva": 585136,
+"forwarder": null,
+"ref": "ole32.dll!0x8edb0"
+},
+{
+"name": "OleTranslateColorExt",
+"ordinal": 1272,
+"rva": 43424,
+"forwarder": null,
+"ref": "ole32.dll!0xa9a0"
+},
+{
+"name": "OleUninitialize",
+"ordinal": 1273,
+"rva": 51456,
+"forwarder": null,
+"ref": "ole32.dll!0xc900"
+},
+{
+"name": "OpenOrCreateStream",
+"ordinal": 1274,
+"rva": 119152,
+"forwarder": null,
+"ref": "ole32.dll!0x1d170"
+},
+{
+"name": "ProgIDFromCLSID",
+"ordinal": 1275,
+"rva": 1019660,
+"forwarder": "api-ms-win-core-com-l1-1-0.ProgIDFromCLSID",
+"ref": null
+},
+{
+"name": "PropStgNameToFmtId",
+"ordinal": 1276,
+"rva": 276592,
+"forwarder": null,
+"ref": "ole32.dll!0x43870"
+},
+{
+"name": "PropSysAllocString",
+"ordinal": 1277,
+"rva": 276624,
+"forwarder": null,
+"ref": "ole32.dll!0x43890"
+},
+{
+"name": "PropSysFreeString",
+"ordinal": 1278,
+"rva": 276656,
+"forwarder": null,
+"ref": "ole32.dll!0x438b0"
+},
+{
+"name": "PropVariantChangeType",
+"ordinal": 1279,
+"rva": 276688,
+"forwarder": null,
+"ref": "ole32.dll!0x438d0"
+},
+{
+"name": "PropVariantClear",
+"ordinal": 1280,
+"rva": 156096,
+"forwarder": null,
+"ref": "ole32.dll!0x261c0"
+},
+{
+"name": "PropVariantCopy",
+"ordinal": 1281,
+"rva": 156128,
+"forwarder": null,
+"ref": "ole32.dll!0x261e0"
+},
+{
+"name": "ReadClassStg",
+"ordinal": 1282,
+"rva": 139568,
+"forwarder": null,
+"ref": "ole32.dll!0x22130"
+},
+{
+"name": "ReadClassStm",
+"ordinal": 1283,
+"rva": 155264,
+"forwarder": null,
+"ref": "ole32.dll!0x25e80"
+},
+{
+"name": "ReadFmtUserTypeStg",
+"ordinal": 1284,
+"rva": 108384,
+"forwarder": null,
+"ref": "ole32.dll!0x1a760"
+},
+{
+"name": "ReadOleStg",
+"ordinal": 1285,
+"rva": 118592,
+"forwarder": null,
+"ref": "ole32.dll!0x1cf40"
+},
+{
+"name": "ReadStringStream",
+"ordinal": 1286,
+"rva": 108864,
+"forwarder": null,
+"ref": "ole32.dll!0x1a940"
+},
+{
+"name": "RegisterActiveObjectExt",
+"ordinal": 1287,
+"rva": 780832,
+"forwarder": null,
+"ref": "ole32.dll!0xbea20"
+},
+{
+"name": "RegisterDragDrop",
+"ordinal": 1288,
+"rva": 51712,
+"forwarder": null,
+"ref": "ole32.dll!0xca00"
+},
+{
+"name": "ReleaseStgMedium",
+"ordinal": 1289,
+"rva": 60368,
+"forwarder": null,
+"ref": "ole32.dll!0xebd0"
+},
+{
+"name": "RevokeActiveObjectExt",
+"ordinal": 1290,
+"rva": 781024,
+"forwarder": null,
+"ref": "ole32.dll!0xbeae0"
+},
+{
+"name": "RevokeDragDrop",
+"ordinal": 1291,
+"rva": 48144,
+"forwarder": null,
+"ref": "ole32.dll!0xbc10"
+},
+{
+"name": "RoGetAgileReference",
+"ordinal": 1292,
+"rva": 1020002,
+"forwarder": "api-ms-win-core-com-l1-1-1.RoGetAgileReference",
+"ref": null
+},
+{
+"name": "SNB_UserFree",
+"ordinal": 1293,
+"rva": 166880,
+"forwarder": null,
+"ref": "ole32.dll!0x28be0"
+},
+{
+"name": "SNB_UserFree64",
+"ordinal": 1294,
+"rva": 166896,
+"forwarder": null,
+"ref": "ole32.dll!0x28bf0"
+},
+{
+"name": "SNB_UserMarshal",
+"ordinal": 1295,
+"rva": 166912,
+"forwarder": null,
+"ref": "ole32.dll!0x28c00"
+},
+{
+"name": "SNB_UserMarshal64",
+"ordinal": 1296,
+"rva": 166928,
+"forwarder": null,
+"ref": "ole32.dll!0x28c10"
+},
+{
+"name": "SNB_UserSize",
+"ordinal": 1297,
+"rva": 166944,
+"forwarder": null,
+"ref": "ole32.dll!0x28c20"
+},
+{
+"name": "SNB_UserSize64",
+"ordinal": 1298,
+"rva": 166960,
+"forwarder": null,
+"ref": "ole32.dll!0x28c30"
+},
+{
+"name": "SNB_UserUnmarshal",
+"ordinal": 1299,
+"rva": 166976,
+"forwarder": null,
+"ref": "ole32.dll!0x28c40"
+},
+{
+"name": "SNB_UserUnmarshal64",
+"ordinal": 1300,
+"rva": 166992,
+"forwarder": null,
+"ref": "ole32.dll!0x28c50"
+},
+{
+"name": "STGMEDIUM_UserFree",
+"ordinal": 1301,
+"rva": 167008,
+"forwarder": null,
+"ref": "ole32.dll!0x28c60"
+},
+{
+"name": "STGMEDIUM_UserFree64",
+"ordinal": 1302,
+"rva": 167024,
+"forwarder": null,
+"ref": "ole32.dll!0x28c70"
+},
+{
+"name": "STGMEDIUM_UserMarshal",
+"ordinal": 1303,
+"rva": 167040,
+"forwarder": null,
+"ref": "ole32.dll!0x28c80"
+},
+{
+"name": "STGMEDIUM_UserMarshal64",
+"ordinal": 1304,
+"rva": 167056,
+"forwarder": null,
+"ref": "ole32.dll!0x28c90"
+},
+{
+"name": "STGMEDIUM_UserSize",
+"ordinal": 1305,
+"rva": 167072,
+"forwarder": null,
+"ref": "ole32.dll!0x28ca0"
+},
+{
+"name": "STGMEDIUM_UserSize64",
+"ordinal": 1306,
+"rva": 167088,
+"forwarder": null,
+"ref": "ole32.dll!0x28cb0"
+},
+{
+"name": "STGMEDIUM_UserUnmarshal",
+"ordinal": 1307,
+"rva": 167104,
+"forwarder": null,
+"ref": "ole32.dll!0x28cc0"
+},
+{
+"name": "STGMEDIUM_UserUnmarshal64",
+"ordinal": 1308,
+"rva": 167120,
+"forwarder": null,
+"ref": "ole32.dll!0x28cd0"
+},
+{
+"name": "SetConvertStg",
+"ordinal": 1309,
+"rva": 476912,
+"forwarder": null,
+"ref": "ole32.dll!0x746f0"
+},
+{
+"name": "SetDocumentBitStg",
+"ordinal": 1310,
+"rva": 476944,
+"forwarder": null,
+"ref": "ole32.dll!0x74710"
+},
+{
+"name": "SetErrorInfo",
+"ordinal": 1311,
+"rva": 1020398,
+"forwarder": "api-ms-win-core-com-private-l1-1-1.CoSetErrorInfo",
+"ref": null
+},
+{
+"name": "SetWOWThunkGlobalPtr",
+"ordinal": 1312,
+"rva": 84720,
+"forwarder": null,
+"ref": "ole32.dll!0x14af0"
+},
+{
+"name": "StgConvertPropertyToVariant",
+"ordinal": 1313,
+"rva": 276720,
+"forwarder": null,
+"ref": "ole32.dll!0x438f0"
+},
+{
+"name": "StgConvertVariantToProperty",
+"ordinal": 1314,
+"rva": 276752,
+"forwarder": null,
+"ref": "ole32.dll!0x43910"
+},
+{
+"name": "StgCreateDocfile",
+"ordinal": 1315,
+"rva": 276784,
+"forwarder": null,
+"ref": "ole32.dll!0x43930"
+},
+{
+"name": "StgCreateDocfileOnILockBytes",
+"ordinal": 1316,
+"rva": 27488,
+"forwarder": null,
+"ref": "ole32.dll!0x6b60"
+},
+{
+"name": "StgCreatePropSetStg",
+"ordinal": 1317,
+"rva": 276816,
+"forwarder": null,
+"ref": "ole32.dll!0x43950"
+},
+{
+"name": "StgCreatePropStg",
+"ordinal": 1318,
+"rva": 276848,
+"forwarder": null,
+"ref": "ole32.dll!0x43970"
+},
+{
+"name": "StgCreateStorageEx",
+"ordinal": 1319,
+"rva": 276880,
+"forwarder": null,
+"ref": "ole32.dll!0x43990"
+},
+{
+"name": "StgGetIFillLockBytesOnFile",
+"ordinal": 1320,
+"rva": 276960,
+"forwarder": null,
+"ref": "ole32.dll!0x439e0"
+},
+{
+"name": "StgGetIFillLockBytesOnILockBytes",
+"ordinal": 1321,
+"rva": 276992,
+"forwarder": null,
+"ref": "ole32.dll!0x43a00"
+},
+{
+"name": "StgIsStorageFile",
+"ordinal": 1322,
+"rva": 277024,
+"forwarder": null,
+"ref": "ole32.dll!0x43a20"
+},
+{
+"name": "StgIsStorageILockBytes",
+"ordinal": 1323,
+"rva": 277056,
+"forwarder": null,
+"ref": "ole32.dll!0x43a40"
+},
+{
+"name": "StgOpenAsyncDocfileOnIFillLockBytes",
+"ordinal": 1324,
+"rva": 277088,
+"forwarder": null,
+"ref": "ole32.dll!0x43a60"
+},
+{
+"name": "StgOpenPropStg",
+"ordinal": 1325,
+"rva": 277120,
+"forwarder": null,
+"ref": "ole32.dll!0x43a80"
+},
+{
+"name": "StgOpenStorage",
+"ordinal": 1326,
+"rva": 42032,
+"forwarder": null,
+"ref": "ole32.dll!0xa430"
+},
+{
+"name": "StgOpenStorageEx",
+"ordinal": 1327,
+"rva": 139376,
+"forwarder": null,
+"ref": "ole32.dll!0x22070"
+},
+{
+"name": "StgOpenStorageOnHandle",
+"ordinal": 1328,
+"rva": 277152,
+"forwarder": null,
+"ref": "ole32.dll!0x43aa0"
+},
+{
+"name": "StgOpenStorageOnILockBytes",
+"ordinal": 1329,
+"rva": 26976,
+"forwarder": null,
+"ref": "ole32.dll!0x6960"
+},
+{
+"name": "StgPropertyLengthAsVariant",
+"ordinal": 1330,
+"rva": 277184,
+"forwarder": null,
+"ref": "ole32.dll!0x43ac0"
+},
+{
+"name": "StgSetTimes",
+"ordinal": 1331,
+"rva": 277216,
+"forwarder": null,
+"ref": "ole32.dll!0x43ae0"
+},
+{
+"name": "StringFromCLSID",
+"ordinal": 1332,
+"rva": 1020915,
+"forwarder": "api-ms-win-core-com-l1-1-0.StringFromCLSID",
+"ref": null
+},
+{
+"name": "StringFromGUID2",
+"ordinal": 1333,
+"rva": 1020974,
+"forwarder": "api-ms-win-core-com-l1-1-0.StringFromGUID2",
+"ref": null
+},
+{
+"name": "StringFromIID",
+"ordinal": 1334,
+"rva": 1021031,
+"forwarder": "api-ms-win-core-com-l1-1-0.StringFromIID",
+"ref": null
+},
+{
+"name": "UpdateDCOMSettings",
+"ordinal": 1335,
+"rva": 1021091,
+"forwarder": "api-ms-win-core-com-private-l1-1-1.UpdateDCOMSettings",
+"ref": null
+},
+{
+"name": "UpdateProcessTracing",
+"ordinal": 1336,
+"rva": 1021166,
+"forwarder": "api-ms-win-core-com-private-l1-1-1.UpdateProcessTracing",
+"ref": null
+},
+{
+"name": "UtConvertDvtd16toDvtd32",
+"ordinal": 1337,
+"rva": 663056,
+"forwarder": null,
+"ref": "ole32.dll!0xa1e10"
+},
+{
+"name": "UtConvertDvtd32toDvtd16",
+"ordinal": 1338,
+"rva": 663680,
+"forwarder": null,
+"ref": "ole32.dll!0xa2080"
+},
+{
+"name": "UtGetDvtd16Info",
+"ordinal": 1339,
+"rva": 664464,
+"forwarder": null,
+"ref": "ole32.dll!0xa2390"
+},
+{
+"name": "UtGetDvtd32Info",
+"ordinal": 1340,
+"rva": 664800,
+"forwarder": null,
+"ref": "ole32.dll!0xa24e0"
+},
+{
+"name": "WdtpInterfacePointer_UserFree",
+"ordinal": 1341,
+"rva": 1021332,
+"forwarder": "COMBASE.WdtpInterfacePointer_UserFree",
+"ref": null
+},
+{
+"name": "WdtpInterfacePointer_UserFree64",
+"ordinal": 1342,
+"rva": 1021402,
+"forwarder": "COMBASE.WdtpInterfacePointer_UserFree64",
+"ref": null
+},
+{
+"name": "WdtpInterfacePointer_UserMarshal",
+"ordinal": 1343,
+"rva": 1021475,
+"forwarder": "COMBASE.WdtpInterfacePointer_UserMarshal",
+"ref": null
+},
+{
+"name": "WdtpInterfacePointer_UserMarshal64",
+"ordinal": 1344,
+"rva": 1021551,
+"forwarder": "COMBASE.WdtpInterfacePointer_UserMarshal64",
+"ref": null
+},
+{
+"name": "WdtpInterfacePointer_UserSize",
+"ordinal": 1345,
+"rva": 1021624,
+"forwarder": "COMBASE.WdtpInterfacePointer_UserSize",
+"ref": null
+},
+{
+"name": "WdtpInterfacePointer_UserSize64",
+"ordinal": 1346,
+"rva": 1021694,
+"forwarder": "COMBASE.WdtpInterfacePointer_UserSize64",
+"ref": null
+},
+{
+"name": "WdtpInterfacePointer_UserUnmarshal",
+"ordinal": 1347,
+"rva": 1021769,
+"forwarder": "COMBASE.WdtpInterfacePointer_UserUnmarshal",
+"ref": null
+},
+{
+"name": "WdtpInterfacePointer_UserUnmarshal64",
+"ordinal": 1348,
+"rva": 1021849,
+"forwarder": "COMBASE.WdtpInterfacePointer_UserUnmarshal64",
+"ref": null
+},
+{
+"name": "WriteClassStg",
+"ordinal": 1349,
+"rva": 277248,
+"forwarder": null,
+"ref": "ole32.dll!0x43b00"
+},
+{
+"name": "WriteClassStm",
+"ordinal": 1350,
+"rva": 277280,
+"forwarder": null,
+"ref": "ole32.dll!0x43b20"
+},
+{
+"name": "WriteFmtUserTypeStg",
+"ordinal": 1351,
+"rva": 113648,
+"forwarder": null,
+"ref": "ole32.dll!0x1bbf0"
+},
+{
+"name": "WriteOleStg",
+"ordinal": 1352,
+"rva": 117584,
+"forwarder": null,
+"ref": "ole32.dll!0x1cb50"
+},
+{
+"name": "WriteStringStream",
+"ordinal": 1353,
+"rva": 112624,
+"forwarder": null,
+"ref": "ole32.dll!0x1b7f0"
+}
+]
