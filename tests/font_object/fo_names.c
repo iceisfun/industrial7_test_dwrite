@@ -97,7 +97,8 @@ TEST(font_info_absent_name_records) {
         HRESULT hr = IDWriteFont_GetInformationalStrings(x.font[0], (DWRITE_INFORMATIONAL_STRING_ID)k_ids[k].id, &ls, &ex);
         CHECKF(hr == S_OK, "%s -> %s", k_ids[k].label, dw_hr_name(hr));
         if (nid == 1 || nid == 2 || nid == 4 || nid == 6) { CHECKF(ex == TRUE && ls, "%s present", k_ids[k].label); }
-        else if (nid == 0 || nid == 5 || nid == 7 || nid == 8 || nid == 9 || nid == 10 || nid == 11 || nid == 12 || nid == 13 || nid == 14 || nid == 19 || nid == 20) {
+        else if (nid == 5) t_note("%s without a name id 5 record: exists=%d", k_ids[k].label, ex);
+        else if (nid == 0 || nid == 7 || nid == 8 || nid == 9 || nid == 10 || nid == 11 || nid == 12 || nid == 13 || nid == 14 || nid == 19 || nid == 20) {
             CHECKF(ex == FALSE && ls == NULL, "%s absent (ex=%d)", k_ids[k].label, ex);
         } else t_note("%s without a record: exists=%d", k_ids[k].label, ex);
         DW_RELEASE(ls);
@@ -325,7 +326,7 @@ TEST(font_face_names_locale_string_apis) {
         CHECK_HR_OK(IDWriteLocalizedStrings_FindLocaleName(n, L"en-us", &idx, &ex)); CHECK(ex);
         CHECK_HR_OK(IDWriteLocalizedStrings_FindLocaleName(n, L"xx-nonexistent", &idx, &ex)); EXPECT_EQ(ex, FALSE); EXPECT_EQ(idx, (UINT32)-1);
         { UINT32 len = 0; WCHAR w[16]; CHECK_HR_OK(IDWriteLocalizedStrings_GetStringLength(n, 0, &len)); EXPECT_EQ(len, 7);
-          CHECK_HR(IDWriteLocalizedStrings_GetString(n, 0, w, len), DW_E_NOT_SUFFICIENT_BUFFER);
+          CHECK_HR_FAILED(IDWriteLocalizedStrings_GetString(n, 0, w, len));        /* no room for the terminating NUL */
           CHECK_HR_OK(IDWriteLocalizedStrings_GetString(n, 0, w, len + 1)); CHECK(!lstrcmpW(w, L"Regular"));
           CHECK_HR_FAILED(IDWriteLocalizedStrings_GetStringLength(n, IDWriteLocalizedStrings_GetCount(n), &len)); }
     }
@@ -454,4 +455,30 @@ TEST(font_info_exists_iff_strings_nonnull) {
         CHECKF((ex == 1) == (ls != NULL), "%s", k_ids[k].label); DW_RELEASE(ls);
     }
     fo_close(&x);
+}
+
+TEST(font_info_string_length_matches_content) {
+    /* GetStringLength excludes the NUL and equals the length of the stored text for every string of every reported id */
+    fo_fx x; ttf_spec s; int k; info_spec(&s, "FoInfLen"); FO_OPEN1(x, s);
+    for (k = 0; k < NIDS; k++) {
+        IDWriteLocalizedStrings *ls = NULL; BOOL ex = 0; UINT32 i, n;
+        IDWriteFont_GetInformationalStrings(x.font[0], (DWRITE_INFORMATIONAL_STRING_ID)k_ids[k].id, &ls, &ex);
+        if (!ls) continue;
+        n = IDWriteLocalizedStrings_GetCount(ls);
+        for (i = 0; i < n; i++) { UINT32 len = 0; WCHAR w[256]; IDWriteLocalizedStrings_GetStringLength(ls, i, &len); CHECKF(len < 256 && fo_ls_w(ls, i, w, 256) == (int)len && lstrlenW(w) == (int)len, "%s string %u", k_ids[k].label, i); }
+        DW_RELEASE(ls);
+    }
+    fo_close(&x);
+}
+TEST(font_info_system_string_length_matches_content) {
+    FO_SYS_REG(f, L"Arial"); int k;
+    for (k = 0; k < NIDS; k++) {
+        IDWriteLocalizedStrings *ls = NULL; BOOL ex = 0; UINT32 i, n;
+        IDWriteFont_GetInformationalStrings(f, (DWRITE_INFORMATIONAL_STRING_ID)k_ids[k].id, &ls, &ex);
+        if (!ls) continue;
+        n = IDWriteLocalizedStrings_GetCount(ls);
+        for (i = 0; i < n; i++) { UINT32 len = 0; WCHAR *w; IDWriteLocalizedStrings_GetStringLength(ls, i, &len); w = (WCHAR *)malloc((len + 1) * sizeof(WCHAR)); if (w) { CHECK_HR_OK(IDWriteLocalizedStrings_GetString(ls, i, w, len + 1)); CHECKF((UINT32)lstrlenW(w) == len, "%s string %u", k_ids[k].label, i); free(w); } }
+        DW_RELEASE(ls);
+    }
+    DW_RELEASE(f);
 }

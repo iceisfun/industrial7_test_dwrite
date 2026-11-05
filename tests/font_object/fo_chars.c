@@ -141,10 +141,26 @@ TEST(font_has_symbol_cmap) {
     EXPECT_EQ(has(x.font[0], 0xF020), 1); EXPECT_EQ(has(x.font[0], 0xF05B), 0); EXPECT_EQ(has(x.font[0], 0xF040), 0); EXPECT_EQ(has(x.font[0], 0xF021), 0); EXPECT_EQ(has(x.font[0], 0xF061), 0);
     fo_close(&x);
 }
-TEST(font_has_symbol_cmap_low_range_note) {
-    /* a (3,0) font maps the private-use code points U+F0xx; CrossPopulateSymbols may also expose U+00xx */
-    fo_fx x; ttf_spec s; fo_symbol_spec(&s, "FoHasSym2"); FO_OPEN1(x, s);
-    t_note("symbol cmap F041: HasCharacter(U+0041)=%d (U+0020)=%d (U+005A)=%d (U+0061)=%d", has(x.font[0], 0x41), has(x.font[0], 0x20), has(x.font[0], 0x5A), has(x.font[0], 0x61));
+TEST(font_has_symbol_cmap_cross_populates_low_range) {
+    /* CompactCmapRegion::Create calls CrossPopulateSymbols for a (3,0) map: pages U+F000..U+F0FF and U+0000..U+00FF are OR-ed into each other */
+    fo_fx x; ttf_spec s; int i; fo_symbol_spec(&s, "FoHasSym2"); FO_OPEN1(x, s);
+    for (i = 0; i < 26; i++) CHECKF(has(x.font[0], 0x41 + i) == 1, "U+%04X", 0x41 + i);
+    EXPECT_EQ(has(x.font[0], 0x20), 1); EXPECT_EQ(has(x.font[0], 0x21), 0); EXPECT_EQ(has(x.font[0], 0x40), 0); EXPECT_EQ(has(x.font[0], 0x5B), 0); EXPECT_EQ(has(x.font[0], 0x61), 0);
+    EXPECT_EQ(has(x.font[0], 0x100), 0); EXPECT_EQ(has(x.font[0], 0xF100), 0); EXPECT_EQ(has(x.font[0], 0xEF41), 0);
+    fo_close(&x);
+}
+TEST(font_has_symbol_cmap_low_codes_mirror_up) {
+    /* the mirroring is symmetric: a (3,0) subtable that maps U+0041 directly also answers U+F041 */
+    static const ttf_map m[] = { { 0x41, 2 }, { 0x42, 3 }, { 0xF030, 4 } };
+    fo_fx x; ttf_spec s; ttf_cmap cm; fo_spec(&s, "FoHasSym3"); cm.format = 4; cm.plat = 3; cm.enc = 0; cm.n = 3; cm.map = m; cm.nuvs = 0; cm.uvs = NULL; s.cmaps = &cm; s.ncmaps = 1; FO_OPEN1(x, s);
+    EXPECT_EQ(has(x.font[0], 0x41), 1); EXPECT_EQ(has(x.font[0], 0xF041), 1); EXPECT_EQ(has(x.font[0], 0x42), 1); EXPECT_EQ(has(x.font[0], 0xF042), 1);
+    EXPECT_EQ(has(x.font[0], 0x30), 1); EXPECT_EQ(has(x.font[0], 0xF030), 1); EXPECT_EQ(has(x.font[0], 0x43), 0); EXPECT_EQ(has(x.font[0], 0xF043), 0);
+    fo_close(&x);
+}
+TEST(font_has_unicode_cmap_does_not_mirror) {
+    static const ttf_map m[] = { { 0x41, 2 }, { 0xF042, 3 } };
+    fo_fx x; ttf_spec s; ttf_cmap cm; one_cmap(&s, "FoHasNoMir", &cm, 4, 3, 1, m, 2); FO_OPEN1(x, s);
+    EXPECT_EQ(has(x.font[0], 0x41), 1); EXPECT_EQ(has(x.font[0], 0xF041), 0); EXPECT_EQ(has(x.font[0], 0xF042), 1); EXPECT_EQ(has(x.font[0], 0x42), 0);
     fo_close(&x);
 }
 TEST(font_has_glyph_zero_mapping_note) {
@@ -335,12 +351,11 @@ TEST(font_ranges_many_isolated_code_points) {
     for (i = 0; i < n; i++) { CHECKF(r[i].first == 0x100 + 2 * i && r[i].last == r[i].first, "range %u: %X-%X", i, r[i].first, r[i].last); }
     free(r); fo_close(&x);
 }
-TEST(font_ranges_symbol_font_note) {
-    fo_fx x; ttf_spec s; DWRITE_UNICODE_RANGE r[16]; UINT32 n = 0, i; HRESULT hr; fo_symbol_spec(&s, "FoRngSym"); FO_OPEN1(x, s);
-    ranges_of(x.font[0], r, 16, &n, &hr);
-    t_note("symbol cmap F020,F041-F05A: hr=%s count=%u", dw_hr_name(hr), n);
-    for (i = 0; i < n && i < 16; i++) t_note("  range %u: U+%04X-U+%04X", i, r[i].first, r[i].last);
-    CHECK(n >= 2);
+TEST(font_ranges_symbol_font_mirrored_ranges) {
+    /* symbol map F020, F041-F05A is reported with its cross-populated low copies: 0020, 0041-005A, F020, F041-F05A */
+    fo_fx x; ttf_spec s; DWRITE_UNICODE_RANGE r[16]; UINT32 n = 0; HRESULT hr; fo_symbol_spec(&s, "FoRngSym"); FO_OPEN1(x, s);
+    ranges_of(x.font[0], r, 16, &n, &hr); CHECK_HR_OK(hr); EXPECT_EQ(n, 4);
+    if (n == 4) { EXPECT_EQ(r[0].first, 0x20); EXPECT_EQ(r[0].last, 0x20); EXPECT_EQ(r[1].first, 0x41); EXPECT_EQ(r[1].last, 0x5A); EXPECT_EQ(r[2].first, 0xF020); EXPECT_EQ(r[2].last, 0xF020); EXPECT_EQ(r[3].first, 0xF041); EXPECT_EQ(r[3].last, 0xF05A); }
     fo_close(&x);
 }
 TEST(font_ranges_consistent_with_has_character_synthetic) {
