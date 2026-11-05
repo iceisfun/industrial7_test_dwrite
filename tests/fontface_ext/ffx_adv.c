@@ -41,6 +41,7 @@ TEST(da_zero_count_with_null_pointers) {
     ffx_close(&x);
 }
 TEST(da_null_indices_zero_output_invalid) {
+    if (t_is_wine()) { t_skip("Wine dereferences the NULL index array"); return; }
     ffx x; if (!ffx_open_default(&x)) { ffx_close(&x); return; }
     INT32 a[5]; memset(a, 0xCC, sizeof a);
     CHECK_HR(design_adv(&x, 5, NULL, a, FALSE), EINVAL);
@@ -217,6 +218,7 @@ TEST(ga_invalid_arguments_zero_output) {
     };
     int i, j;
     for (i = 0; i < (int)(sizeof c / sizeof c[0]); i++) {
+        if (t_is_wine() && c[i].nullidx) continue;        /* Wine dereferences the NULL index array */
         memset(a, 0xCC, sizeof a);
         HRESULT hr = gdi_adv(&x, c[i].em, c[i].ppd, NULL, FALSE, FALSE, 3, c[i].nullidx ? NULL : g, a);
         t_check(hr == EINVAL, __FILE__, __LINE__, c[i].what, "hr %s", dw_hr_name(hr));
@@ -564,6 +566,7 @@ TEST(vv_zero_count_null_pointers_ok) {
     ffx_close(&x);
 }
 TEST(vv_null_nominal_zero_fills_output) {
+    if (t_is_wine()) { t_skip("Wine dereferences the NULL nominal array"); return; }
     ffx x; if (!ffx_open_default(&x)) { ffx_close(&x); return; }
     UINT16 out[6]; memset(out, 0xFF, sizeof out);
     CHECK_HR(vvar(&x, 6, NULL, out), EINVAL);
@@ -579,6 +582,7 @@ TEST(vv_no_variants_identity) {
     ffx_close(&x);
 }
 TEST(vv_in_place_matches_out_of_place) {
+    if (t_is_wine()) { t_skip("Wine faults while applying a synthetic GSUB 'vert' lookup"); return; }
     ttf_spec s; ffx_spec_vert(&s);
     ffx x; if (!ffx_open_spec(&x, &s, DWRITE_FONT_SIMULATIONS_NONE)) { ffx_close(&x); return; }
     UINT16 in[8] = { 2, 3, 4, 5, 28, 64, 0, 2 }, out[8], ip[8]; memcpy(ip, in, sizeof in);
@@ -589,6 +593,7 @@ TEST(vv_in_place_matches_out_of_place) {
     ffx_close(&x);
 }
 TEST(vv_vert_feature_consistency) {
+    if (t_is_wine()) { t_skip("Wine faults while applying a synthetic GSUB 'vert' lookup"); return; }
     ttf_spec s; ffx_spec_vert(&s);
     ffx x; if (!ffx_open_spec(&x, &s, DWRITE_FONT_SIMULATIONS_NONE)) { ffx_close(&x); return; }
     UINT16 in[TTF_DEF_NGLYPHS], out[TTF_DEF_NGLYPHS]; int i, changed = 0, bad = 0;
@@ -607,6 +612,7 @@ TEST(vv_vert_feature_consistency) {
     ffx_close(&x);
 }
 TEST(vv_unmapped_glyphs_unchanged_with_vert_font) {
+    if (t_is_wine()) { t_skip("Wine faults while applying a synthetic GSUB 'vert' lookup"); return; }
     ttf_spec s; ffx_spec_vert(&s);
     ffx x; if (!ffx_open_spec(&x, &s, DWRITE_FONT_SIMULATIONS_NONE)) { ffx_close(&x); return; }
     UINT16 in[6] = { 0, 1, 5, 28, 54, 67 }, out[6];
@@ -624,6 +630,7 @@ TEST(vv_vrt2_feature_font_note) {
     ffx_close(&x);
 }
 TEST(vv_both_vert_and_vrt2_note) {
+    if (t_is_wine()) { t_skip("Wine faults while applying a synthetic GSUB 'vert' lookup"); return; }
     static const ttf_sub1 alt[] = { { 2, 65 }, { 3, 64 } };
     static const ttf_feature f[] = { { "vert", TTF_LK_SINGLE, 3, ffx_vert_subs }, { "vrt2", TTF_LK_SINGLE, 2, alt } };
     ttf_spec s; ffx_spec_vert(&s); s.gsub = f; s.ngsub = 2;
