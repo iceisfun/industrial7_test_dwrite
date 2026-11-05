@@ -49,7 +49,24 @@ void ffx_close(ffx *x) {
     if (x->owns_h) dwx_font_close(&x->h);
     memset(x, 0, sizeof *x);
 }
-void ffx_metrics1(ffx *x, DWRITE_FONT_METRICS1 *m) { memset(m, 0xCC, sizeof *m); IDWriteFontFace1_GetMetrics(x->f1, m); }
+void ffx_metrics1(ffx *x, DWRITE_FONT_METRICS1 *m) { memset(m, 0xCC, sizeof *m); ffx_c_metrics1(x->f1, m); }
+
+uint8_t *ffx_tbl(uint8_t *blob, size_t n, const char *tag, unsigned *len) {
+    unsigned l = 0; const uint8_t *p = ttf_find_table(blob, n, tag, &l);
+    if (len) *len = l;
+    return (uint8_t *)(ULONG_PTR)p;
+}
+void ffx_put16(uint8_t *p, unsigned off, int v) { p[off] = (uint8_t)((v >> 8) & 0xFF); p[off + 1] = (uint8_t)(v & 0xFF); }
+int ffx_get16(const uint8_t *p, unsigned off) { return (int)(short)((p[off] << 8) | p[off + 1]); }
+unsigned ffx_getu16(const uint8_t *p, unsigned off) { return (unsigned)((p[off] << 8) | p[off + 1]); }
+int ffx_open_patched(ffx *x, const ttf_spec *s, DWRITE_FONT_SIMULATIONS sim, ffx_patch_fn patch, void *ctx) {
+    size_t n = 0; uint8_t *b = ttf_build(s, &n); int ok;
+    if (!b) { memset(x, 0, sizeof *x); t_skip("ttf_build failed"); return 0; }
+    if (patch) patch(b, n, ctx);
+    ok = ffx_open_blob(x, b, n, 0, sim);
+    free(b);
+    return ok;
+}
 
 /* ---- fixtures ------------------------------------------------------------------------------------------------ */
 #define A_ G('A')
