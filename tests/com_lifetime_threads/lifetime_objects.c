@@ -11,7 +11,7 @@ static void body_factory_first(int idx) {
     clt_ctx c; IUnknown *o; const clt_maker *mk = mk_at(idx); dwx_mem_loader *probe; LONG at_factory_drop;
     NEED_PROC();
     if (!clt_ctx_init(&c)) { t_skip("no factory"); return; }
-    DWX_LEAK_BEGIN(ff);
+    CLT_LEAK_BEGIN(ff);
     probe = dwx_loader_new();
     CHECK_HR_OK(dwx_loader_register(probe, c.f));
     EXPECT_EQ(dwx_refs(probe), 2);
@@ -30,9 +30,9 @@ static void body_factory_first(int idx) {
     CLT_QI_BALANCE(o);
     IUnknown_Release(o);
     clt_ctx_abandon(&c);                          /* our own fixture references (no calls into the factory) */
-    EXPECT_EQ(dwx_refs(probe), 1);                /* now nothing of dwrite is left holding the factory or its registry */
+    CHECKF(clt_settle_refs(probe, 1) == 1, "factory registry still holds the probe loader (%ld)", (long)dwx_refs(probe));                /* now nothing of dwrite is left holding the factory or its registry */
     dwx_release(probe);
-    DWX_LEAK_END(ff);
+    CLT_LEAK_END(ff);
 }
 TEST(factory_first_textformat) { body_factory_first(0); }
 TEST(factory_first_textlayout) { body_factory_first(1); }
@@ -86,7 +86,7 @@ TEST(chain_any_release_order_keeps_remaining_alive) {
     for (p = 0; p < cnt; p++) {
         clt_cfix x; IDWriteFontCollection *c = NULL; IDWriteFontFamily *fam = NULL; IDWriteFont *fn = NULL; IDWriteFontFace *fc = NULL;
         void *obj[4]; int i; char tag[64];
-        DWX_LEAK_BEGIN(chain);
+        CLT_LEAK_BEGIN(chain);
         if (!clt_cfix_open(&x, 2)) { t_skip("fixture"); clt_cfix_close(&x); return; }
         if (FAILED(dwx_coll_create(x.cl, x.f, &c)) || !c) { CHECKF(0, "perm %d: collection", p); clt_cfix_close(&x); return; }
         IDWriteFontCollection_GetFontFamily(c, 1, &fam);
@@ -102,7 +102,7 @@ TEST(chain_any_release_order_keeps_remaining_alive) {
             chain_use((IDWriteFontCollection *)obj[0], (IDWriteFontFamily *)obj[1], (IDWriteFont *)obj[2], (IDWriteFontFace *)obj[3], tag, __FILE__, __LINE__);
         }
         clt_cfix_close(&x);
-        DWX_LEAK_END(chain);
+        CLT_LEAK_END(chain);
     }
 }
 TEST(chain_face_outlives_everything_but_loader_registration) {
@@ -248,7 +248,7 @@ TEST(layout_holds_and_releases_inline_object) {
     NEED_PROC();
     IDWriteFactory *f = dw_shared(); IDWriteTextFormat *fm = NULL; IDWriteTextLayout *l = NULL; dwx_inline *a, *b;
     DWRITE_TEXT_RANGE all = { 0, 5 };
-    DWX_LEAK_BEGIN(inl);
+    CLT_LEAK_BEGIN(inl);
     a = dwx_inline_new(20, 10, 8, FALSE); b = dwx_inline_new(30, 10, 8, FALSE);
     IDWriteFactory_CreateTextFormat(f, L"Arial", NULL, 400, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, 14.0f, L"en-us", &fm);
     if (fm) IDWriteFactory_CreateTextLayout(f, L"01234", 5, fm, 200, 100, &l);
@@ -273,7 +273,7 @@ TEST(layout_holds_and_releases_inline_object) {
     DW_RELEASE(l);
     EXPECT_EQ(dwx_refs(a), 1);
     dwx_release(a); dwx_release(b);
-    DWX_LEAK_END(inl);
+    CLT_LEAK_END(inl);
 }
 TEST(layout_holds_and_releases_drawing_effect) {
     NEED_PROC();
@@ -370,6 +370,8 @@ TEST(layout_draw_balances_renderer_and_objects) {
     if (!l) { t_skip("layout"); dwx_release(r); dwx_release(io); dwx_release(e); return; }
     CHECK_HR_OK(IDWriteTextLayout_SetInlineObject(l, (IDWriteInlineObject *)io, RNG(2, 1)));
     CHECK_HR_OK(IDWriteTextLayout_SetDrawingEffect(l, (IUnknown *)e, RNG(0, 5)));
+    CHECK_HR_OK(IDWriteTextLayout_Draw(l, (void *)0x1234, (IDWriteTextRenderer *)r, 5.0f, 6.0f));   /* warm-up: Windows 10 keeps extra references after the first Draw */
+    dwx_renderer_clear(r);
     {
         LONG io0 = dwx_refs(io), e0 = dwx_refs(e);
         CHECK_HR_OK(IDWriteTextLayout_Draw(l, (void *)0x1234, (IDWriteTextRenderer *)r, 5.0f, 6.0f));

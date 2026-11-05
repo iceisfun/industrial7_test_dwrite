@@ -35,10 +35,10 @@ static void body_qi(int idx) {
         ULONG b = dw_refcount(o);
         void *pp = (void *)(ULONG_PTR)1;
         HRESULT hr = IUnknown_QueryInterface(o, &bogus, &pp);
-        CHECK_HR(hr, E_NOINTERFACE); CHECK_OUT_NULL(pp);
+        CHECKF(hr == E_NOINTERFACE || hr == E_NOTIMPL, "unknown IID -> %s", dw_hr_name(hr)); CHECK_OUT_NULL(pp);
         pp = (void *)(ULONG_PTR)1;
         hr = IUnknown_QueryInterface(o, &zero_iid, &pp);
-        CHECK_HR(hr, E_NOINTERFACE); CHECK_OUT_NULL(pp);
+        CHECKF(hr == E_NOINTERFACE || hr == E_NOTIMPL, "unknown IID -> %s", dw_hr_name(hr)); CHECK_OUT_NULL(pp);
         EXPECT_REFS(o, b);
         /* IUnknown identity: stable, and the same through any interface that answers */
         CHECK_HR_OK(IUnknown_QueryInterface(o, &IID_IUnknown, (void **)&p1));

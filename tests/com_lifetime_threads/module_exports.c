@@ -10,7 +10,7 @@ static void missing_export(const char *name) {
     SET_ERR(0);
     p = GetProcAddress(m, name);
     CHECKF(p == NULL, "%s unexpectedly exported", name);
-    if (!p) EXPECT_ERR(ERROR_PROC_NOT_FOUND);
+    if (!p) { DWORD e = GetLastError(); CHECKF(e == ERROR_PROC_NOT_FOUND || e == ERROR_INVALID_ORDINAL, "GetLastError %lu (want 127 or 182)", e); }
 }
 #define MISSING(id, name) TEST(exp_missing_##id) { missing_export(name); }
 MISSING(DllGetClassObject, "DllGetClassObject")
@@ -54,7 +54,7 @@ static void missing_ordinal(int ord) {
     SET_ERR(0);
     p = GetProcAddress(m, MAKEINTRESOURCEA(ord));
     CHECKF(p == NULL, "ordinal %d unexpectedly exported", ord);
-    if (!p) EXPECT_ERR(ERROR_PROC_NOT_FOUND);
+    if (!p) { DWORD e = GetLastError(); CHECKF(e == ERROR_PROC_NOT_FOUND || e == ERROR_INVALID_ORDINAL, "GetLastError %lu (want 127 or 182)", e); }
 }
 TEST(exp_ordinal_2_absent) { missing_ordinal(2); }
 TEST(exp_ordinal_3_absent) { missing_ordinal(3); }

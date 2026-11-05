@@ -36,6 +36,13 @@ int clt_qi_balance(IUnknown *o, const char *file, int line);
 void clt_refs_arith(IUnknown *o, const char *file, int line);
 #define CLT_REFS_ARITH(o) clt_refs_arith((IUnknown *)(o), __FILE__, __LINE__)
 
+/* Windows 10 releases some retained references lazily; wait (bounded) until the doubles' live count stops changing,
+ * and until a double reaches a wanted count. */
+void clt_quiesce(void);
+LONG clt_settle_refs(void *obj, LONG want);          /* returns the last observed count */
+#define CLT_LEAK_BEGIN(tag) int tag##_live0_ = (clt_quiesce(), dwx_live())
+#define CLT_LEAK_END(tag)   do { clt_quiesce(); CHECKF(dwx_live() == tag##_live0_, "test doubles still referenced after the scope: %d -> %d", tag##_live0_, dwx_live()); } while (0)
+
 /* True when addr lies inside the loaded dwrite.dll image (vtables of dwrite objects do; an OLE proxy's would not). */
 int clt_in_dwrite(const void *addr);
 

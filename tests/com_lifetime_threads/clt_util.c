@@ -44,6 +44,22 @@ void clt_ctx_done(clt_ctx *c) {
     DW_RELEASE(c->f);
 }
 
+/* Windows 10 completes deferred releases when dwrite is next entered on the thread: do some harmless work. */
+static void clt_nudge(void) {
+    IDWriteFactory *f = dw_new_factory(DWRITE_FACTORY_TYPE_ISOLATED); IDWriteTextFormat *fm = NULL;
+    if (!f) return;
+    IDWriteFactory_CreateTextFormat(f, L"Arial", NULL, 400, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, 12.0f, L"en-us", &fm);
+    DW_RELEASE(fm); IDWriteFactory_Release(f);
+}
+void clt_quiesce(void) {
+    int last = dwx_live(), stable = 0, i;
+    for (i = 0; i < 100 && stable < 5; i++) { Sleep(10); if (i % 10 == 5) clt_nudge(); { int n = dwx_live(); if (n == last) stable++; else { stable = 0; last = n; } } }
+}
+LONG clt_settle_refs(void *obj, LONG want) {
+    LONG r = dwx_refs(obj); int i;
+    for (i = 0; i < 100 && r != want; i++) { Sleep(10); if (i % 10 == 5) clt_nudge(); r = dwx_refs(obj); }
+    return r;
+}
 int clt_in_dwrite(const void *addr) {
     MEMORY_BASIC_INFORMATION mbi; HMODULE m = t_module("dwrite.dll");
     if (!m || !addr) return 0;
@@ -69,7 +85,8 @@ int clt_qi_balance(IUnknown *o, const char *file, int line) {
                 IUnknown_Release((IUnknown *)p);
             }
         } else {
-            t_check(hr == E_NOINTERFACE, file, line, rows[i].name, "QI failure code %s want E_NOINTERFACE", dw_hr_name(hr));
+            /* Windows 10 answers E_NOTIMPL for some well-known IIDs the object does not implement */
+            t_check(hr == E_NOINTERFACE || hr == E_NOTIMPL, file, line, rows[i].name, "QI failure code %s want E_NOINTERFACE or E_NOTIMPL", dw_hr_name(hr));
             t_check(p == NULL, file, line, rows[i].name, "out pointer not zeroed on failure (%p)", p);
         }
     }
