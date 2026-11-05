@@ -44,6 +44,12 @@ void clt_ctx_done(clt_ctx *c) {
     DW_RELEASE(c->f);
 }
 
+int clt_in_dwrite(const void *addr) {
+    MEMORY_BASIC_INFORMATION mbi; HMODULE m = t_module("dwrite.dll");
+    if (!m || !addr) return 0;
+    if (!VirtualQuery(addr, &mbi, sizeof mbi)) return 0;
+    return mbi.AllocationBase == (void *)m;
+}
 /* ---- generic COM checks --------------------------------------------------------------------------------- */
 int clt_qi_balance(IUnknown *o, const char *file, int line) {
     int n = 0, i, ok = 0; const dw_qi_row *rows = dw_iid_table(&n);
@@ -58,6 +64,7 @@ int clt_qi_balance(IUnknown *o, const char *file, int line) {
             t_check(p != NULL && p != (void *)1, file, line, rows[i].name, "success with bad out pointer");
             t_check(now == base + 1, file, line, rows[i].name, "QI success must add exactly one reference: %lu -> %lu", base, now);
             if (p && p != (void *)1) {
+                t_check(clt_in_dwrite(*(void **)p), file, line, rows[i].name, "interface vtable %p is not inside dwrite.dll (no proxy expected)", *(void **)p);
                 t_check(dw_same_identity((IUnknown *)p, o), file, line, rows[i].name, "different COM identity");
                 IUnknown_Release((IUnknown *)p);
             }

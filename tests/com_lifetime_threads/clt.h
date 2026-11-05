@@ -36,6 +36,9 @@ int clt_qi_balance(IUnknown *o, const char *file, int line);
 void clt_refs_arith(IUnknown *o, const char *file, int line);
 #define CLT_REFS_ARITH(o) clt_refs_arith((IUnknown *)(o), __FILE__, __LINE__)
 
+/* True when addr lies inside the loaded dwrite.dll image (vtables of dwrite objects do; an OLE proxy's would not). */
+int clt_in_dwrite(const void *addr);
+
 /* ---- makers ------------------------------------------------------------------------------------------- */
 typedef struct clt_maker {
     const char *name;
