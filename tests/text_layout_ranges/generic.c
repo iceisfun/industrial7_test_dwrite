@@ -43,7 +43,8 @@ TEST(gen_positions_past_text_report_tail_run)
         SET_OK(p, 1, 2, 3);
         EXPECT_AT(p, 10, 0, 5, A(5)); EXPECT_AT(p, 11, 0, 5, A(5)); EXPECT_AT(p, 1000, 0, 5, A(5));
         EXPECT_AT(p, 0x7FFFFFFFu, 0, 5, A(5)); EXPECT_AT(p, 0xFFFFFFFEu, 0, 5, A(5));
-        if (!t_is_wine()) EXPECT_AT(p, 0xFFFFFFFFu, 0, 5, A(5));
+        /* Windows 10: the last possible position is reported as an empty range at that position, not as the tail run */
+        if (!t_is_wine()) EXPECT_AT(p, 0xFFFFFFFFu, 0, 0xFFFFFFFFu, 0);
     }
     TLR_ENV_END();
 }
