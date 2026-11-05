@@ -130,6 +130,7 @@ TEST(sp_infinite_spacing_valid_args) {
     TA_END();
 }
 TEST(sp_zero_glyphcount_succeeds_with_null_arrays) {
+    if (t_is_wine()) { t_skip("the Wine implementation dereferences NULL arguments"); return; }
     TA_BEGIN();
     CHECK_HR(IDWriteTextAnalyzer1_ApplyCharacterSpacing(a1, 1, 1, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL), S_OK);
     CHECK_HR(IDWriteTextAnalyzer1_ApplyCharacterSpacing(a1, 1, 1, 0, 5, 0, NULL, NULL, NULL, NULL, NULL, NULL), S_OK);
@@ -150,6 +151,7 @@ TEST(sp_zero_textlength_invalid) {
     TA_END();
 }
 TEST(sp_null_inputs_invalid) {
+    if (t_is_wine()) { t_skip("the Wine implementation dereferences NULL arguments"); return; }
     TA_BEGIN(); sp_case c; float adv[2] = { 10, 10 }; float oa[2]; DWRITE_GLYPH_OFFSET oo[2]; sp_simple(&c, 2, adv);
     CHECK_HR(IDWriteTextAnalyzer1_ApplyCharacterSpacing(a1, 1, 1, 0, c.n, c.g, NULL, c.adv, c.off, c.gp, oa, oo), TA_E_INVALIDARG);
     CHECK_HR(IDWriteTextAnalyzer1_ApplyCharacterSpacing(a1, 1, 1, 0, c.n, c.g, c.cm, NULL, c.off, c.gp, oa, oo), TA_E_INVALIDARG);

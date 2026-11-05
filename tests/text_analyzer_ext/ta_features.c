@@ -60,6 +60,7 @@ TEST(ft_tag_constants_match_opentype_tags) {
 
 /* ---- GetTypographicFeatures ---------------------------------------------------------------------------------------------------- */
 TEST(ft_null_face_invalid_count_cleared) {
+    if (t_is_wine()) { t_skip("the Wine implementation dereferences NULL arguments"); return; }
     TA_BEGIN(); UINT32 n = 99; DWRITE_FONT_FEATURE_TAG t[4]; DWRITE_SCRIPT_ANALYSIS sa = ta_sa_of(&c_, L"A", 1);
     CHECK_HR(IDWriteTextAnalyzer2_GetTypographicFeatures(a2, NULL, sa, L"en-us", 4, &n, t), TA_E_INVALIDARG);
     EXPECT_EQ(n, 0);
@@ -173,6 +174,7 @@ static HRESULT chk(IDWriteTextAnalyzer2 *a2, ffix *ff, UINT32 tag, UINT32 n, con
     return IDWriteTextAnalyzer2_CheckTypographicFeature(a2, ff->h.face, ff->latin, L"en-us", (DWRITE_FONT_FEATURE_TAG)tag, n, g, out);
 }
 TEST(fc_null_face_invalid_outputs_cleared) {
+    if (t_is_wine()) { t_skip("the Wine implementation dereferences NULL arguments"); return; }
     TA_BEGIN(); UINT16 g[3] = { 2, 3, 4 }; UINT8 out[3] = { 7, 7, 7 }; DWRITE_SCRIPT_ANALYSIS sa = ta_sa_of(&c_, L"A", 1);
     CHECK_HR(IDWriteTextAnalyzer2_CheckTypographicFeature(a2, NULL, sa, L"en-us", DWRITE_FONT_FEATURE_TAG_KERNING, 3, g, out), TA_E_INVALIDARG);
     EXPECT_EQ(out[0], 0); EXPECT_EQ(out[1], 0); EXPECT_EQ(out[2], 0);
