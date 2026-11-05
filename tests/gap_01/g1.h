@@ -60,7 +60,7 @@ g1_io *g1_io_new(float width, float height, float baseline);
 typedef struct g1_remote {
     const void *lpVtbl; volatile LONG ref;
     dwx_mem_loader *inner; DWRITE_LOCALITY locality; HRESULT locality_hr;
-    LONG n_locality, n_create, n_remote_create; UINT32 last_key_size;
+    LONG n_locality, n_create, n_remote_create; UINT32 last_key_size, last_key;
     int registered; IDWriteFactory *reg_factory;
 } g1_remote;
 g1_remote *g1_remote_new(dwx_mem_loader *inner, DWRITE_LOCALITY loc);
@@ -86,4 +86,14 @@ void g1_fnt_close(g1_fnt *g);
 /* Patches bytes into a spec's OS/2 table (copy kept for the life of the process). Returns 1 on success. */
 int  g1_patch_os2(ttf_spec *s, unsigned off, const void *bytes, unsigned len);
 #define G1_FNT(g, spec) g1_fnt g; memset(&g, 0, sizeof g); if (!g1_fnt_open(&g, &(spec))) { g1_fnt_close(&g); t_skip("synthetic font collection unavailable"); return; }
+
+/* ---- synthetic variable fonts (fvar + gvar, optional STAT axis values and fvar named instances) ---------------------------- */
+typedef struct g1_axis { char tag[5]; float mn, df, mx; unsigned nameid; const char *name; } g1_axis;
+typedef struct g1_stat_val { int format; int axis; unsigned nameid; const char *name; float value, lo, hi, linked; } g1_stat_val;   /* format 1 (value), 2 (nominal value, lo..hi), 3 (value + linked) */
+typedef struct g1_inst { unsigned nameid; const char *name; float coord[4]; } g1_inst;
+/* Default synthetic glyphs, family `family`, with an fvar of the axes, a STAT table when nv > 0 and nin fvar named instances. malloc'd blob. */
+uint8_t *g1_build_var(const char *family, const g1_axis *ax, int n, const g1_stat_val *sv, int nv, const g1_inst *in, int nin, size_t *size);
+/* Two axes: wght 100/400/900 (name 256 "Weight"), XTRA 10/50/90 (name 257 "Extra Axis"). */
+uint8_t *g1_build_var2(const char *family, size_t *size);
+#define G1_TAG(a, b, c, d) DW_TAG(a, b, c, d)
 #endif

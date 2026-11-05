@@ -162,7 +162,7 @@ static HRESULT WINAPI rm_CreateRemoteStream(IDWriteRemoteFontFileLoader *This, c
 static HRESULT WINAPI rm_Locality(IDWriteRemoteFontFileLoader *This, const void *key, UINT32 ks, DWRITE_LOCALITY *loc)
 {
     g1_remote *l = (g1_remote *)This; InterlockedIncrement(&l->n_locality);
-    l->last_key_size = ks;
+    l->last_key_size = ks; if (key && ks >= 4) memcpy(&l->last_key, key, 4);
     if (FAILED(l->locality_hr)) return l->locality_hr;
     *loc = l->locality;
     return S_OK;
@@ -265,4 +265,63 @@ int g1_patch_os2(ttf_spec *s, unsigned off, const void *bytes, unsigned len)
     memcpy(raws[nr + cnt].tag, "OS/2", 5); raws[nr + cnt].data = copy; raws[nr + cnt].len = tl; cnt++;
     s->raw = &raws[nr]; s->nraw = cnt; nr += cnt;
     return 1;
+}
+
+/* ---- variable font builders ---------------------------------------------------------------------------------------------------- */
+static void p16(uint8_t *p, unsigned v) { p[0] = (uint8_t)(v >> 8); p[1] = (uint8_t)v; }
+static void p32(uint8_t *p, uint32_t v) { p[0] = (uint8_t)(v >> 24); p[1] = (uint8_t)(v >> 16); p[2] = (uint8_t)(v >> 8); p[3] = (uint8_t)v; }
+static uint32_t fx16(float v) { return (uint32_t)(int32_t)(v * 65536.0f); }
+
+uint8_t *g1_build_var(const char *family, const g1_axis *ax, int n, const g1_stat_val *sv, int nv, const g1_inst *in, int nin, size_t *size)
+{
+    ttf_spec s; ttf_rawtable raw[3]; int nraw = 0, i, j; uint8_t *fv, *gv, *stat = NULL, *blob;
+    unsigned inst_size = 4 + 4 * (unsigned)n, fv_len = 16 + 20 * (unsigned)n + (unsigned)nin * inst_size, gv_len = 20 + 2 * (TTF_DEF_NGLYPHS + 1), stat_len = 0;
+    char ps[96];
+    ttf_default_spec(&s); snprintf(ps, sizeof ps, "%s-Regular", family); ttf_set_names(&s, family, "Regular", family, ps);
+    fv = (uint8_t *)calloc(1, fv_len);
+    p16(fv, 1); p16(fv + 2, 0); p16(fv + 4, 16); p16(fv + 6, 2); p16(fv + 8, (unsigned)n); p16(fv + 10, 20); p16(fv + 12, (unsigned)nin); p16(fv + 14, inst_size);
+    for (i = 0; i < n; i++) {
+        uint8_t *a = fv + 16 + 20 * i;
+        memcpy(a, ax[i].tag, 4); p32(a + 4, fx16(ax[i].mn)); p32(a + 8, fx16(ax[i].df)); p32(a + 12, fx16(ax[i].mx)); p16(a + 16, 0); p16(a + 18, ax[i].nameid);
+        if (ax[i].name && ax[i].nameid) ttf_add_name(&s, 3, 1, 0x409, ax[i].nameid, ax[i].name);
+    }
+    for (i = 0; i < nin; i++) {
+        uint8_t *r = fv + 16 + 20 * n + i * inst_size;
+        p16(r, in[i].nameid); p16(r + 2, 0);
+        for (j = 0; j < n && j < 4; j++) p32(r + 4 + 4 * j, fx16(in[i].coord[j]));
+        if (in[i].name && in[i].nameid) ttf_add_name(&s, 3, 1, 0x409, in[i].nameid, in[i].name);
+    }
+    memset(raw, 0, sizeof raw);
+    memcpy(raw[nraw].tag, "fvar", 5); raw[nraw].data = fv; raw[nraw].len = fv_len; nraw++;
+    gv = (uint8_t *)calloc(1, gv_len);
+    p16(gv, 1); p16(gv + 2, 0); p16(gv + 4, (unsigned)n); p16(gv + 6, 0); p32(gv + 8, gv_len); p16(gv + 12, TTF_DEF_NGLYPHS); p16(gv + 14, 0); p32(gv + 16, gv_len);
+    memcpy(raw[nraw].tag, "gvar", 5); raw[nraw].data = gv; raw[nraw].len = gv_len; nraw++;
+    if (nv > 0) {
+        unsigned hdr = 20, axes_off = hdr, offs_off = axes_off + 8 * (unsigned)n, tab_off = offs_off + 2 * (unsigned)nv, cur = tab_off;
+        for (i = 0; i < nv; i++) cur += sv[i].format == 1 ? 12 : sv[i].format == 2 ? 20 : 16;
+        stat_len = cur; stat = (uint8_t *)calloc(1, stat_len);
+        p16(stat, 1); p16(stat + 2, 1); p16(stat + 4, 8); p16(stat + 6, (unsigned)n); p32(stat + 8, axes_off); p16(stat + 12, (unsigned)nv); p32(stat + 14, offs_off); p16(stat + 18, 2);
+        for (i = 0; i < n; i++) { uint8_t *a = stat + axes_off + 8 * i; memcpy(a, ax[i].tag, 4); p16(a + 4, ax[i].nameid); p16(a + 6, (unsigned)i); }
+        cur = tab_off;
+        for (i = 0; i < nv; i++) {
+            uint8_t *t = stat + cur; unsigned len = sv[i].format == 1 ? 12 : sv[i].format == 2 ? 20 : 16;
+            p16(stat + offs_off + 2 * i, cur - offs_off);
+            p16(t, (unsigned)sv[i].format); p16(t + 2, (unsigned)sv[i].axis); p16(t + 4, 0); p16(t + 6, sv[i].nameid);
+            p32(t + 8, fx16(sv[i].value));
+            if (sv[i].format == 2) { p32(t + 12, fx16(sv[i].lo)); p32(t + 16, fx16(sv[i].hi)); }
+            if (sv[i].format == 3) p32(t + 12, fx16(sv[i].linked));
+            if (sv[i].name && sv[i].nameid) ttf_add_name(&s, 3, 1, 0x409, sv[i].nameid, sv[i].name);
+            cur += len;
+        }
+        memcpy(raw[nraw].tag, "STAT", 5); raw[nraw].data = stat; raw[nraw].len = stat_len; nraw++;
+    }
+    s.raw = raw; s.nraw = nraw;
+    blob = ttf_build(&s, size);
+    free(fv); free(gv); free(stat);
+    return blob;
+}
+uint8_t *g1_build_var2(const char *family, size_t *size)
+{
+    g1_axis ax[2] = { { "wght", 100, 400, 900, 256, "Weight" }, { "XTRA", 10, 50, 90, 257, "Extra Axis" } };
+    return g1_build_var(family, ax, 2, NULL, 0, NULL, 0, size);
 }
