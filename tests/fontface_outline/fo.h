@@ -16,7 +16,9 @@
 #define FO_H
 #include "dwx.h"
 
-#define FO_NEED_FACE() dwx_font h; memset(&h, 0, sizeof h); \
+static int fo_upm = TTF_DEF_UPM, fo_lab_upm, fo_lab_compress;   /* unitsPerEm of the font under test; lab font knobs */
+
+#define FO_NEED_FACE() dwx_font h; memset(&h, 0, sizeof h); fo_upm = TTF_DEF_UPM; \
     if (!dw_shared()) { t_skip("DWriteCreateFactory unavailable"); return; } \
     DW_REQUIRE_OK(dwx_font_open_default(&h, dw_shared())); if (!h.face) { dwx_font_close(&h); t_skip("no face"); return; }
 
@@ -146,26 +148,31 @@ static void fo_origins(fo_org *o, int n, double k, const double *fadv /*design a
 /* ---------------------------------------------------------------- comparison */
 /* Compare the recorded sink stream to the model.  Returns 1 when identical within tol.  One CHECK per call; the failure
  * detail names the first difference. */
-static int fo_compare_(const dwx_geom *g, const fo_exp *e, double tol, const char *file, int line, const char *what) {
-    int i, pi = 0, ok = 1; char msg[200] = "";
-    if (g->nev != e->n) { snprintf(msg, sizeof msg, "%s: event count %d want %d", what, g->nev, e->n); ok = 0; }
+static int fo_diff_(const dwx_geom *g, const fo_exp *e, double tol, const char *what, char *msg, size_t msgcap) {
+    int i, pi = 0, ok = 1;
+    (void)msgcap;
+    if (g->nev != e->n) { snprintf(msg, 200, "%s: event count %d want %d", what, g->nev, e->n); ok = 0; }
     for (i = 0; ok && i < e->n; i++) {
         const dwx_gev *a = &g->ev[i]; const fo_ev *b = &e->ev[i]; int j, np = 0;
-        if (a->kind != b->kind) { snprintf(msg, sizeof msg, "%s: ev %d kind %d want %d", what, i, a->kind, b->kind); ok = 0; break; }
-        if (b->kind == DWX_G_FILL) { if (a->arg != D2D1_FILL_MODE_WINDING) { snprintf(msg, sizeof msg, "%s: fill mode %d", what, a->arg); ok = 0; } continue; }
-        if (b->kind == DWX_G_END) { if (a->arg != D2D1_FIGURE_END_CLOSED) { snprintf(msg, sizeof msg, "%s: ev %d end flag %d", what, i, a->arg); ok = 0; } continue; }
-        if (b->kind == DWX_G_BEGIN) { np = 1; if (a->arg != D2D1_FIGURE_BEGIN_FILLED) { snprintf(msg, sizeof msg, "%s: ev %d begin flag %d", what, i, a->arg); ok = 0; break; } }
+        if (a->kind != b->kind) { snprintf(msg, 200, "%s: ev %d kind %d want %d", what, i, a->kind, b->kind); ok = 0; break; }
+        if (b->kind == DWX_G_FILL) { if (a->arg != D2D1_FILL_MODE_WINDING) { snprintf(msg, 200, "%s: fill mode %d", what, a->arg); ok = 0; } continue; }
+        if (b->kind == DWX_G_END) { if (a->arg != D2D1_FIGURE_END_CLOSED) { snprintf(msg, 200, "%s: ev %d end flag %d", what, i, a->arg); ok = 0; } continue; }
+        if (b->kind == DWX_G_BEGIN) { np = 1; if (a->arg != D2D1_FIGURE_BEGIN_FILLED) { snprintf(msg, 200, "%s: ev %d begin flag %d", what, i, a->arg); ok = 0; break; } }
         else if (b->kind == DWX_G_LINES) np = b->n; else if (b->kind == DWX_G_BEZIERS) np = 3 * b->n;
-        if (b->kind != DWX_G_BEGIN && a->count != b->n) { snprintf(msg, sizeof msg, "%s: ev %d count %d want %d", what, i, a->count, b->n); ok = 0; break; }
+        if (b->kind != DWX_G_BEGIN && a->count != b->n) { snprintf(msg, 200, "%s: ev %d count %d want %d", what, i, a->count, b->n); ok = 0; break; }
         for (j = 0; j < np; j++) {
             double gx, gy, wx, wy;
-            if (pi >= g->npts) { snprintf(msg, sizeof msg, "%s: ran out of points at ev %d", what, i); ok = 0; break; }
+            if (pi >= g->npts) { snprintf(msg, 200, "%s: ran out of points at ev %d", what, i); ok = 0; break; }
             gx = g->pts[pi].x; gy = g->pts[pi].y; wx = b->p[2 * j]; wy = b->p[2 * j + 1]; pi++;
             if (!(fabs(gx - wx) <= tol && fabs(gy - wy) <= tol)) {
-                snprintf(msg, sizeof msg, "%s: ev %d pt %d got (%g,%g) want (%g,%g)", what, i, j, gx, gy, wx, wy); ok = 0; break;
+                snprintf(msg, 200, "%s: ev %d pt %d got (%g,%g) want (%g,%g)", what, i, j, gx, gy, wx, wy); ok = 0; break;
             }
         }
     }
+    return ok;
+}
+static int fo_compare_(const dwx_geom *g, const fo_exp *e, double tol, const char *file, int line, const char *what) {
+    char msg[200] = ""; int ok = fo_diff_(g, e, tol, what, msg, sizeof msg);
     t_check(ok, file, line, "outline stream matches model", "%s", msg);
     return ok;
 }
@@ -281,6 +288,9 @@ static HRESULT fo_open_lab(dwx_font *h, DWRITE_FONT_SIMULATIONS sim) {
     memset(h, 0, sizeof *h);
     if (!dw_shared()) return E_FAIL;
     fo_lab_spec(&s);
+    if (fo_lab_upm) s.upm = fo_lab_upm;
+    s.compress_hmtx = fo_lab_compress;
+    fo_upm = s.upm;
     b = ttf_build(&s, &n);
     if (!b) return E_FAIL;
     hr = dwx_font_open(h, dw_shared(), b, n, 0, sim);
@@ -300,7 +310,7 @@ static void fo_model_run(fo_exp *e, const ttf_glyph *tab, int ntab, IDWriteFontF
                          const float *adv, const DWRITE_GLYPH_OFFSET *off, UINT32 n, int sw, int rtl, double shear) {
     UINT32 i; fo_org *o = (fo_org *)calloc(n ? n : 1, sizeof *o);
     double *fa = (double *)calloc(n ? n : 1, sizeof(double)), *va = (double *)calloc(n ? n : 1, sizeof(double)), *vo = (double *)calloc(n ? n : 1, sizeof(double));
-    double k = em / TTF_DEF_UPM;
+    double k = em / fo_upm;
     e->n = 0;
     if (n == 0) { free(o); free(fa); free(va); free(vo); return; }
     for (i = 0; i < n; i++) {

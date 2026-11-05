@@ -268,6 +268,24 @@ TEST(proto_long_run_200_glyphs) {
     FO_INVARIANTS(s, 1);
     dwx_release(s); dwx_font_close(&h);
 }
+TEST(proto_huge_empty_run) {
+    FO_NEED_FACE();
+    UINT16 *g = (UINT16 *)malloc(50000 * sizeof(UINT16)); int i; dwx_geom *s = dwx_geom_new();
+    for (i = 0; i < 50000; i++) g[i] = (i & 1) ? G_SPACE : TTF_GID_EMPTY500;
+    CHECK_HR(fo_call(h.face, 12.0f, g, NULL, NULL, 50000, FALSE, FALSE, s), S_OK);
+    CHECK(s->nev == 1 && s->fill_calls == 1);       /* 50000 outline-less glyphs: only SetFillMode */
+    free(g); dwx_release(s); dwx_font_close(&h);
+}
+TEST(proto_run_3000_boxes_counters) {
+    FO_NEED_FACE();
+    UINT16 *g = (UINT16 *)malloc(3000 * sizeof(UINT16)); int i; dwx_geom *s = dwx_geom_new();
+    for (i = 0; i < 3000; i++) g[i] = 2 + (i % 26);
+    CHECK_HR(fo_call(h.face, 12.0f, g, NULL, NULL, 3000, FALSE, FALSE, s), S_OK);
+    CHECK(s->nfigures_begun == 3000 && s->nfigures_ended == 3000);
+    CHECK(s->nlines == 9000 && s->nbeziers == 0);
+    CHECK(s->fill_calls == 1 && s->order_violations == 0 && s->close_calls == 0);
+    free(g); dwx_release(s); dwx_font_close(&h);
+}
 TEST(proto_notdef_outline) {
     FO_NEED_FACE();
     /* glyph 0 is a regular glyph: .notdef box (100,0)-(1100,1400) */
