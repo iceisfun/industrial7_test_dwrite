@@ -30,6 +30,22 @@ for i in decl:
         for m in decl[anc]:
             if (i, m) in macro: covered[anc].add(m)
             elif m in vt and anc == i: covered[anc].add(m)
+status = {}
+sp = os.path.join(root, "tools", "interface_support.tsv")
+if os.path.exists(sp):
+    for l in list(open(sp))[1:]:
+        f = l.rstrip("\n").split("\t"); status[f[0]] = f[1]
+# per-method call-site counts (macro calls anywhere in tests, attributed to the declaring interface)
+cnt = collections.Counter(re.findall(r"\bI(DWrite\w+)_(\w+)\s*\(", src))
+def calls(i, m):
+    n = 0
+    for (a, b), v in cnt.items():
+        if b != m: continue
+        k = "I" + a
+        while k:
+            if k == i: n += v; break
+            k = base.get(k)
+    return n
 # interface-level view (a derived interface also "has" inherited methods called through it)
 tot = sum(len(v) for v in decl.values()); cov = sum(len(covered[i]) for i in decl)
 lines = ["# dwrite interface-method coverage", "", f"Total: {cov}/{tot} methods covered ({100*cov/max(tot,1):.1f}%)", "",
@@ -40,4 +56,12 @@ for i, ms in decl.items():
     print(f"{i:36s} {len(c):4d}/{len(ms):<4d}")
     lines.append(f"| {i} | {len(c)} | {len(ms)} | {', '.join(miss)} |")
 print(f"TOTAL {cov}/{tot}")
+thin = [(i, m, calls(i, m)) for i in decl for m in decl[i] if m in covered[i] and 0 < calls(i, m) <= 3 and m not in ("QueryInterface","AddRef","Release")]
+lines += ["", "## Interface status (19041) and callback interfaces", "",
+          "Interfaces marked callback are implemented by the test; their methods are driven by dwrite and observed through the common/dwx doubles, so zero macro calls is expected.",
+          "not-in-19041 interfaces are not reachable on build 19041 (QueryInterface must fail).", ""]
+for i in decl:
+    if status.get(i) in ("callback", "not-in-19041"): lines.append(f"- {i}: {status[i]}")
+lines += ["", "## Thin (1-3 macro call sites)", ""] + [f"- {i}::{m} ({n})" for i, m, n in thin]
+open(os.path.join(root, "COVERAGE.md"), "w").write("\n".join(lines) + "\n")
 open(os.path.join(root, "COVERAGE.md"), "w").write("\n".join(lines) + "\n")
