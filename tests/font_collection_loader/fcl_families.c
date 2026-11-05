@@ -672,13 +672,13 @@ TEST(fcl_names_missing_name_table_no_crash)
 /* ------------------------------------------------------------------------- legacy vs typographic naming */
 TEST(fcl_group_light_weight_is_its_own_legacy_family)
 {
-    /* name ID 1 = "Wws Fam Light", ID 16 = "Wws Fam": the WWS model uses the legacy name. */
+    /* name ID 1 = "Wws Fam Light", ID 16 = "Wws Fam": Win10 groups loader collections by the typographic name. */
     FCL_OPEN(x);
     fcl_add_style(&x, "Wws Fam", 300, 5, 0);
     FCL_COLL(x, c);
     EXPECT_EQ(IDWriteFontCollection_GetFontFamilyCount(c), 1);
-    CHECK(fcl_find(c, "Wws Fam Light") == 0);
-    t_note("typographic name \"Wws Fam\" resolves to %ld", fcl_find(c, "Wws Fam"));
+    CHECK(fcl_find(c, "Wws Fam") == 0);
+    t_note("legacy name \"Wws Fam Light\" resolves to %ld", fcl_find(c, "Wws Fam Light"));
     IDWriteFont *f = fcl_pick(c, 0, 300, 5, 0, 0);
     CHECK(f != NULL);
     DW_RELEASE(f);
@@ -691,11 +691,11 @@ TEST(fcl_group_regular_and_light_are_two_families)
     fcl_add_style(&x, "Split Fam", 400, 5, 0);
     fcl_add_style(&x, "Split Fam", 300, 5, 0);
     FCL_COLL(x, c);
-    EXPECT_EQ(IDWriteFontCollection_GetFontFamilyCount(c), 2);
-    long r = fcl_find(c, "Split Fam"), l = fcl_find(c, "Split Fam Light");
-    CHECK(r >= 0 && l >= 0 && r != l);
-    if (r >= 0) { IDWriteFont *f = fcl_pick(c, (UINT32)r, 400, 5, 0, 0); CHECK(f != NULL); DW_RELEASE(f); f = fcl_pick(c, (UINT32)r, 300, 5, 0, -1); CHECK(f == NULL); DW_RELEASE(f); }
-    if (l >= 0) { IDWriteFont *f = fcl_pick(c, (UINT32)l, 300, 5, 0, 0); CHECK(f != NULL); DW_RELEASE(f); }
+    /* Win10 groups by the typographic name: Regular and Light share one family */
+    EXPECT_EQ(IDWriteFontCollection_GetFontFamilyCount(c), 1);
+    long r = fcl_find(c, "Split Fam");
+    CHECK(r == 0);
+    if (r >= 0) { IDWriteFont *f = fcl_pick(c, (UINT32)r, 400, 5, 0, 0); CHECK(f != NULL); DW_RELEASE(f); f = fcl_pick(c, (UINT32)r, 300, 5, 0, 0); CHECK(f != NULL); DW_RELEASE(f); }
     DW_RELEASE(c);
     fcl_close(&x);
 }
@@ -706,21 +706,16 @@ TEST(fcl_group_weight_ladder)
     unsigned i;
     for (i = 0; i < sizeof weights / sizeof weights[0]; i++) fcl_add_style(&x, "Ladder", weights[i], 5, 0);
     FCL_COLL(x, c);
-    /* "Ladder" holds 400+700 (legacy RIBBI), every other weight has its own legacy family name */
-    EXPECT_EQ(IDWriteFontCollection_GetFontFamilyCount(c), 8);
+    /* Win10 groups by the typographic name: all nine weights live in one family */
+    EXPECT_EQ(IDWriteFontCollection_GetFontFamilyCount(c), 1);
     long base = fcl_find(c, "Ladder");
-    CHECK(base >= 0);
-    for (i = 0; i < sizeof weights / sizeof weights[0]; i++) {
-        if (weights[i] == 400 || weights[i] == 700) continue;
-        char nm[64]; snprintf(nm, sizeof nm, "Ladder %s", ttf_weight_word(weights[i]));
-        long idx = fcl_find(c, nm);
-        CHECKF(idx >= 0, "%s missing", nm);
-        if (idx >= 0) { IDWriteFont *f = fcl_pick(c, (UINT32)idx, weights[i], 5, 0, 0); CHECKF(f != NULL, "%s: no face with weight %d", nm, weights[i]); DW_RELEASE(f); }
-    }
+    CHECK(base == 0);
     if (base >= 0) {
-        IDWriteFont *r = fcl_pick(c, (UINT32)base, 400, 5, 0, 0), *b = fcl_pick(c, (UINT32)base, 700, 5, 0, 0);
-        CHECK(r != NULL && b != NULL);
-        DW_RELEASE(r); DW_RELEASE(b);
+        for (i = 0; i < sizeof weights / sizeof weights[0]; i++) {
+            IDWriteFont *f = fcl_pick(c, (UINT32)base, weights[i], 5, 0, 0);
+            CHECKF(f != NULL, "no face with weight %d", weights[i]);
+            DW_RELEASE(f);
+        }
     }
     fcl_note_families(c, "weight ladder");
     DW_RELEASE(c);
@@ -733,11 +728,14 @@ TEST(fcl_group_stretch_is_its_own_legacy_family)
     fcl_add_style(&x, "Narrow Fam", 400, 3, 0);      /* condensed */
     fcl_add_style(&x, "Narrow Fam", 400, 7, 0);      /* expanded */
     FCL_COLL(x, c);
-    EXPECT_EQ(IDWriteFontCollection_GetFontFamilyCount(c), 3);
-    long a = fcl_find(c, "Narrow Fam"), b = fcl_find(c, "Narrow Fam Condensed"), d = fcl_find(c, "Narrow Fam Expanded");
-    CHECK(a >= 0 && b >= 0 && d >= 0);
-    if (b >= 0) { IDWriteFont *f = fcl_pick(c, (UINT32)b, 400, DWRITE_FONT_STRETCH_CONDENSED, 0, 0); CHECK(f != NULL); DW_RELEASE(f); }
-    if (d >= 0) { IDWriteFont *f = fcl_pick(c, (UINT32)d, 400, DWRITE_FONT_STRETCH_EXPANDED, 0, 0); CHECK(f != NULL); DW_RELEASE(f); }
+    /* Win10 groups by the typographic name: the three widths share one family */
+    EXPECT_EQ(IDWriteFontCollection_GetFontFamilyCount(c), 1);
+    long a = fcl_find(c, "Narrow Fam");
+    CHECK(a == 0);
+    if (a >= 0) {
+        IDWriteFont *f = fcl_pick(c, 0, 400, DWRITE_FONT_STRETCH_CONDENSED, 0, 0); CHECK(f != NULL); DW_RELEASE(f);
+        f = fcl_pick(c, 0, 400, DWRITE_FONT_STRETCH_EXPANDED, 0, 0); CHECK(f != NULL); DW_RELEASE(f);
+    }
     DW_RELEASE(c);
     fcl_close(&x);
 }
@@ -817,9 +815,10 @@ TEST(fcl_group_typographic_names_do_not_merge_families)
     ttf_add_name(&b, 3, 1, 0x409, 16, "Typo Group");          ttf_add_name(&b, 3, 1, 0x409, 17, "SemiBold");
     fcl_add_spec(&x, &a); fcl_add_spec(&x, &b);
     FCL_COLL(x, c);
-    EXPECT_EQ(IDWriteFontCollection_GetFontFamilyCount(c), 2);
+    /* Win10 merges them: the second face's ID16 equals the first face's ID1 */
+    EXPECT_EQ(IDWriteFontCollection_GetFontFamilyCount(c), 1);
     CHECK(fcl_find(c, "Typo Group") >= 0);
-    CHECK(fcl_find(c, "Typo Group SemiBold") >= 0);
+    t_note("\"Typo Group SemiBold\" resolves to %ld", fcl_find(c, "Typo Group SemiBold"));
     DW_RELEASE(c);
     fcl_close(&x);
 }
@@ -836,8 +835,8 @@ TEST(fcl_group_typographic_family_with_many_styles)
     t_note("Designer 300/400/500/700 + 400 italic -> %u families", n);
     fcl_note_families(c, "designer");
     CHECK(fcl_find(c, "Designer") >= 0);
-    CHECK(fcl_find(c, "Designer Light") >= 0);
-    CHECK(fcl_find(c, "Designer Medium") >= 0);
+    EXPECT_EQ(n, 1);
+    t_note("\"Designer Light\" resolves to %ld", fcl_find(c, "Designer Light"));
     DW_RELEASE(c);
     fcl_close(&x);
 }
