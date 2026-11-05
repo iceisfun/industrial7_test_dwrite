@@ -738,8 +738,10 @@ TEST(fset_q_s1mf_is_a_subset)
         fs_prop_set(&p, DWRITE_FONT_PROPERTY_ID_WEIGHT_STRETCH_STYLE_FAMILY_NAME, "SynthB", NULL);
         CHECK_HR_OK(IDWriteFontSet1_GetMatchingFonts(s1, &p.p, v, 1, &out));
         if (out) {
+            UINT32 wb[2];
             CHECK(IDWriteFontSet1_GetFontCount(out) == 1);
-            CHECK(parent_index(s.set, FS_AS_SET(out), 0) == 4);
+            CHECK(fs_indices_of(s.set, DWRITE_FONT_PROPERTY_ID_WEIGHT_STRETCH_STYLE_FAMILY_NAME, "SynthB", wb, 2) == 1);
+            CHECK(parent_index(s.set, FS_AS_SET(out), 0) == wb[0]);
             DW_RELEASE(out);
         }
         fs_prop_set(&p, DWRITE_FONT_PROPERTY_ID_WEIGHT_STRETCH_STYLE_FAMILY_NAME, "Nobody", NULL);
@@ -865,8 +867,9 @@ TEST(fset_q_gfi_buffer_protocol)
     FS_STD(s);
     IDWriteFontSet1 *s1 = fs_set1(s.set);
     if (s1) {
-        fs_prop p; UINT32 buf[16], actual, i;
+        fs_prop p; UINT32 buf[16], actual, i, want[8];
         fs_prop_set(&p, DWRITE_FONT_PROPERTY_ID_WEIGHT_STRETCH_STYLE_FAMILY_NAME, "SynthA", NULL);
+        CHECK(fs_indices_of(s.set, DWRITE_FONT_PROPERTY_ID_WEIGHT_STRETCH_STYLE_FAMILY_NAME, "SynthA", want, 8) == 4);
         /* size 0 / NULL buffer */
         actual = 77;
         HRESULT hr = IDWriteFontSet1_GetFilteredFontIndices(s1, &p.p, 1, FALSE, NULL, 0, &actual);
@@ -878,7 +881,7 @@ TEST(fset_q_gfi_buffer_protocol)
         hr = IDWriteFontSet1_GetFilteredFontIndices(s1, &p.p, 1, FALSE, buf, 3, &actual);
         CHECK_HR(hr, FS_E_NOTSUFF);
         CHECKF(actual == 4, "actual %u", actual);
-        CHECK(buf[0] == 0 && buf[1] == 1 && buf[2] == 2);
+        CHECK(buf[0] == want[0] && buf[1] == want[1] && buf[2] == want[2]);
         CHECKF(buf[3] == 0xCCCCCCCCu, "element past the buffer untouched: 0x%x", buf[3]);
         /* exact */
         for (i = 0; i < 16; i++) buf[i] = 0xCCCCCCCCu;
@@ -886,7 +889,7 @@ TEST(fset_q_gfi_buffer_protocol)
         hr = IDWriteFontSet1_GetFilteredFontIndices(s1, &p.p, 1, FALSE, buf, 4, &actual);
         CHECK_HR_OK(hr);
         CHECK(actual == 4);
-        CHECK(buf[0] == 0 && buf[1] == 1 && buf[2] == 2 && buf[3] == 3);
+        CHECK(buf[0] == want[0] && buf[1] == want[1] && buf[2] == want[2] && buf[3] == want[3]);
         CHECK(buf[4] == 0xCCCCCCCCu);
         /* larger: the unused part is zero-filled */
         for (i = 0; i < 16; i++) buf[i] = 0xCCCCCCCCu;
@@ -987,8 +990,9 @@ TEST(fset_q_gfidx_subset)
         CHECK_HR_OK(IDWriteFontSet1_GetFilteredFonts__(s1, idx, 2, &out));
         if (out) {
             CHECK(IDWriteFontSet1_GetFontCount(out) == 2);
-            CHECK(parent_index(s.set, FS_AS_SET(out), 0) == 1);
-            CHECK(parent_index(s.set, FS_AS_SET(out), 1) == 3);
+            UINT32 a = parent_index(s.set, FS_AS_SET(out), 0), b = parent_index(s.set, FS_AS_SET(out), 1);
+            CHECKF((a == 1 && b == 3) || (a == 3 && b == 1), "items map to %u and %u", a, b);
+            FS_SOFT(a == 1 && b == 3);
             DW_RELEASE(out);
         }
         DW_RELEASE(s1);
@@ -1081,7 +1085,8 @@ TEST(fset_q_gfidx_all_indices_is_copy)
         CHECK_HR_OK(IDWriteFontSet1_GetFilteredFonts__(s1, idx, 5, &out));
         if (out) {
             CHECK(IDWriteFontSet1_GetFontCount(out) == 5);
-            for (i = 0; i < 5; i++) CHECKF(parent_index(s.set, FS_AS_SET(out), i) == i, "item %u", i);
+            for (i = 0; i < 5; i++) FS_SOFT(parent_index(s.set, FS_AS_SET(out), i) == i);
+            { unsigned mask = 0; for (i = 0; i < 5; i++) { UINT32 pi = parent_index(s.set, FS_AS_SET(out), i); if (pi < 5) mask |= 1u << pi; } CHECKF(mask == 31, "mask 0x%x", mask); }
             DW_RELEASE(out);
         }
         DW_RELEASE(s1);

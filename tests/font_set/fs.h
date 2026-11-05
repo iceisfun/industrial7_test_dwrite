@@ -222,6 +222,14 @@ static UINT32 fs_find_by(IDWriteFontSet *set, DWRITE_FONT_PROPERTY_ID id, const 
     for (i = 0; i < n; i++) if (fs_font_prop(set, i, id, b, sizeof b) && !strcmp(b, value)) return i;
     return FS_NOT_FOUND;
 }
+/* Indexes (ascending) of the fonts whose property `id` equals `value`; returns how many (at most max are stored). */
+static int fs_indices_of(IDWriteFontSet *set, DWRITE_FONT_PROPERTY_ID id, const char *value, UINT32 *out, int max)
+{
+    UINT32 i, n = IDWriteFontSet_GetFontCount(set); int k = 0; char b[256];
+    for (i = 0; i < n; i++)
+        if (fs_font_prop(set, i, id, b, sizeof b) && !strcmp(b, value)) { if (k < max) out[k] = i; k++; }
+    return k;
+}
 static int fs_atoi(const char *s) { return atoi(s); }
 /* DWRITE_FONT_PROPERTY with a wide copy of an ASCII value. */
 typedef struct { DWRITE_FONT_PROPERTY p; WCHAR v[128]; WCHAR l[32]; } fs_prop;
