@@ -22,6 +22,11 @@
 /* The mingw IDWriteFactory5_GetSystemFontCollection macro recurses into the IDWriteFactory3 one; call the slot directly. */
 #define FCS_F5_GETSYS(f5, dl, pc, chk) ((*(f5)->lpVtbl->IDWriteFactory3_GetSystemFontCollection))((f5), (dl), (pc), (chk))
 
+/* Same class of mingw macro defects: the macro names a vtable member that is itself a macro. Call the slot directly. */
+#define FCS_FL2_GETFONT(l, i, pf) ((*(l)->lpVtbl->IDWriteFontList1_GetFont))((l), (i), (pf))
+#define FCS_C3_GETFAMILY(c3, i, pf) ((*(c3)->lpVtbl->IDWriteFontCollection2_GetFontFamily))((c3), (i), (pf))
+#define FCS_C3_GETFONTSET(c3, pfs) ((*(c3)->lpVtbl->IDWriteFontCollection2_GetFontSet))((c3), (pfs))
+
 /* UTF-8 rendering of a wide string in one of a few rotating static buffers (diagnostics only). */
 static const char *fcs_u8(const WCHAR *w) {
     static char ring[4][512]; static int n; char *b = ring[n++ & 3];
