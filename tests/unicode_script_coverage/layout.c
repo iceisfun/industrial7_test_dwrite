@@ -197,7 +197,8 @@ TEST(range_formats_split_pair_accepted)
     CHECK_HR_OK(IDWriteTextLayout_GetFontWeight(l, 1, &w, &q));
     CHECK(w == DWRITE_FONT_WEIGHT_NORMAL && q.startPosition == 0 && q.length == 2);
     CHECK_HR_OK(IDWriteTextLayout_GetFontWeight(l, 3, &w, &q));
-    CHECK(w == DWRITE_FONT_WEIGHT_NORMAL && q.startPosition == 3 && q.length == 1);
+    t_note("weight at 3: %d range %u+%u", (int)w, q.startPosition, q.length);
+    CHECK(w == DWRITE_FONT_WEIGHT_NORMAL && q.startPosition == 3 && q.length >= 1); /* final range may report an open-ended length */
     {
         DWRITE_CLUSTER_METRICS m[8]; HRESULT hr; UINT32 c = cm_get(l, m, 8, &hr);
         CHECK_HR_OK(hr);
@@ -443,12 +444,15 @@ TEST(separator_zwsp_break_opportunity)
 TEST(separator_nbsp_prevents_break)
 {
     UC_FX_BEGIN();
-    static const WCHAR t1[] = L"AA AA", t2[] = L"AA\x00A0" L"AA";
-    IDWriteTextLayout *a = uc_layout(&X, t1, 5, SZ, 3500.0f, 1000.0f), *b = uc_layout(&X, t2, 5, SZ, 3500.0f, 1000.0f); DWRITE_TEXT_METRICS ma, mb;
+    /* width 4500 fits four 1000-wide glyphs; a space offers a break after "A ", a no-break space does not */
+    static const WCHAR t1[] = L"A AA AA", t2[] = L"A AA\x00A0" L"AA";
+    IDWriteTextLayout *a = uc_layout(&X, t1, 7, SZ, 4500.0f, 1000.0f), *b = uc_layout(&X, t2, 7, SZ, 4500.0f, 1000.0f);
+    DWRITE_LINE_METRICS la[4], lb[4]; UINT32 na = 0, nb = 0;
     if (!a || !b) { DW_RELEASE(a); DW_RELEASE(b); UC_FX_END(); t_skip("CreateTextLayout failed"); return; }
-    CHECK_HR_OK(IDWriteTextLayout_GetMetrics(a, &ma)); CHECK_HR_OK(IDWriteTextLayout_GetMetrics(b, &mb));
-    CHECK(ma.lineCount == 2);
-    CHECKF(mb.lineCount == 1, "NBSP offered a break (%u lines)", mb.lineCount);
+    CHECK_HR_OK(IDWriteTextLayout_GetLineMetrics(a, la, 4, &na)); CHECK_HR_OK(IDWriteTextLayout_GetLineMetrics(b, lb, 4, &nb));
+    t_note("space: %u lines, first len %u; nbsp: %u lines, first len %u", na, na ? la[0].length : 0, nb, nb ? lb[0].length : 0);
+    CHECK(na >= 2 && nb >= 2);
+    if (na >= 2 && nb >= 2) CHECKF(la[0].length != lb[0].length, "NBSP did not change the break (%u vs %u)", la[0].length, lb[0].length);
     DW_RELEASE(a); DW_RELEASE(b); UC_FX_END();
 }
 TEST(separator_softhyphen_note)

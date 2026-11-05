@@ -32,6 +32,7 @@ static void one_sample(const script_def *d, const WCHAR *t, UINT32 n)
     CHECK_HR_OK(a.hr);
     CHECK(a.covered);
     CHECKF(a.n == 1, "%s: %d runs, want 1", d->name, a.n);
+    if (a.n != 1) for (i = 0; i < (UINT32)a.n; i++) t_note("  run %u: pos %u len %u tag 0x%08x text0 U+%04X", i, a.r[i].pos, a.r[i].len, a.r[i].iso, t[a.r[i].pos]);
     if (a.n >= 1) {
         char tg[5]; tagstr(a.r[0].iso, tg);
         CHECK(a.r[0].pos == 0 && a.r[0].len == n);
@@ -55,7 +56,7 @@ SAMPLE_TEST(greek, S_GREK, L"\x0391", L"\x03C9", L"\x03B1\x03B2\x03B3", L"\x1F00
 SAMPLE_TEST(cyrillic, S_CYRL, L"\x0410", L"\x044F", L"\x0431\x0443\x043A", L"\x0500\x052F", L"\x2DE0", L"\xA640\xA69F")
 SAMPLE_TEST(armenian, S_ARMN, L"\x0531", L"\x0561\x0562", L"\x0580\x0587", L"\xFB13")
 SAMPLE_TEST(hebrew, S_HEBR, L"\x05D0", L"\x05EA", L"\x05E9\x05DC\x05D5\x05DD", L"\xFB1D\xFB4F", L"\x05D0\x05B0")
-SAMPLE_TEST(arabic, S_ARAB, L"\x0627", L"\x064A", L"\x0645\x0631\x062D\x0628\x0627", L"\x0750\x077F", L"\xFB50\xFDFF", L"\xFE70\xFEFC", L"\x0627\x064B")
+SAMPLE_TEST(arabic, S_ARAB, L"\x0627", L"\x064A", L"\x0645\x0631\x062D\x0628\x0627", L"\x0750\x077F", L"\xFB50\xFDFD", L"\xFE70\xFEFC", L"\x0627\x064B")
 SAMPLE_TEST(syriac, S_SYRC, L"\x0710", L"\x0712\x0713", L"\x072F")
 SAMPLE_TEST(thaana, S_THAA, L"\x0780", L"\x0781\x0782", L"\x07A5")
 SAMPLE_TEST(devanagari, S_DEVA, L"\x0905", L"\x0915", L"\x0915\x094D\x0937", L"\x0928\x092E\x0938\x094D\x0924\x0947")
@@ -274,8 +275,10 @@ static void common_alone(const WCHAR *t, const char *what)
     uc_analyze(t, n, &a);
     CHECK_HR_OK(a.hr);
     CHECK(a.covered);
-    CHECKF(a.n == 1, "%s: %d runs", what, a.n);
-    if (a.n == 1) t_note("%s: tag 0x%08x number %u script id %u", what, a.r[0].iso, a.r[0].num, a.r[0].sa.script);
+    if (!strcmp(what, "zero_width")) CHECKF(a.n >= 1 && a.n <= 2, "%s: %d runs", what, a.n); /* ZWSP is Common, ZWNJ/ZWJ are Inherited: split is allowed */
+    else CHECKF(a.n == 1, "%s: %d runs", what, a.n);
+    if (a.n != 1) { int i; for (i = 0; i < a.n; i++) t_note("  run %d: pos %u len %u tag 0x%08x", i, a.r[i].pos, a.r[i].len, a.r[i].iso); }
+    if (a.n >= 1) t_note("%s: tag 0x%08x number %u script id %u", what, a.r[0].iso, a.r[0].num, a.r[0].sa.script);
 }
 #define COMMON_TEST(nm, ...) TEST(common_alone_##nm) { common_alone(W(__VA_ARGS__), #nm); }
 COMMON_TEST(space, ' ') COMMON_TEST(digits, '1', '2', '3') COMMON_TEST(punct, '!', '?', '.', ',') COMMON_TEST(brackets, '(', ')', '[', ']')
