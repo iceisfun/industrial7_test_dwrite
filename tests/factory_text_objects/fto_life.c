@@ -38,7 +38,7 @@ static void bundle_use(bundle *b) {
     if (b->layout) { CHECK_HR_OK(IDWriteTextLayout_GetMetrics(b->layout, &m)); CHECK(m.width > 0.0f); CHECK_FLOAT_EQ(m.layoutWidth, 200.0f); }
     if (b->gdi_layout) { CHECK_HR_OK(IDWriteTextLayout_GetMetrics(b->gdi_layout, &m)); CHECK(m.width > 0.0f); }
     if (b->sign) { DWRITE_INLINE_OBJECT_METRICS im; CHECK_HR_OK(IDWriteInlineObject_GetMetrics(b->sign, &im)); CHECK(im.width > 0.0f); }
-    if (b->typo) { DWRITE_FONT_FEATURE ft = { DWRITE_FONT_FEATURE_TAG_KERNING, 1 }; CHECK_HR_OK(IDWriteTypography_AddFontFeature(b->typo, ft)); CHECK(IDWriteTypography_GetFontFeatureCount(b->typo) == 1); }
+    if (b->typo) { DWRITE_FONT_FEATURE ft = { DWRITE_FONT_FEATURE_TAG_KERNING, 1 }; UINT32 c0 = IDWriteTypography_GetFontFeatureCount(b->typo); CHECK_HR_OK(IDWriteTypography_AddFontFeature(b->typo, ft)); CHECK(IDWriteTypography_GetFontFeatureCount(b->typo) == c0 + 1); }
     if (b->crp) { CHECK_FLOAT_EQ(IDWriteRenderingParams_GetGamma(b->crp), 2.0f); CHECK(IDWriteRenderingParams_GetRenderingMode(b->crp) == DWRITE_RENDERING_MODE_NATURAL); }
     if (b->rp) CHECK(IDWriteRenderingParams_GetGamma(b->rp) > 0.0f);
     if (b->sysfc) CHECK(IDWriteFontCollection_GetFontFamilyCount(b->sysfc) > 0);

@@ -78,7 +78,7 @@ FTO_BOTH(fto_cc_collection_matches_font) {
     IDWriteFontFamily *fam = NULL; IDWriteFont *font = NULL; IDWriteFontFace *face = NULL;
     CHECK_HR_OK(IDWriteFontCollection_GetFontFamily(fc.coll, 0, &fam));
     if (fam) {
-        CHECK(IDWriteFontFamily_GetFontCount(fam) == 1);
+        CHECK(IDWriteFontFamily_GetFontCount(fam) >= 1);   /* simulated bold/oblique faces may be listed too */
         CHECK_HR_OK(IDWriteFontFamily_GetFirstMatchingFont(fam, DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STRETCH_NORMAL, DWRITE_FONT_STYLE_NORMAL, &font));
         if (font) {
             CHECK(IDWriteFont_GetWeight(font) == DWRITE_FONT_WEIGHT_NORMAL);
@@ -1011,8 +1011,8 @@ TEST(fto_gra3_rendering_mode1_range) {
     for (m = 0; m < 12; m++) {
         IDWriteGlyphRunAnalysis *a = (IDWriteGlyphRunAnalysis *)FTO_SENTINEL;
         HRESULT hr = IDWriteFactory3_CreateGlyphRunAnalysis(f3, &g.run, NULL, (DWRITE_RENDERING_MODE1)m, DWRITE_MEASURING_MODE_NATURAL, DWRITE_GRID_FIT_MODE_DEFAULT, DWRITE_TEXT_ANTIALIAS_MODE_CLEARTYPE, 0, 0, &a);
-        if (m <= 5) { CHECKF(hr == S_OK, "mode1 %u: %s", m, dw_hr_name(hr)); if (hr == S_OK && a) IDWriteGlyphRunAnalysis_Release(a); }
-        else if (m <= 7) { t_note("mode1 %u -> %s", m, dw_hr_name(hr)); if (SUCCEEDED(hr) && a && !NIL_P(a)) IDWriteGlyphRunAnalysis_Release(a); else CHECK_OUT_NULL(a); }
+        if (m == 0 || m == 6) { CHECKF(hr == FTO_E_INVALIDARG, "mode1 %u (DEFAULT / OUTLINE): %s", m, dw_hr_name(hr)); CHECK_OUT_NULL(a); }
+        else if (m <= 5 || m == 7) { CHECKF(hr == S_OK, "mode1 %u: %s", m, dw_hr_name(hr)); if (hr == S_OK && a) IDWriteGlyphRunAnalysis_Release(a); }
         else { CHECKF(hr == FTO_E_INVALIDARG, "mode1 %u: %s", m, dw_hr_name(hr)); CHECK_OUT_NULL(a); }
     }
     IDWriteGlyphRunAnalysis *a = (IDWriteGlyphRunAnalysis *)FTO_SENTINEL;

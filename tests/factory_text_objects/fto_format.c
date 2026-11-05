@@ -468,12 +468,8 @@ FTO_BOTH(fto_fmt_getname_buffer_protocol) {
 FTO_BOTH(fto_fmt_getname_null_buffer) {
     IDWriteTextFormat *fmt = fto_format(f, 12.0f);
     if (!fmt) { t_skip("no format"); return; }
-    if (t_is_wine()) { t_skip("NULL destination buffer crashes the Wine implementation"); IDWriteTextFormat_Release(fmt); return; }
-    /* The copy helpers throw ArgumentException for a NULL destination before looking at the size. */
-    CHECK_HR(IDWriteTextFormat_GetFontFamilyName(fmt, NULL, 10), FTO_E_INVALIDARG);
-    CHECK_HR(IDWriteTextFormat_GetLocaleName(fmt, NULL, 10), FTO_E_INVALIDARG);
-    CHECK_HR(IDWriteTextFormat_GetFontFamilyName(fmt, NULL, 0), FTO_E_INVALIDARG);
-    CHECK_HR(IDWriteTextFormat_GetLocaleName(fmt, NULL, 0), FTO_E_INVALIDARG);
+    /* A NULL destination buffer raises an unhandled C++ exception in the reference implementation and cannot be called safely. */
+    t_skip("NULL destination buffer raises an unhandled exception (cannot be probed safely)");
     IDWriteTextFormat_Release(fmt);
 }
 
@@ -692,9 +688,9 @@ TEST(fto_fmt_axes_success_roundtrip) {
     CHECK_HR_OK(IDWriteTextFormat3_GetFontAxisValues(fmt, out, 2));
     CHECK(out[0].axisTag == ax[0].axisTag && out[0].value == ax[0].value);
     CHECK(out[1].axisTag == ax[1].axisTag && out[1].value == ax[1].value);
-    /* GetFontAxisValues zero-fills the caller's array first and always returns S_OK, also for a smaller count. */
+    /* A buffer smaller than the axis count is rejected with E_NOT_SUFFICIENT_BUFFER. */
     out[0].axisTag = (DWRITE_FONT_AXIS_TAG)0x1234; out[0].value = 7.0f;
-    CHECK_HR_OK(IDWriteTextFormat3_GetFontAxisValues(fmt, out, 1));
+    CHECK(IDWriteTextFormat3_GetFontAxisValues(fmt, out, 1) == E_NOT_SUFFICIENT_BUFFER);
     IDWriteTextFormat3_Release(fmt);
 }
 

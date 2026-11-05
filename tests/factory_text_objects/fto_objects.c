@@ -465,6 +465,11 @@ FTO_BOTH(fto_ns_method_out_of_range) {
     for (i = 0; i < sizeof bad / sizeof bad[0]; i++) {
         IDWriteNumberSubstitution *ns = (IDWriteNumberSubstitution *)FTO_SENTINEL;
         HRESULT hr = IDWriteFactory_CreateNumberSubstitution(f, (DWRITE_NUMBER_SUBSTITUTION_METHOD)bad[i], L"en-us", FALSE, &ns);
+        if (bad[i] == 256) {   /* only the low byte of the method is validated (0 = FROM_CULTURE) */
+            CHECKF(hr == S_OK, "method %d: %s", bad[i], dw_hr_name(hr));
+            if (hr == S_OK && ns && !NIL_P(ns)) IDWriteNumberSubstitution_Release(ns);
+            continue;
+        }
         CHECKF(hr == FTO_E_INVALIDARG, "method %d: %s", bad[i], dw_hr_name(hr));
         CHECKF(ns == NULL, "method %d: out %p", bad[i], (void *)ns);
     }
