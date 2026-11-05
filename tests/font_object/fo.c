@@ -123,3 +123,30 @@ int fo_sys_table(IDWriteFont *font, const char *tag, uint8_t **data, UINT32 *len
     IDWriteFontFace_Release(face);
     return ok;
 }
+static unsigned be16(const uint8_t *p) { return (p[0] << 8) | p[1]; }
+int fo_name_find(const uint8_t *t, UINT32 len, unsigned plat, unsigned enc, unsigned lang, unsigned id, WCHAR *out, int cap) {
+    unsigned n, so, i;
+    if (len < 6) return -1;
+    n = be16(t + 2); so = be16(t + 4);
+    for (i = 0; i < n; i++) {
+        const uint8_t *r = t + 6 + 12 * i; unsigned sl, soff, k;
+        if (6 + 12 * (i + 1) > len) return -1;
+        if (be16(r) != plat || be16(r + 2) != enc || be16(r + 4) != lang || be16(r + 6) != id) continue;
+        sl = be16(r + 8); soff = be16(r + 10);
+        if (so + soff + sl > len) return -1;
+        for (k = 0; k < sl / 2 && (int)k < cap - 1; k++) out[k] = (WCHAR)be16(t + so + soff + 2 * k);
+        out[k] = 0; return (int)k;
+    }
+    return -1;
+}
+int fo_ls_w(IDWriteLocalizedStrings *ls, UINT32 idx, WCHAR *out, int cap) {
+    UINT32 len = 0; out[0] = 0;
+    if (FAILED(IDWriteLocalizedStrings_GetStringLength(ls, idx, &len)) || (int)len + 1 > cap) return 0;
+    if (FAILED(IDWriteLocalizedStrings_GetString(ls, idx, out, len + 1))) return 0;
+    return (int)len;
+}
+int fo_ls_find_ci(IDWriteLocalizedStrings *ls, const char *locale) {
+    UINT32 i, n = IDWriteLocalizedStrings_GetCount(ls); char b[LOCALE_NAME_MAX_LENGTH];
+    for (i = 0; i < n; i++) { fo_ls_locale(ls, i, b, sizeof b); if (!_stricmp(b, locale)) return (int)i; }
+    return -1;
+}

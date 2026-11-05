@@ -43,3 +43,9 @@ UINT32 fo_font_key(IDWriteFont *font);
 /* System Arial table byte helpers */
 int fo_sys_table(IDWriteFont *font, const char *tag, uint8_t **data, UINT32 *len);
 #endif
+/* Parses an sfnt 'name' table: UTF-16BE record (plat 3 / 0) to WCHAR (NUL terminated); returns length in WCHARs, -1 when absent. */
+int fo_name_find(const uint8_t *t, UINT32 len, unsigned plat, unsigned enc, unsigned lang, unsigned id, WCHAR *out, int cap);
+/* wide string at index idx of a localized string set; returns length (0 on failure) */
+int fo_ls_w(IDWriteLocalizedStrings *ls, UINT32 idx, WCHAR *out, int cap);
+/* index of locale (case-insensitive compare done by the caller via the returned name), -1 when not found */
+int fo_ls_find_ci(IDWriteLocalizedStrings *ls, const char *locale);
