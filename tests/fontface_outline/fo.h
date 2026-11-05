@@ -241,6 +241,7 @@ static const ttf_comp fo_c_off[1]    = { { TTF_GID_TRIANGLE, 200, 400, 0, 0x2000
 static const ttf_comp fo_c_soff[1]   = { { TTF_GID_TRIANGLE, 200, 400, TTF_COMP_SCALED_OFFSET, 0x2000 } };
 
 static ttf_glyph fo_glyphs[FO_G_COUNT];
+static int fo_lab_vertical;      /* build the lab font with vhea/vmtx */
 static void fo_lab_spec(ttf_spec *s) {
     int n, i; const ttf_glyph *d = ttf_default_glyphs(&n);
     ttf_default_spec(s);
@@ -268,6 +269,10 @@ static void fo_lab_spec(ttf_spec *s) {
     fo_glyphs[FO_G_COMP_NESTED].adv = 2000; fo_glyphs[FO_G_COMP_NESTED].ncomp = 2; fo_glyphs[FO_G_COMP_NESTED].comps = fo_c_nested;
     fo_glyphs[FO_G_COMP_OFF].adv = 1000;    fo_glyphs[FO_G_COMP_OFF].ncomp = 1;   fo_glyphs[FO_G_COMP_OFF].comps = fo_c_off;
     fo_glyphs[FO_G_COMP_SOFF].adv = 1000;   fo_glyphs[FO_G_COMP_SOFF].ncomp = 1;  fo_glyphs[FO_G_COMP_SOFF].comps = fo_c_soff;
+    if (fo_lab_vertical) {
+        s->vertical = 1; s->v_ascent = 1500; s->v_descent = -500;
+        fo_glyphs[2].vadv = 2500; fo_glyphs[64].vadv = 1800; fo_glyphs[TTF_GID_ROUND].vadv = 2100; fo_glyphs[FO_G_NARROW].vadv = 700;
+    }
     s->glyphs = fo_glyphs; s->nglyphs = FO_G_COUNT;
 }
 /* Open the lab font; simulations optional.  Caller always dwx_font_close()s.  Returns the HRESULT. */
@@ -282,6 +287,7 @@ static HRESULT fo_open_lab(dwx_font *h, DWRITE_FONT_SIMULATIONS sim) {
     free(b);
     return hr;
 }
+#define FO_LABV(h, sim) dwx_font h; fo_lab_vertical = 1; { HRESULT hr__ = fo_open_lab(&h, sim); fo_lab_vertical = 0; if (FAILED(hr__) || !h.face) { dwx_font_close(&h); t_skip("vertical lab font unavailable"); return; } }
 #define FO_LAB(h, sim) dwx_font h; if (FAILED(fo_open_lab(&h, sim)) || !h.face) { dwx_font_close(&h); t_skip("lab font unavailable"); return; }
 
 /* Run one call and compare to the model: returns HRESULT. */
@@ -320,5 +326,11 @@ static void fo_model_run(fo_exp *e, const ttf_glyph *tab, int ntab, IDWriteFontF
 static int fo_bounds(const dwx_geom *g, float *x0, float *y0, float *x1, float *y1) {
     if (!g->npts) { *x0 = *y0 = *x1 = *y1 = 0; return 0; }
     dwx_geom_bounds(g, x0, y0, x1, y1); return 1;
+}
+/* i-th BeginFigure point recorded in the sink (1-based figure number); returns 0 when absent. */
+static int fo_begin_pt(const dwx_geom *g, int nth, float *x, float *y) {
+    int i, n = 0;
+    for (i = 0; i < g->nev; i++) if (g->ev[i].kind == DWX_G_BEGIN && ++n == nth) { *x = g->ev[i].pt.x; *y = g->ev[i].pt.y; return 1; }
+    return 0;
 }
 #endif
