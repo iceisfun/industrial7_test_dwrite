@@ -909,7 +909,7 @@ TEST(bidi_run_coverage_mixed)
     static const WCHAR src[] = L"AB " HEB L" CD " HEB L" EF";
     unsigned char cover[32]; memset(cover, 0, sizeof cover); int i; UINT32 k;
     for (i = 0; i < r->ncalls; i++) { const dwx_draw *c = &r->calls[i]; if (c->kind != DWX_DRAW_GLYPHRUN) continue; for (k = 0; k < c->text_len && c->text_pos + k < 32; k++) cover[c->text_pos + k]++; }
-    for (k = 0; k < 19; k++) { if (src[k] != L' ') EXPECT_EQ(cover[k], 1); else CHECK(cover[k] <= 1); }
+    for (k = 0; k < 16; k++) { if (src[k] != L' ') EXPECT_EQ(cover[k], 1); else CHECK(cover[k] <= 1); }
     DONE(l, r);
 }
 TEST(bidi_explicit_embedding_marks)

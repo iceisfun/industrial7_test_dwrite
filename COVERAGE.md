@@ -1,6 +1,6 @@
 # dwrite interface-method coverage
 
-Total: 429/469 methods covered (91.5%)
+Total: 438/469 methods covered (93.4%)
 
 | Interface | Covered | Total | Missing |
 |---|---:|---:|---|
@@ -25,7 +25,7 @@ Total: 429/469 methods covered (91.5%)
 | IDWriteBitmapRenderTarget | 8 | 8 |  |
 | IDWriteGdiInterop | 5 | 5 |  |
 | IDWriteTextLayout | 39 | 39 |  |
-| IDWriteTextAnalysisSource | 1 | 5 | GetTextAtPosition, GetTextBeforePosition, GetParagraphReadingDirection, GetNumberSubstitution |
+| IDWriteTextAnalysisSource | 2 | 5 | GetTextBeforePosition, GetParagraphReadingDirection, GetNumberSubstitution |
 | IDWriteTextAnalysisSink | 0 | 4 | SetScriptAnalysis, SetLineBreakpoints, SetBidiLevel, SetNumberSubstitution |
 | IDWriteTextAnalyzer | 7 | 7 |  |
 | IDWriteGlyphRunAnalysis | 3 | 3 |  |
@@ -88,9 +88,9 @@ Total: 429/469 methods covered (91.5%)
 | IDWriteFontFace7 | 0 | 2 | GetPaintFeatureLevel, CreatePaintReader |
 | IDWriteColorGlyphRunEnumerator1 | 1 | 1 |  |
 | IDWriteFactory4 | 3 | 3 |  |
-| IDWriteAsyncResult | 0 | 2 | GetWaitHandle, GetResult |
-| IDWriteRemoteFontFileStream | 0 | 4 | GetLocalFileSize, GetFileFragmentLocality, GetLocality, BeginDownload |
-| IDWriteRemoteFontFileLoader | 1 | 3 | CreateRemoteStreamFromKey, GetLocalityFromKey |
+| IDWriteAsyncResult | 2 | 2 |  |
+| IDWriteRemoteFontFileStream | 4 | 4 |  |
+| IDWriteRemoteFontFileLoader | 3 | 3 |  |
 | IDWriteInMemoryFontFileLoader | 2 | 2 |  |
 | IDWriteFactory5 | 5 | 5 |  |
 | IDWriteFactory6 | 7 | 7 |  |
@@ -130,35 +130,16 @@ not-in-19041 interfaces are not reachable on build 19041 (QueryInterface must fa
 
 ## Thin (1-3 macro call sites)
 
-- IDWriteFontFileStream::GetLastWriteTime (3)
-- IDWriteInlineObject::GetOverhangMetrics (3)
-- IDWriteInlineObject::GetBreakConditions (3)
-- IDWriteTextAnalyzer::GetGdiCompatibleGlyphPlacements (3)
-- IDWriteFont1::GetPanose (3)
-- IDWriteFont1::IsMonospacedFont (3)
-- IDWriteTextAnalyzer1::GetJustificationOpportunities (3)
-- IDWriteTextLayout2::SetLastLineWrapping (3)
-- IDWriteFont2::IsColorFont (2)
+- IDWriteTextAnalysisSource::GetTextAtPosition (1)
+- IDWriteTextAnalysisSource::GetLocaleName (2)
 - IDWriteFontDownloadListener::DownloadCompleted (1)
-- IDWriteFontDownloadQueue::CancelDownload (1)
-- IDWriteFontResource::GetAxisNames (2)
-- IDWriteFontResource::GetAxisValueNameCount (2)
-- IDWriteFontResource::GetAxisValueNames (2)
-- IDWriteFontSet1::GetFontAxisRanges_ (3)
-- IDWriteFontSet1::GetFontAxisRanges (3)
-- IDWriteFontSet1::GetFontLocality (1)
-- IDWriteFontCollection3::GetExpirationEvent (3)
-- IDWriteFontList1::GetFontLocality (3)
-- IDWriteFontList2::GetFontSet (2)
-- IDWriteFontSet2::GetExpirationEvent (1)
-- IDWriteFontSet3::GetFontSourceType (1)
-- IDWriteFontSet3::GetFontSourceNameLength (3)
-- IDWriteFontFace3::IsGlyphLocal (3)
-- IDWriteFontFallback1::MapCharacters (2)
-- IDWriteGdiInterop1::GetFontSignature_ (3)
-- IDWriteFactory4::ComputeGlyphOrigins_ (1)
-- IDWriteFactory4::ComputeGlyphOrigins (1)
-- IDWriteRemoteFontFileLoader::CreateFontFileReferenceFromUrl (3)
-- IDWriteFactory6::CreateFontSetBuilder (2)
-- IDWriteFactory7::GetSystemFontSet (1)
-- IDWriteFactory7::GetSystemFontCollection (3)
+- IDWriteFactory4::ComputeGlyphOrigins_ (2)
+- IDWriteFactory4::ComputeGlyphOrigins (2)
+- IDWriteRemoteFontFileStream::GetFileFragmentLocality (2)
+- IDWriteRemoteFontFileLoader::GetLocalityFromKey (3)
+
+## Methods deliberately not called by macro, with reasons
+
+- Test-implemented callback methods (IDWriteFontFileEnumerator MoveNext/GetCurrentFontFile, IDWriteFontCollectionLoader::CreateEnumeratorFromKey, IDWriteTextAnalysisSource/Sink and *1 variants, IDWriteTextRenderer*, IDWriteFontDownloadListener): dwrite calls these on our doubles in common/dwx; they are observed (order, arguments, counts) rather than invoked.
+- IDWriteFontSet::GetPropertyValues and IDWriteFontSet1::GetFilteredFonts trailing-underscore overload variants: C macro aliases of already covered overloads.
+- IDWriteFontSet4, IDWriteFontFace6/7, IDWritePaintReader, IDWriteBitmapRenderTarget2/3, IDWriteFactory8, IDWriteTextLayout4, IDWriteFontFamily2, IDWriteFontSet3, IDWriteColorGlyphRunEnumerator1: not present on build 19041 (Windows 11 / later Insider). Tests check that QueryInterface fails; their methods cannot be called.

@@ -114,8 +114,8 @@ static HRESULT WINAPI ld_Create(IDWriteFontFileLoader *This, const void *key, UI
     s->lpVtbl = &st_vt; s->data = l->blob[k].data; s->size = l->blob[k].size; s->last_write = l->last_write;
     s->copy_fragments = l->stream_copy_fragments; s->fail_read = l->stream_fail_read; s->fail_getsize = l->stream_fail_getsize;
     s->loader = l;
-    if (l->nstreams < 128) l->streams[l->nstreams++] = s;
-    l->last_stream = s;
+    lock(); if (l->nstreams < 128) l->streams[l->nstreams++] = s;
+    l->last_stream = s; unlock();
     *out = (IDWriteFontFileStream *)s;
     return S_OK;
 }
