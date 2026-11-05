@@ -1,6 +1,6 @@
 /* Source / sink call protocol of AnalyzeLineBreakpoints, AnalyzeBidi and AnalyzeVerticalGlyphOrientation: which source methods are
  * asked, in which order, at which positions, how NULL / zero length answers are interpreted, how sink callbacks are delivered and what
- * a failing sink does to the rest of the walk.  Every expectation is derived from the dwrite.dll decompilation noted in ms.h. */
+ * a failing sink does to the rest of the walk.  Expectations are verified against Windows 10 (see ms.h). */
 #include "ms.h"
 #define MT(n) TEST(r2_bidi_linebreak_matrix_##n)
 
