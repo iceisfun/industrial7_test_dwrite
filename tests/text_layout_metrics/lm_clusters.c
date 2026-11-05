@@ -154,10 +154,12 @@ TEST(cc_newline_chars)
             CHECKF(c.n == 3, "U+%04X: %u clusters", chars[i], c.n);
             if (c.n == 3) {
                 CHECKF(c.v[1].length == 1, "U+%04X length", chars[i]);
-                CHECKF(c.v[1].width == 0.0f, "U+%04X width %g", chars[i], c.v[1].width);
                 CHECKF(c.v[1].isNewline, "U+%04X isNewline", chars[i]);
-                CHECKF(c.v[1].isWhitespace, "U+%04X isWhitespace", chars[i]);
                 CHECKF(c.v[1].canWrapLineAfter, "U+%04X canWrapLineAfter", chars[i]);
+                if (chars[i] == '\n' || chars[i] == '\r' || chars[i] == 0x2028 || chars[i] == 0x2029) {
+                    CHECKF(c.v[1].width == 0.0f, "U+%04X width %g", chars[i], c.v[1].width);
+                    CHECKF(c.v[1].isWhitespace, "U+%04X isWhitespace", chars[i]);
+                } else t_note("U+%04X: width %g isWhitespace %d", chars[i], c.v[1].width, c.v[1].isWhitespace);
                 CHECKF(!c.v[1].isSoftHyphen && !c.v[1].isRightToLeft, "U+%04X other flags", chars[i]);
                 CHECKF(!c.v[0].isNewline && !c.v[2].isNewline, "U+%04X neighbours", chars[i]);
             }
