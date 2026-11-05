@@ -54,6 +54,15 @@ static __inline DWRITE_SHAPING_GLYPH_PROPERTIES ta_gp(unsigned just, unsigned cl
 void ta_model_spacing(float lead, float trail, float minadv, UINT32 textlen, UINT32 nglyphs, const UINT16 *cmap, const float *adv,
                       const DWRITE_GLYPH_OFFSET *off, const DWRITE_SHAPING_GLYPH_PROPERTIES *gp, float *oadv, DWRITE_GLYPH_OFFSET *ooff);
 
+HRESULT ta_model_justify(float lw, UINT32 n, const DWRITE_JUSTIFICATION_OPPORTUNITY *op, const float *adv, const DWRITE_GLYPH_OFFSET *off, float *oadv, DWRITE_GLYPH_OFFSET *ooff);
+void ta_model_justify_adjustments(float lw, UINT32 n, const DWRITE_JUSTIFICATION_OPPORTUNITY *op, const float *adv, float *adj);
+HRESULT ta_model_spacing_call(float L, float T, float M, UINT32 n, UINT32 g, const UINT16 *cm, const float *adv, const DWRITE_GLYPH_OFFSET *off,
+                              const DWRITE_SHAPING_GLYPH_PROPERTIES *gp, float *oadv, DWRITE_GLYPH_OFFSET *ooff);
+#ifdef TA_USE_MODEL   /* self-check build: stand-in for the DLL calls, to validate hand computed expectations against the models */
+#define IDWriteTextAnalyzer1_JustifyGlyphAdvances(a, lw, n, op, adv, off, oa, oo) ta_model_justify(lw, n, op, adv, off, oa, oo)
+#define IDWriteTextAnalyzer1_ApplyCharacterSpacing(a, L, T, M, n, g, cm, adv, off, gp, oa, oo) ta_model_spacing_call(L, T, M, n, g, cm, adv, off, gp, oa, oo)
+#endif
+
 /* Synthetic font with a custom cmap/BASE/GSUB; closes with dwx_font_close. */
 HRESULT ta_open_spec(dwx_font *h, IDWriteFactory *f, const ttf_spec *s);
 #endif

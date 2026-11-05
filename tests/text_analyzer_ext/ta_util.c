@@ -30,3 +30,16 @@ HRESULT ta_open_spec(dwx_font *h, IDWriteFactory *f, const ttf_spec *s) {
     free(b);
     return hr;
 }
+
+#include "ta_shape.h"
+int ta_shape(ta_shaped *s, ta_ctx *c, IDWriteFontFace *face, const WCHAR *text, UINT32 n, int rtl, float em) {
+    memset(s, 0, sizeof *s);
+    if (n == 0 || n > TA_SHAPE_MAX) return 0;
+    s->sa = ta_sa_of(c, text, n); s->ntext = n;
+    if (s->sa.script == 0xFFFF) return 0;
+    if (FAILED(IDWriteTextAnalyzer_GetGlyphs(c->a, text, n, face, FALSE, rtl, &s->sa, L"en-us", NULL, NULL, NULL, 0, TA_SHAPE_MAX * 2, s->cmap, s->tprops,
+                                             s->glyphs, s->gprops, &s->nglyphs))) return 0;
+    if (FAILED(IDWriteTextAnalyzer_GetGlyphPlacements(c->a, text, s->cmap, s->tprops, n, s->glyphs, s->gprops, s->nglyphs, face, em, FALSE, rtl, &s->sa,
+                                                      L"en-us", NULL, NULL, 0, s->adv, s->off))) return 0;
+    return 1;
+}
