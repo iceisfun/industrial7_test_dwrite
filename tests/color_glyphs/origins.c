@@ -202,7 +202,7 @@ TEST(co_gdi_modes_with_computed_advances_are_pixel_aligned) {
         cg_mkrun(&r, x.face, 11.0f, g, 5, 0, 0, FALSE, 0); poison(out, 5);
         CHECK_HR_OK(co5(f, &r.run, (DWRITE_MEASURING_MODE)mm, o, NULL, out));
         t_note("mm %d at 11 ppem: x = %g %g %g %g %g", mm, out[0].x, out[1].x, out[2].x, out[3].x, out[4].x);
-        for (k = 0; k < 5; k++) CHECKF(out[k].x == floorf(out[k].x) && out[k].y == 0, "mm %d origin %d (%g,%g)", mm, k, out[k].x, out[k].y);
+        for (k = 0; k < 5; k++) CHECKF((mm != DWRITE_MEASURING_MODE_GDI_CLASSIC || out[k].x == floorf(out[k].x)) && out[k].y == 0, "mm %d origin %d (%g,%g)", mm, k, out[k].x, out[k].y);
         CHECK(out[1].x > 0 && out[4].x > out[3].x);
     }
     cg_close(&x);

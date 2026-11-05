@@ -401,3 +401,15 @@ TEST(en_concurrent_use_from_threads) {
     for (i = 0; i < 4; i++) CHECKF(t[i].bad == 0, "thread %d: %ld bad iterations", i, t[i].bad);
     cg_close(&x);
 }
+
+TEST(en_layer_run_advance_note) {
+    CG_OPEN(x, CGFX_COLR); snap s[40]; UINT16 g[] = { GID_A, GID_B }; static cgrun r; IDWriteColorGlyphRunEnumerator *e = NULL; int k, i;
+    cg_mkrun(&r, x.face, 2048.0f, g, 2, 2, 0, FALSE, 0);
+    CHECK_HR_OK(IDWriteFactory2_TranslateColorGlyphRun(cg_f2(), 0, 0, &r.run, NULL, DWRITE_MEASURING_MODE_NATURAL, NULL, 0, &e));
+    if (e) {
+        k = collect(e, s, 40);
+        for (i = 0; i < k; i++) { t_note("run %d: glyph %u advance[0] %g (input advances %g %g)", i, s[i].gl[0], s[i].adv[0], r.adv[0], r.adv[1]); CHECK(s[i].has_adv); }
+        DW_RELEASE(e);
+    }
+    cg_close(&x);
+}

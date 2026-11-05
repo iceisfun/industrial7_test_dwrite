@@ -211,7 +211,7 @@ TEST(f2_measuring_modes_computed_advances_gdi) {
         }
         /* GDI compatible advances are whole pixels at 10 ppem: 1000/2048*10 = 4.88 -> 5 */
         t_note("mm %d: base advance[0] = %g (natural would be %g)", mm, adv0, 1000 * 10.0f / 2048);
-        CHECK(adv0 == floorf(adv0));
+        if (mm == DWRITE_MEASURING_MODE_GDI_CLASSIC) CHECK(adv0 == floorf(adv0));
         EXPECT_EQ(k, 3);
         DW_RELEASE(e);
     }

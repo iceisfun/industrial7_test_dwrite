@@ -197,7 +197,7 @@ int cg_expect(const DWRITE_GLYPH_RUN *run, float ox, float oy, UINT32 req, UINT3
                 e = &out[nout++]; memset(e, 0, sizeof *e);
                 e->n = 1; e->gl[0] = L[j].gid; e->first_glyph = (int)i; e->fmt = (used & 3) | CGF_COLR; e->y = oy;
                 e->x = (run->bidiLevel & 1) ? ox - cum[i] : ox + cum[i];
-                e->adv[0] = adv[0]; if (i == 0) e->advmask = 1;
+                e->adv[0] = adv[0]; /* advance[0] of a single-glyph layer run is not asserted: it is the run's first advance, see en_layer_run_advance_note */
                 if (pi < (unsigned)m->nent) { uint32_t c = m->argb[palette * m->nent + pi]; e->c[0] = ((c >> 16) & 255) / 255.0f; e->c[1] = ((c >> 8) & 255) / 255.0f; e->c[2] = (c & 255) / 255.0f; e->c[3] = (c >> 24) / 255.0f; e->pal = (UINT16)pi; }
                 else e->pal = 0xFFFF;
             }

@@ -37,7 +37,7 @@ TEST(sys_emoji_single_glyph_translate_matches_tables) {
     CG_NEED_F2(f); EMO(e); int i, ok = 0;
     for (i = 0; i < NEMOJI; i++) {
         UINT16 g = gid_of(&e.x, k_emoji[i]); static cgrun r; char tag[40]; if (!g) continue;
-        cg_mkrun(&r, e.x.face, 72.0f, &g, 1, 0, 0, FALSE, 0); snprintf(tag, sizeof tag, "U+%X gid %u", k_emoji[i], g);
+        cg_mkrun(&r, e.x.face, 72.0f, &g, 1, 1, 0, FALSE, 0); snprintf(tag, sizeof tag, "U+%X gid %u", k_emoji[i], g);
         if (cg_check_f2(f, tag, &r.run, 10, 90, DWRITE_MEASURING_MODE_NATURAL, NULL, 0, e.ff) == S_OK) ok++;
     }
     t_note("%d of %d sample emoji translate to colour layers", ok, NEMOJI);
@@ -73,8 +73,8 @@ TEST(sys_emoji_multi_glyph_runs) {
     CG_NEED_F2(f); EMO(e); UINT16 g[8]; int n = 0, i; static cgrun r;
     for (i = 0; i < NEMOJI && n < 8; i++) { UINT16 x = gid_of(&e.x, k_emoji[i]); if (x) g[n++] = x; }
     if (n < 3) { t_skip("not enough emoji glyphs"); emo_close(&e); return; }
-    cg_mkrun(&r, e.x.face, 64.0f, g, n, 0, 0, FALSE, 0); cg_check_f2(f, "emoji run", &r.run, 5, 70, DWRITE_MEASURING_MODE_NATURAL, NULL, 0, e.ff);
-    cg_mkrun(&r, e.x.face, 64.0f, g, n, 0, 0, FALSE, 1); cg_check_f2(f, "emoji run rtl", &r.run, 600, 70, DWRITE_MEASURING_MODE_NATURAL, NULL, 0, e.ff);
+    cg_mkrun(&r, e.x.face, 64.0f, g, n, 1, 0, FALSE, 0); cg_check_f2(f, "emoji run", &r.run, 5, 70, DWRITE_MEASURING_MODE_NATURAL, NULL, 0, e.ff);
+    cg_mkrun(&r, e.x.face, 64.0f, g, n, 1, 0, FALSE, 1); cg_check_f2(f, "emoji run rtl", &r.run, 600, 70, DWRITE_MEASURING_MODE_NATURAL, NULL, 0, e.ff);
     cg_mkrun(&r, e.x.face, 64.0f, g, n, 2, 1, FALSE, 0); cg_check_f2(f, "emoji run provided", &r.run, 5, 70, DWRITE_MEASURING_MODE_NATURAL, NULL, 0, e.ff);
     emo_close(&e);
 }
@@ -82,7 +82,7 @@ TEST(sys_emoji_mixed_with_latin_letters) {
     CG_NEED_F2(f); EMO(e); UINT16 a = gid_of(&e.x, 'A'), sp = gid_of(&e.x, ' '), em = gid_of(&e.x, 0x1F600), st = gid_of(&e.x, 0x2B50); UINT16 g[5]; static cgrun r;
     if (!a || !em) { t_skip("glyphs missing"); emo_close(&e); return; }
     g[0] = a; g[1] = em; g[2] = sp ? sp : a; g[3] = st ? st : em; g[4] = a;
-    cg_mkrun(&r, e.x.face, 40.0f, g, 5, 0, 0, FALSE, 0); cg_check_f2(f, "latin + emoji", &r.run, 0, 50, DWRITE_MEASURING_MODE_NATURAL, NULL, 0, e.ff);
+    cg_mkrun(&r, e.x.face, 40.0f, g, 5, 1, 0, FALSE, 0); cg_check_f2(f, "latin + emoji", &r.run, 0, 50, DWRITE_MEASURING_MODE_NATURAL, NULL, 0, e.ff);
     emo_close(&e);
 }
 TEST(sys_emoji_latin_glyph_has_no_color) {
