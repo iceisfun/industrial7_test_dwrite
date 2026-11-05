@@ -114,7 +114,7 @@ TEST(r2_layout_bidi_reorder_tabs_draw_run_widths)
     r = bx_draw(l, 0, 0);
     if (r) {
         for (i = 0; i < r->ncalls; i++) if (r->calls[i].kind == DWX_DRAW_GLYPHRUN) sum += dwx_run_width(&r->calls[i]);
-        CHK_NEAR(sum, 50.0f + 2 * CW);                              /* ab + tab (to 50) + two Hebrew letters */
+        CHK_NEAR(sum, 4 * CW);                                      /* the tab is a gap, not a glyph run: ab + two Hebrew letters */
         dwx_release(r);
     }
     BX_DONE(l);

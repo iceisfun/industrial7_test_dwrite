@@ -151,7 +151,9 @@ UINT32 bx_lines(IDWriteTextLayout *l, DWRITE_LINE_METRICS *lm, UINT32 cap)
 dwx_renderer *bx_draw(IDWriteTextLayout *l, float ox, float oy)
 {
     dwx_renderer *r = dwx_renderer_new();
-    HRESULT hr = IDWriteTextLayout_Draw(l, NULL, (IDWriteTextRenderer *)r, ox, oy);
+    HRESULT hr;
+    r->support_r1 = 1;                                   /* vertical layouts need IDWriteTextRenderer1 */
+    hr = IDWriteTextLayout_Draw(l, NULL, (IDWriteTextRenderer *)r, ox, oy);
     t_check(hr == S_OK, __FILE__, __LINE__, "Draw", "got %s", dw_hr_name(hr));
     if (hr != S_OK) { dwx_release(r); return NULL; }
     return r;

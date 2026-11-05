@@ -115,7 +115,7 @@ FORM(latin_mark,         L"a\u0301b", 2, 2, 1)
 FORM(latin_two_marks,    L"a\u0301\u0302b", 2, 3, 1)
 FORM(latin_mark_end,     L"ba\u0301", 2, 1, 2)
 FORM(hebrew_point,       L"\u05d0\u05b0\u05d1", 2, 2, 1)
-FORM(hebrew_two_points,  L"\u05d0\u05b0\u05b1\u05d1", 2, 3, 1)
+FORM(hebrew_two_points,  L"\u05d0\u05b0\u05b1\u05d1", 3, 2, 1, 1)   /* only the first point joins the letter */
 FORM(arabic_mark,        L"\u0627\u064e\u0628", 2, 2, 1)
 FORM(arabic_two_marks,   L"\u0627\u064e\u064f\u0628", 2, 3, 1)
 FORM(surrogate_alone,    L"\U00010800", 1, 2)

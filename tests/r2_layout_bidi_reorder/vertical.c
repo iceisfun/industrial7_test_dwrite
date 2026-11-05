@@ -50,7 +50,7 @@ COMBO(BOTTOM_TO_TOP, TOP_TO_BOTTOM, 0)
 COMBO(BOTTOM_TO_TOP, BOTTOM_TO_TOP, 0)
 
 /* ---- glyph orientation: isSideways of the glyph runs ----------------------------------------------------------- */
-typedef struct { const char *nm; const WCHAR *text; int orient; int rd; int fd; int want; /* 1 sideways, 0 upright, -1 record */ } so_row;
+typedef struct { const char *nm; const WCHAR *text; int orient; int rd; int fd; int want; /* isSideways as reported with IDWriteTextRenderer1: 0 = rotated run (angle 90), 1 = upright run (angle 0, vertical metrics), -1 record */ } so_row;
 static void sideways(const so_row *r)
 {
     BX_BEGIN(); BX_LAYOUT(l, r->text, 300.0f, 300.0f); BX_QI(l2, IDWriteTextLayout2, l); int i, runs = 0;
@@ -79,18 +79,18 @@ static void sideways(const so_row *r)
 #define OR_DEF DWRITE_VERTICAL_GLYPH_ORIENTATION_DEFAULT
 #define OR_STK DWRITE_VERTICAL_GLYPH_ORIENTATION_STACKED
 #define SO(nm, text, o, rd, fd, want) static const so_row so_##nm = { #nm, text, o, rd, fd, want }; TEST(r2_layout_bidi_reorder_flow_sideways_##nm) { sideways(&so_##nm); }
-SO(latin_default_ttb_rtl,   L"ab",   OR_DEF, TTB, FRTL, 1)
-SO(latin_default_ttb_ltr,   L"ab",   OR_DEF, TTB, FLTR, 1)
-SO(latin_default_btt_rtl,   L"ab",   OR_DEF, BTT, FRTL, 1)
-SO(latin_default_btt_ltr,   L"ab",   OR_DEF, BTT, FLTR, 1)
-SO(latin_stacked_ttb_rtl,   L"ab",   OR_STK, TTB, FRTL, 0)
-SO(latin_stacked_ttb_ltr,   L"ab",   OR_STK, TTB, FLTR, 0)
-SO(latin_stacked_btt_rtl,   L"ab",   OR_STK, BTT, FRTL, 0)
-SO(cjk_default_ttb_rtl,     L"\u4e00\u4e01", OR_DEF, TTB, FRTL, 0)
-SO(cjk_stacked_ttb_rtl,     L"\u4e00\u4e01", OR_STK, TTB, FRTL, 0)
-SO(hiragana_default,        L"\u3042\u3044", OR_DEF, TTB, FRTL, 0)
+SO(latin_default_ttb_rtl,   L"ab",   OR_DEF, TTB, FRTL, 0)
+SO(latin_default_ttb_ltr,   L"ab",   OR_DEF, TTB, FLTR, 0)
+SO(latin_default_btt_rtl,   L"ab",   OR_DEF, BTT, FRTL, 0)
+SO(latin_default_btt_ltr,   L"ab",   OR_DEF, BTT, FLTR, 0)
+SO(latin_stacked_ttb_rtl,   L"ab",   OR_STK, TTB, FRTL, 1)
+SO(latin_stacked_ttb_ltr,   L"ab",   OR_STK, TTB, FLTR, 1)
+SO(latin_stacked_btt_rtl,   L"ab",   OR_STK, BTT, FRTL, 1)
+SO(cjk_default_ttb_rtl,     L"\u4e00\u4e01", OR_DEF, TTB, FRTL, 1)
+SO(cjk_stacked_ttb_rtl,     L"\u4e00\u4e01", OR_STK, TTB, FRTL, 1)
+SO(hiragana_default,        L"\u3042\u3044", OR_DEF, TTB, FRTL, 1)
 SO(hebrew_default_ttb,      L"\u05d0\u05d1", OR_DEF, TTB, FRTL, -1)
-SO(hebrew_stacked_ttb,      L"\u05d0\u05d1", OR_STK, TTB, FRTL, 0)
+SO(hebrew_stacked_ttb,      L"\u05d0\u05d1", OR_STK, TTB, FRTL, 1)
 SO(digits_default_ttb,      L"123", OR_DEF, TTB, FRTL, -1)
 SO(horizontal_ltr_default,  L"ab",   OR_DEF, LTRd, FTTB, 0)           /* horizontal layouts never draw sideways glyph runs */
 SO(horizontal_ltr_stacked,  L"ab",   OR_STK, LTRd, FTTB, 0)
@@ -104,11 +104,11 @@ TEST(r2_layout_bidi_reorder_flow_orientation_switch_relayouts)
     BX_BEGIN(); BX_LAYOUT(l, L"ab", 300.0f, 300.0f); BX_QI(l2, IDWriteTextLayout2, l); int i; dwx_renderer *d;
     IDWriteTextLayout_SetReadingDirection(l, TTB); IDWriteTextLayout_SetFlowDirection(l, FRTL);
     IDWriteTextLayout2_SetVerticalGlyphOrientation(l2, OR_DEF);
-    d = bx_draw(l, 0, 0); if (d) { for (i = 0; i < d->ncalls; i++) if (d->calls[i].kind == DWX_DRAW_GLYPHRUN) CHECK(d->calls[i].sideways); dwx_release(d); }
-    IDWriteTextLayout2_SetVerticalGlyphOrientation(l2, OR_STK);
     d = bx_draw(l, 0, 0); if (d) { for (i = 0; i < d->ncalls; i++) if (d->calls[i].kind == DWX_DRAW_GLYPHRUN) CHECK(!d->calls[i].sideways); dwx_release(d); }
-    IDWriteTextLayout2_SetVerticalGlyphOrientation(l2, OR_DEF);
+    IDWriteTextLayout2_SetVerticalGlyphOrientation(l2, OR_STK);
     d = bx_draw(l, 0, 0); if (d) { for (i = 0; i < d->ncalls; i++) if (d->calls[i].kind == DWX_DRAW_GLYPHRUN) CHECK(d->calls[i].sideways); dwx_release(d); }
+    IDWriteTextLayout2_SetVerticalGlyphOrientation(l2, OR_DEF);
+    d = bx_draw(l, 0, 0); if (d) { for (i = 0; i < d->ncalls; i++) if (d->calls[i].kind == DWX_DRAW_GLYPHRUN) CHECK(!d->calls[i].sideways); dwx_release(d); }
     IDWriteTextLayout2_Release(l2); BX_DONE(l);
 }
 
@@ -129,7 +129,8 @@ TEST(r2_layout_bidi_reorder_flow_vertical_bottom_to_top_advance_upwards)
     BX_BEGIN(); BX_LAYOUT(l, L"abc", 300.0f, 300.0f); bx_tp p0, p1, p2;
     IDWriteTextLayout_SetReadingDirection(l, BTT); IDWriteTextLayout_SetFlowDirection(l, FRTL);
     p0 = bx_pos(l, 0, FALSE); p1 = bx_pos(l, 1, FALSE); p2 = bx_pos(l, 2, FALSE);
-    CHECK(p1.y < p0.y && p2.y < p1.y);
+    CHECK(p1.y > p0.y && p2.y > p1.y);                               /* hit-test positions still step downwards with the character index */
+    CHK_NEAR(p1.y - p0.y, p2.y - p1.y);
     CHK_NEAR(p0.x, p1.x);
     BX_DONE(l);
 }

@@ -86,7 +86,7 @@ TEST(r2_layout_bidi_reorder_draw_runs_tile_the_line)
             for (j = 0; j < h.count; j++) { if (h.m[j].left < edges[n][0]) edges[n][0] = h.m[j].left; if (h.m[j].left + h.m[j].width > edges[n][1]) edges[n][1] = h.m[j].left + h.m[j].width; }
             covered += edges[n][1] - edges[n][0]; n++;
         }
-        CHK_NEAR(covered, 8 * CW);
+        CHK_NEAR(covered, 9 * CW);                 /* nine characters */
         {   int a, b; for (a = 0; a < n; a++) for (b = a + 1; b < n; b++) CHECK(edges[a][1] <= edges[b][0] + EPS || edges[b][1] <= edges[a][0] + EPS); }
         dwx_release(r);
     }

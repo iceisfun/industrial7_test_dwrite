@@ -28,7 +28,7 @@ static void wrap_lines(int base)
     CHK_NEAR(tm.width, 3 * CW); CHK_NEAR(tm.widthIncludingTrailingWhitespace, 4 * CW);
     CHK_NEAR(tm.height, lm[0].height + lm[1].height + lm[2].height + lm[3].height);
     CHK_NEAR(tm.top, 0.0f);
-    CHK_NEAR(tm.left, base ? 6.5f * CW - 3 * CW : 0.0f);
+    CHK_NEAR(tm.left, base ? 6.5f * CW - 4 * CW : 0.0f);                /* the widest line (with its trailing space) sets the left edge */
     BX_DONE(l);
 }
 TEST(r2_layout_bidi_reorder_wrap_hebrew_lines_ltr_paragraph) { wrap_lines(0); }

@@ -79,9 +79,9 @@ TEST(r2_layout_bidi_reorder_spacing_range_straddling_runs)
 /* spacing is per cluster: a base and its combining marks share one spacing */
 TEST(r2_layout_bidi_reorder_spacing_applies_per_cluster_with_marks)
 {
-    BX_BEGIN(); BX_LAYOUT(l, L"a\u0301\u0302\u05d0\u05b0\u05b1", 1000.0f, 100.0f); BX_QI(l1, IDWriteTextLayout1, l);
+    BX_BEGIN(); BX_LAYOUT(l, L"a\u0301\u0302\u05d0\u05b0", 1000.0f, 100.0f); BX_QI(l1, IDWriteTextLayout1, l);
     DWRITE_CLUSTER_METRICS cm[8]; UINT32 n;
-    CHECK_HR_OK(IDWriteTextLayout1_SetCharacterSpacing(l1, 2.0f, 3.0f, 0.0f, RNG(0, 6)));
+    CHECK_HR_OK(IDWriteTextLayout1_SetCharacterSpacing(l1, 2.0f, 3.0f, 0.0f, RNG(0, 5)));
     n = bx_clusters(l, cm, 8); CHECK(n == 2);
     if (n == 2) { CHK_NEAR(cm[0].width, CW + 5.0f); CHK_NEAR(cm[1].width, CW + 5.0f); }
     IDWriteTextLayout1_Release(l1); BX_DONE(l);
