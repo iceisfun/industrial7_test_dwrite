@@ -202,9 +202,10 @@ TEST(inline_effect_passthrough)
 }
 TEST(inline_rtl_paragraph_flags)
 {
-    TD_BEGIN(); TD_LAYOUT(l, L"A#B", 16.0f, 200.0f, 100.0f); RD(); NOSNAP(r);
+    /* a lone neutral character resolves to the paragraph level (UBA N2): odd in an RTL paragraph, so isRightToLeft is TRUE */
+    TD_BEGIN(); TD_LAYOUT(l, L"#", 16.0f, 200.0f, 100.0f); RD(); NOSNAP(r);
     dwx_inline *io = dwx_inline_new(20.0f, 12.0f, 8.0f, FALSE);
-    IDWriteTextLayout_SetInlineObject(l, (IDWriteInlineObject *)io, RNG(1, 1));
+    IDWriteTextLayout_SetInlineObject(l, (IDWriteInlineObject *)io, RNG(0, 1));
     IDWriteTextLayout_SetReadingDirection(l, DWRITE_READING_DIRECTION_RIGHT_TO_LEFT);
     DRAW_OK(l, r, 0.0f, 0.0f);
     const dwx_draw *c = IL(r, 0);
@@ -212,7 +213,7 @@ TEST(inline_rtl_paragraph_flags)
     if (c) {
         EXPECT_EQ(c->obj_rtl, TRUE); EXPECT_EQ(c->obj_sideways, FALSE);
         t_note("inline object in RTL paragraph: origin (%g, %g)", c->x, c->y);
-        CHECK(c->x >= 200.0f - 2 * 7.8125f - 20.0f - 0.01f && c->x <= 200.0f);
+        CHECK(c->x >= 200.0f - 20.0f - 0.01f && c->x <= 200.0f);
     }
     DONE_IO(l, r, io);
 }

@@ -55,8 +55,7 @@ TEST(run_baseline_equals_font_ascent_scaled)
     const dwx_draw *c = td_nth(r, DWX_DRAW_GLYPHRUN, 0);
     DWRITE_FONT_METRICS m; td_face_metrics(c, &m);
     if (c) {
-        float asc = m.ascent * 16.0f / m.designUnitsPerEm;
-        CHECK_NEAR(c->y, asc, 0.02);
+        CHECK_BASELINE(c->y, m, 16.0f);
         t_note("face ascent %u descent %u lineGap %d upm %u, baseline %g", m.ascent, m.descent, m.lineGap, m.designUnitsPerEm, c->y);
     }
     DONE(l, r);
@@ -177,9 +176,9 @@ TEST(desc_locale_follows_setlocalename)
     }
     TD_END();
 }
-TEST(desc_string_points_into_layout_text)
+TEST(desc_total_glyphs_across_size_runs)
 {
-    /* every description's string is layoutText + textPosition: strings of different runs differ by exactly the position difference */
+    /* one glyph per character over several runs of different sizes */
     TD_BEGIN(); TD_LAYOUT(l, L"AAAA BBBB CCCC DDDD", 16.0f, 1000.0f, 100.0f); RD();
     IDWriteTextLayout_SetFontSize(l, 20.0f, RNG(5, 4)); IDWriteTextLayout_SetFontSize(l, 24.0f, RNG(10, 4));
     DRAW_OK(l, r, 0.0f, 0.0f);
@@ -294,7 +293,7 @@ TEST(split_font_family_changes_face)
         /* both runs share one baseline: the taller font decides it */
         CHECK_NEARF(a->y, b->y);
         CHECK_NEARF(a->y, td_line_baseline(l, 0));
-        CHECK_NEARF(b->y, mb.ascent * 16.0f / mb.designUnitsPerEm);
+        CHECK_BASELINE(b->y, mb, 16.0f);
     }
     DONE(l, r);
 }
@@ -543,7 +542,7 @@ TEST(pos_mixed_size_shared_baseline)
     if (a && b && c) {
         CHECK_NEARF(a->y, b->y); CHECK_NEARF(b->y, c->y);
         DWRITE_FONT_METRICS m; td_face_metrics(b, &m);
-        CHECK_NEARF(b->y, m.ascent * 48.0f / m.designUnitsPerEm);
+        CHECK_BASELINE(b->y, m, 48.0f);
         CHECK_NEARF(td_line_baseline(l, 0), b->y);
     }
     DONE(l, r);

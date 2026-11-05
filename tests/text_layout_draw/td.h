@@ -83,6 +83,9 @@ int  td_line_of(const td_lines_t *o, UINT32 textpos);            /* line contain
 float td_snap(float v, float scale, float offset);
 /* Glyph run starting exactly at text position `pos` (nth of that kind with the position), NULL if none. */
 const dwx_draw *td_run_at(dwx_renderer *r, UINT32 pos);
+/* Baseline y (relative to the draw origin) must be the face ascent scaled to `size`, plus at most the line gap (how a gap is distributed is a font-metrics matter). */
+void td_check_baseline_(float y, const DWRITE_FONT_METRICS *m, float size, const char *file, int line);
+#define CHECK_BASELINE(y, m, size) td_check_baseline_((y), &(m), (size), __FILE__, __LINE__)
 /* Check the run's glyph indices against IDWriteFontFace::GetGlyphIndices of the run's own face (LTR order). */
 void td_check_indices(const dwx_draw *d, const WCHAR *src, const char *what);
 

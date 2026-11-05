@@ -167,6 +167,11 @@ const dwx_draw *td_run_at(dwx_renderer *r, UINT32 pos)
     for (i = 0; i < r->ncalls; i++) if (r->calls[i].kind == DWX_DRAW_GLYPHRUN && r->calls[i].has_desc && r->calls[i].text_pos == pos) return &r->calls[i];
     return NULL;
 }
+void td_check_baseline_(float y, const DWRITE_FONT_METRICS *m, float size, const char *file, int line)
+{
+    float asc = m->ascent * size / m->designUnitsPerEm, gap = (m->lineGap > 0 ? m->lineGap : 0) * size / m->designUnitsPerEm;
+    t_check(y >= asc - 0.02f && y <= asc + gap + 0.02f, file, line, "baseline within [ascent, ascent+lineGap]", "baseline %g, ascent %g, lineGap %g", y, asc, gap);
+}
 void td_check_indices(const dwx_draw *d, const WCHAR *src, const char *what)
 {
     UINT32 cp[256], i; UINT16 want[256];

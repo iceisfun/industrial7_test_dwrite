@@ -349,7 +349,7 @@ TEST(sys_run_fields_for_system_fonts)
             EXPECT_EQ(c->nglyphs, 11);
             td_check_indices(c, L"Hello World", "system font glyph indices");
             DWRITE_FONT_METRICS m; td_face_metrics(c, &m);
-            CHECK_NEAR(c->y, 2.0f + m.ascent * 20.0f / m.designUnitsPerEm, 0.05);
+            CHECK_BASELINE(c->y - 2.0f, m, 20.0f);
             CHECK_NEARF(c->x, 1.0f);
             DWRITE_GLYPH_METRICS gm[11]; if (c->nglyphs == 11 && SUCCEEDED(IDWriteFontFace_GetDesignGlyphMetrics(c->face, c->indices, 11, gm, FALSE))) { UINT32 k; for (k = 0; k < 11; k++) CHECK_NEAR(c->advances[k], gm[k].advanceWidth * 20.0f / m.designUnitsPerEm, 0.02 + 0.2); }
             t_note("%ls: ascent %u descent %u upm %u baseline %g", k_sys[i], m.ascent, m.descent, m.designUnitsPerEm, c->y);
