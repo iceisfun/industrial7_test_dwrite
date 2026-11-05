@@ -68,6 +68,14 @@ typedef struct { unsigned ppem, ppi; const crb_sbrec *r; int nr; } crb_sbstrike;
 uint8_t *crb_sbix(const crb_sbstrike *s, int ns, unsigned nglyphs, unsigned version, size_t *n);
 #define CRB_TAG(a, b, c, d) (((uint32_t)(a) << 24) | ((uint32_t)(b) << 16) | ((uint32_t)(c) << 8) | (uint32_t)(d))
 
+/* ---- COLR v0/v1 header + CPAL ---- */
+typedef struct { unsigned gid, first, n; } crb_cbase;
+typedef struct { unsigned gid, pal; } crb_clayer;
+/* COLR with version `ver` (0 or 1; 1 appends an empty v1 header: five zero offsets) */
+uint8_t *crb_colr(unsigned ver, const crb_cbase *b, int nb, const crb_clayer *l, int nl, size_t *n);
+/* CPAL: palette p starts at color record first[p]; argb records are 0xAARRGGBB; ver 1 appends zero type/label offsets */
+uint8_t *crb_cpal(unsigned ver, unsigned nent, unsigned npal, const unsigned *first, unsigned nrec, const uint32_t *argb, size_t *n);
+
 /* ---- fonts ---- */
 /* default synthetic font (69 glyphs; nglyphs > 69 appends empty glyphs) plus raw tables. */
 uint8_t *crb_blob(const ttf_rawtable *raw, int nraw, int nglyphs, size_t *n);
@@ -94,4 +102,6 @@ uint8_t *crb_cbdt_font(size_t *n);
 /* the entries dwrite must accept from that font (strikes with depth != 32 or ppemX != ppemY are not in the list) */
 typedef struct { unsigned gid, ppem; int imgfmt; crb_met m; const uint8_t *png; size_t pnglen; } crb_cbexp;
 const crb_cbexp *crb_cb_entries(int *n);
+/* sbix (PNG/JPEG/TIFF at 16/32/64) + COLR/CPAL font of t_translate.c: bitmap glyphs 2..8, colour glyphs 2,10..14 */
+uint8_t *crb_translate_fixture(size_t *n);
 #endif

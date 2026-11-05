@@ -238,7 +238,10 @@ HRESULT crb_gif(crb *x, UINT16 g, UINT32 a, UINT32 b, UINT32 *out) {
     *out = (UINT32)f; return hr;
 }
 HRESULT crb_gid(crb *x, UINT16 g, UINT32 ppem, UINT32 fmt, DWRITE_GLYPH_IMAGE_DATA *d, void **ctx) {
-    return IDWriteFontFace4_GetGlyphImageData(x->f4, g, ppem, (DWRITE_GLYPH_IMAGE_FORMATS)fmt, d, ctx);
+    HRESULT hr = IDWriteFontFace4_GetGlyphImageData(x->f4, g, ppem, (DWRITE_GLYPH_IMAGE_FORMATS)fmt, d, ctx);
+    /* neither S_OK nor E_INVALIDARG: the implementation does not provide the call at all; leave the caller a defined (empty) result instead of stale bytes */
+    if (hr != S_OK && hr != E_INVALIDARG_) { memset(d, 0, sizeof *d); *ctx = NULL; }
+    return hr;
 }
 int crb_is_zero(const void *p, size_t n) { const unsigned char *q = (const unsigned char *)p; size_t i; for (i = 0; i < n; i++) if (q[i]) return 0; return 1; }
 
@@ -286,4 +289,22 @@ uint8_t *crb_cbdt_font(size_t *n) {
     out = crb_blob(raw, 2, 0, n);
     free(lc); free(dt);
     return out;
+}
+
+/* ------------------------------------------------------------------------------------------ COLR / CPAL */
+uint8_t *crb_colr(unsigned ver, const crb_cbase *b, int nb, const crb_clayer *l, int nl, size_t *n) {
+    crb_buf o = { 0 }; int i; unsigned hdr = ver ? 14 + 20 : 14;
+    crb_u16(&o, ver); crb_u16(&o, (unsigned)nb); crb_u32(&o, nb ? hdr : 0); crb_u32(&o, nl ? hdr + 6 * (unsigned)nb : 0); crb_u16(&o, (unsigned)nl);
+    if (ver) crb_zero(&o, 20);
+    for (i = 0; i < nb; i++) { crb_u16(&o, b[i].gid); crb_u16(&o, b[i].first); crb_u16(&o, b[i].n); }
+    for (i = 0; i < nl; i++) { crb_u16(&o, l[i].gid); crb_u16(&o, l[i].pal); }
+    *n = o.n; return o.p;
+}
+uint8_t *crb_cpal(unsigned ver, unsigned nent, unsigned npal, const unsigned *first, unsigned nrec, const uint32_t *argb, size_t *n) {
+    crb_buf o = { 0 }; unsigned i, hdr = 12 + 2 * npal + (ver ? 12 : 0);
+    crb_u16(&o, ver); crb_u16(&o, nent); crb_u16(&o, npal); crb_u16(&o, nrec); crb_u32(&o, hdr);
+    for (i = 0; i < npal; i++) crb_u16(&o, first[i]);
+    if (ver) crb_zero(&o, 12);
+    for (i = 0; i < nrec; i++) { uint32_t v = argb[i]; crb_u8(&o, v & 0xFF); crb_u8(&o, (v >> 8) & 0xFF); crb_u8(&o, (v >> 16) & 0xFF); crb_u8(&o, v >> 24); }
+    *n = o.n; return o.p;
 }

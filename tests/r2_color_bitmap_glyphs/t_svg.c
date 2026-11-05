@@ -124,7 +124,7 @@ T(svg_compressed_documents_are_returned_verbatim) {
     DWRITE_GLYPH_IMAGE_DATA im; void *ctx = NULL;
     CHECK_HR_OK(crb_gid(&x, 50, 0, F_SVG, &im, &ctx));
     CHECKF(im.imageData && im.imageDataSize == sizeof D4 && !memcmp(im.imageData, D4, sizeof D4), "size %u", im.imageDataSize);
-    CHECKF(((const uint8_t *)im.imageData)[0] == 0x1F && ((const uint8_t *)im.imageData)[1] == 0x8B, "gzip magic");
+    CHECKF(im.imageData && ((const uint8_t *)im.imageData)[0] == 0x1F && ((const uint8_t *)im.imageData)[1] == 0x8B, "gzip magic");
     if (ctx) IDWriteFontFace4_ReleaseGlyphImageData(x.f4, ctx);
     crb_close(&x);
 }
