@@ -77,6 +77,7 @@ static __inline uint64_t clt_hw(uint64_t h, const WCHAR *w) { return clt_h(h, w,
 
 /* The per-iteration workload shared by the thread tests (uses factory f, iteration i); returns a digest and counts
  * in-thread assertion failures in t. Operation k = i % CLT_NOPS. */
+extern int clt_lenient;   /* set by clt_run: tolerate layout failures on emulators without fonts */
 #define CLT_NOPS 8
 uint64_t clt_op(clt_thr *t, IDWriteFactory *f, int op, int i, dwx_mem_loader *ld);
 #endif

@@ -336,6 +336,8 @@ void clt_verify(const clt_thr *t, int n, const char *what) {
     }
 }
 
+int clt_lenient;
+static void __attribute__((constructor)) clt_init_lenient(void) { clt_lenient = t_is_wine(); }
 /* ---- shared workload ------------------------------------------------------------------------------------- */
 static uint64_t hash_family_name(IDWriteFontFamily *fam, uint64_t h) {
     IDWriteLocalizedStrings *s = NULL; WCHAR buf[128];
@@ -363,7 +365,7 @@ uint64_t clt_op(clt_thr *t, IDWriteFactory *f, int op, int i, dwx_mem_loader *ld
         }
         break; }
     case 1: {   /* layout metrics */
-        IDWriteTextFormat *fm = NULL; IDWriteTextLayout *l = NULL; DWRITE_TEXT_METRICS m;
+        IDWriteTextFormat *fm = NULL; IDWriteTextLayout *l = NULL; DWRITE_TEXT_METRICS m; HRESULT hr;
         WCHAR txt[] = L"Hello DirectWrite, concurrent layout of a moderately long line of text.";
         float sz = 12.0f + (float)(i % 5);
         IDWriteFactory_CreateTextFormat(f, L"Arial", NULL, DWRITE_FONT_WEIGHT_REGULAR, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, sz, L"en-us", &fm);
@@ -371,8 +373,10 @@ uint64_t clt_op(clt_thr *t, IDWriteFactory *f, int op, int i, dwx_mem_loader *ld
         TCHK(t, l != NULL);
         if (l) {
             memset(&m, 0, sizeof m);
-            TCHK(t, IDWriteTextLayout_GetMetrics(l, &m) == S_OK);
-            TCHK(t, m.lineCount >= 1 && m.width > 0.0f);
+            hr = IDWriteTextLayout_GetMetrics(l, &m);
+            TCHK(t, hr == S_OK || clt_lenient);        /* an emulator without fonts may fail layout; the result must still agree across threads */
+            h = clt_hi(h, (uint64_t)(uint32_t)hr);
+            TCHK(t, clt_lenient || (m.lineCount >= 1 && m.width > 0.0f));
             h = clt_hf(h, m.width); h = clt_hf(h, m.height); h = clt_hf(h, m.widthIncludingTrailingWhitespace); h = clt_hi(h, m.lineCount);
             IDWriteTextLayout_Release(l);
         }
