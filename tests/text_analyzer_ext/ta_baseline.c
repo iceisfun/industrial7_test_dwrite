@@ -130,6 +130,7 @@ TEST(gb_locale_is_ignored_for_regular_kinds) {
     }
     bf_close(&bf); TA_END();
 }
+/* with no BASE table the script/language lookup loop is skipped entirely (BaseTable count == 0), so only the metrics fallback applies */
 TEST(gb_script_is_ignored_without_base_table) {
     TA_BEGIN(); NEED_BF((void)0); static const WCHAR *samples[] = { L"A", L"\x0416", L"\x0627", L"\x4E00", L"\x0E01", L"\x05D0" }; unsigned i; INT32 ref; BOOL e;
     gb(a1, &bf, DWRITE_BASELINE_CENTRAL, FALSE, TRUE, bf.latin, NULL, &ref, &e);
@@ -140,7 +141,7 @@ TEST(gb_script_is_ignored_without_base_table) {
     bf_close(&bf); TA_END();
 }
 TEST(gb_script_index_out_of_range_still_succeeds) {
-    /* the script id is only used as a table index (out of range ids map to entry 0) */
+    /* BaseTable::GetBaseline clamps script ids >= 0x99 to table entry 0 and never fails; the wrapper only rejects NULL face and baseline > 8 */
     TA_BEGIN(); NEED_BF((void)0); DWRITE_SCRIPT_ANALYSIS sa; INT32 v; BOOL e; sa.script = 0xFFFF; sa.shapes = DWRITE_SCRIPT_SHAPES_DEFAULT;
     CHECK_HR(gb(a1, &bf, DWRITE_BASELINE_ROMAN, FALSE, TRUE, sa, NULL, &v, &e), S_OK);
     bf_close(&bf); TA_END();

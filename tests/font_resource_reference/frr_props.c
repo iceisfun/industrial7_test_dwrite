@@ -218,6 +218,7 @@ TEST(size_arial_matches_disk) {
     if (!frr_sys_path("arial.ttf", p, MAX_PATH) || !frr_disk_info(p, &disk, &ft)) { t_skip("arial.ttf not installed"); return; }
     IDWriteFontFaceReference *r = frr_sys_ref(f3, "arial.ttf", 0, SIM_NONE);
     if (!r) return;
+    /* both sizes come from the local file stream, which is the whole file on disk for a plain .ttf */
     EXPECT_EQ(IDWriteFontFaceReference_GetFileSize(r), disk);
     EXPECT_EQ(IDWriteFontFaceReference_GetLocalFileSize(r), disk);
     CHECK(disk > 0);
