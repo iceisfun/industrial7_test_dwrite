@@ -90,6 +90,7 @@ static HRESULT WINAPI cl_Create(IDWriteFontCollectionLoader *This, IDWriteFactor
     fcl_evc('C');
     c->tid = GetCurrentThreadId();
     c->last_key = key; c->last_ks = ks; c->key_was_null = key == NULL;
+    { uint32_t hv = 2166136261u; UINT32 q; for (q = 0; key && q < ks; q++) { hv ^= ((const uint8_t *)key)[q]; hv *= 16777619u; } c->key_hash = hv; }
     memset(c->keycopy, 0, sizeof c->keycopy);
     if (key && ks) memcpy(c->keycopy, key, ks < sizeof c->keycopy ? ks : sizeof c->keycopy);
     c->last_factory = f;
@@ -102,8 +103,11 @@ static HRESULT WINAPI cl_Create(IDWriteFontCollectionLoader *This, IDWriteFactor
     e->get_hr = c->get_hr; e->get_mask = c->get_mask;
     for (i = 0; i < c->nkeys && e->nfiles < FCL_MAXF; i++) {
         IDWriteFontFile *file = NULL;
-        if (f && SUCCEEDED(dwx_loader_file(c->fl, f, c->keys[i], &file)) && file) e->files[e->nfiles++] = file;
+        IDWriteFactory *ff = c->file_factory ? c->file_factory : f;
+        if (ff && SUCCEEDED(dwx_loader_file(c->fl, ff, c->keys[i], &file)) && file) e->files[e->nfiles++] = file;
     }
+    for (i = 0; i < c->ninject && e->nfiles < FCL_MAXF; i++) { IDWriteFontFile_AddRef(c->inject[i]); e->files[e->nfiles++] = c->inject[i]; }
+    if (c->hook) c->hook(c, f);
     { LONG slot = InterlockedIncrement(&c->nens) - 1; if (slot < FCL_MAXF) c->ens[slot] = e; }
     c->last_en = e;
     if (out) *out = (IDWriteFontFileEnumerator *)e;

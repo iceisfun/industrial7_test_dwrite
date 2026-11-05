@@ -228,6 +228,10 @@ typedef struct fcl_cl {
     HRESULT move_hr; int move_hr_at; int move_hr_true; HRESULT get_hr; unsigned get_mask;   /* copied into new enumerators */
     DWORD tid;
     IID qi_iids[8]; int n_qi_iids;
+    IDWriteFactory *file_factory;             /* when set, enumerated files are created through this factory instead of the one passed in */
+    IDWriteFontFile *inject[FCL_MAXF]; int ninject;     /* extra, pre-built files appended to every enumeration (AddRef'd by the enumerator) */
+    uint32_t key_hash;                        /* FNV-1a over the whole key as seen by the loader */
+    void (*hook)(struct fcl_cl *c, IDWriteFactory *f);  /* runs inside CreateEnumeratorFromKey */
 } fcl_cl;
 fcl_cl *fcl_cl_new(dwx_mem_loader *fl);
 void fcl_cl_add(fcl_cl *c, UINT32 filekey);
