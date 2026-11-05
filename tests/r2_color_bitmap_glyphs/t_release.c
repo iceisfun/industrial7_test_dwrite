@@ -69,7 +69,8 @@ T(release_empty_results_never_touch_the_stream) {
             HRESULT hr; ctx = (void *)(ULONG_PTR)1;
             if (g >= 2 && g <= 7 && q[i].fmt == F_PNG && q[i].ppem < 65) continue;
             hr = crb_gid(&x, (UINT16)g, q[i].ppem, q[i].fmt, &d, &ctx);
-            CHECKF(hr == S_OK || hr == E_INVALIDARG_, "glyph %u query %u: %s", g, i, dw_hr_name(hr));
+            /* the DWriteFontFace wrapper (0xdc780) accepts exactly one of SVG/PNG/JPEG/TIFF/PREMULTIPLIED and returns E_INVALIDARG otherwise */
+            CHECKF(hr == (i >= 8 && i <= 11 ? E_INVALIDARG_ : S_OK), "glyph %u query %u: %s", g, i, dw_hr_name(hr));
             CHECKF(ctx == NULL, "glyph %u query %u: context %p", g, i, ctx);
         }
     }
