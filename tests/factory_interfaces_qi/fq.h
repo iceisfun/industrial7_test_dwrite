@@ -14,6 +14,7 @@ typedef struct fq_ctx {
     IUnknown *hold[10]; int nhold;
     dwx_font font; int font_open;
     IDWriteFactory *own_factory;     /* optional private factory (released at the end) */
+    dwx_mem_loader *ld; dwx_coll_loader *cl;   /* custom collection loaders, kept registered for the object's lifetime */
 } fq_ctx;
 void fq_ctx_init(fq_ctx *c);
 void fq_ctx_free(fq_ctx *c);

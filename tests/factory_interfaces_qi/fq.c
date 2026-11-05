@@ -8,6 +8,8 @@ void fq_hold(fq_ctx *c, void *u) { if (u && c->nhold < 10) c->hold[c->nhold++] =
 void fq_ctx_free(fq_ctx *c) {
     while (c->nhold > 0) { IUnknown *u = c->hold[--c->nhold]; if (u) IUnknown_Release(u); }
     if (c->font_open) { dwx_font_close(&c->font); c->font_open = 0; }
+    if (c->cl) { dwx_coll_unregister(c->cl); dwx_release(c->cl); c->cl = NULL; }
+    if (c->ld) { dwx_loader_unregister(c->ld); dwx_release(c->ld); c->ld = NULL; }
     DW_RELEASE(c->own_factory);
 }
 /* A private factory for creators that register loaders (so the shared factory stays untouched). */
@@ -113,13 +115,9 @@ static IUnknown *mk_font_collection_custom(fq_ctx *c) {
     ld = dwx_loader_new(); key = dwx_loader_add(ld, blob, n); free(blob);
     if (FAILED(dwx_loader_register(ld, f))) { dwx_release(ld); return NULL; }
     cl = dwx_coll_new(ld); dwx_coll_add_key(cl, key);
-    if (SUCCEEDED(dwx_coll_register(cl, f))) {
-        if (FAILED(dwx_coll_create(cl, f, &out))) out = NULL;
-        /* The collection keeps what it needs; the loaders can be unregistered at once (the helper test doubles stay valid). */
-        dwx_coll_unregister(cl);
-    }
-    dwx_loader_unregister(ld);
-    dwx_release(cl); dwx_release(ld);
+    c->ld = ld; c->cl = cl;   /* both stay registered until fq_ctx_free (after the collection is released) */
+    if (FAILED(dwx_coll_register(cl, f))) return NULL;
+    if (FAILED(dwx_coll_create(cl, f, &out))) out = NULL;
     return (IUnknown *)out;
 }
 static IUnknown *mk_font_collection_fontset(fq_ctx *c) {
