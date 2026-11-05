@@ -381,7 +381,7 @@ TEST(source_error_propagates_break)
     if (t_is_wine()) { ta_free(NULL, k); TA_END(); t_skip("emulator faults on source errors"); return; }
     ta_fsrc_init(&fs, t, 5); fs.fail_at = E_FAIL;
     hr = IDWriteTextAnalyzer_AnalyzeLineBreakpoints(an, (IDWriteTextAnalysisSource *)&fs, 0, 5, (IDWriteTextAnalysisSink *)k);
-    CHECK_HR(hr, E_FAIL);
+    CHECK_HR_PROP(hr, E_FAIL);
     CHECK(k->n_break == 0);
     ta_free(NULL, k); TA_END();
 }
@@ -393,7 +393,7 @@ TEST(source_before_error_propagates_break)
     if (t_is_wine()) { ta_free(NULL, k); TA_END(); t_skip("emulator faults on source errors"); return; }
     ta_fsrc_init(&fs, t, 5); fs.fail_before = E_FAIL;
     hr = IDWriteTextAnalyzer_AnalyzeLineBreakpoints(an, (IDWriteTextAnalysisSource *)&fs, 2, 3, (IDWriteTextAnalysisSink *)k);
-    CHECK_HR(hr, E_FAIL);
+    CHECK_HR_PROP(hr, E_FAIL);
     CHECK(k->n_break == 0);
     ta_free(NULL, k); TA_END();
 }

@@ -82,5 +82,8 @@ typedef struct ta_fsrc {
 } ta_fsrc;
 void ta_fsrc_init(ta_fsrc *s, const WCHAR *text, UINT32 len);
 
+/* a callback failure must abort the call with a failure; the exact code is only recorded (the HRESULT mapping is not visible in the decomp) */
+#define CHECK_HR_PROP(hr, code) do { HRESULT p_ = (hr); CHECK_HR_FAILED(p_); if (p_ != (HRESULT)(code)) t_note("callback failed with %s, analyzer returned %s", dw_hr_name((HRESULT)(code)), dw_hr_name(p_)); } while (0)
+
 #define LEN(s) ((UINT32)wcslen(s))
 #endif

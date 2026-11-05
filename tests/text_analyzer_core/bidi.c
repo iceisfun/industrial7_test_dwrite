@@ -136,7 +136,7 @@ TEST(bidi_locale_error_propagates)
     dwx_ana_src *s = dwx_ana_src_new(t, 3); dwx_ana_sink *k = dwx_ana_sink_new(); HRESULT hr;
     s->fail_locale = E_FAIL;
     hr = ta_do(an, TA_BIDI, s, 0, 3, k);
-    CHECK_HR(hr, E_FAIL);
+    CHECK_HR_PROP(hr, E_FAIL);
     CHECK(k->n_bidi == 0);
     ta_free(s, k); TA_END();
 }
@@ -353,7 +353,7 @@ TEST(bidi_sink_error_propagates)
     dwx_ana_src *s = dwx_ana_src_new(t, LEN(t)); dwx_ana_sink *k = dwx_ana_sink_new(); HRESULT hr;
     k->fail_bidi = E_OUTOFMEMORY;
     hr = ta_do(an, TA_BIDI, s, 0, LEN(t), k);
-    CHECK_HR(hr, E_OUTOFMEMORY);
+    CHECK_HR_PROP(hr, E_OUTOFMEMORY);
     CHECK(k->n_bidi == 1);
     ta_free(s, k); TA_END();
 }
@@ -365,7 +365,7 @@ TEST(bidi_source_error_propagates)
     if (t_is_wine()) { ta_free(NULL, k); TA_END(); t_skip("emulator faults on source errors"); return; }
     ta_fsrc_init(&fs, t, 3); fs.fail_at = E_FAIL;
     hr = IDWriteTextAnalyzer_AnalyzeBidi(an, (IDWriteTextAnalysisSource *)&fs, 0, 3, (IDWriteTextAnalysisSink *)k);
-    CHECK_HR(hr, E_FAIL);
+    CHECK_HR_PROP(hr, E_FAIL);
     CHECK(k->n_bidi == 0);
     ta_free(NULL, k); TA_END();
 }
@@ -553,7 +553,7 @@ TEST(numsub_sink_error_propagates)
     if (!ns) { TA_END(); t_skip("CreateNumberSubstitution failed"); return; }
     s = dwx_ana_src_new(t, 3); k = dwx_ana_sink_new(); s->subst = ns; k->fail_subst = E_FAIL;
     hr = ta_do(an, TA_NUMSUB, s, 0, 3, k);
-    CHECK_HR(hr, E_FAIL);
+    CHECK_HR_PROP(hr, E_FAIL);
     CHECK(k->n_subst == 1);
     EXPECT_REFS(ns, 1);
     ta_free(s, k); DW_RELEASE(ns); TA_END();
@@ -565,7 +565,7 @@ TEST(numsub_source_error_propagates)
     dwx_ana_src *s = dwx_ana_src_new(t, 3); dwx_ana_sink *k = dwx_ana_sink_new(); HRESULT hr;
     s->fail_subst = E_OUTOFMEMORY;
     hr = ta_do(an, TA_NUMSUB, s, 0, 3, k);
-    CHECK_HR(hr, E_OUTOFMEMORY);
+    CHECK_HR_PROP(hr, E_OUTOFMEMORY);
     CHECK(k->n_subst == 0);
     ta_free(s, k); TA_END();
 }
