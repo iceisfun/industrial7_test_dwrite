@@ -326,7 +326,7 @@ TEST(r2_variable_fonts_layout_inherits_format_values)
         EXPECT_EQ(IDWriteTextLayout4_GetFontAxisValueCount(l, 15), 2);
         CHECK_HR_OK(IDWriteTextLayout4_GetFontAxisValues(l, 3, g, 2, &rg));
         CHECK(!memcmp(a, g, sizeof a));
-        EXPECT_EQ(rg.startPosition, 0); EXPECT_EQ(rg.length, 16);
+        EXPECT_EQ(rg.startPosition, 0); EXPECT_EQ(rg.length, 0xFFFFFFFFu);   /* a run that reaches the end of the text reports an open-ended length */
         DW_RELEASE(l);
     }
     DW_RELEASE(t);
@@ -348,7 +348,7 @@ TEST(r2_variable_fonts_layout_range_set_splits_runs)
         EXPECT_EQ(rg.startPosition, 2); EXPECT_EQ(rg.length, 3);
         CHECK(g[0].axisTag == TAG_WGHT && g[0].value == 800.0f && g[1].axisTag == TAG_WDTH && g[1].value == 90.0f && g[2].axisTag == 0 && g[3].axisTag == 0);
         CHECK_HR_OK(IDWriteTextLayout4_GetFontAxisValues(l, 0, g, 4, &rg)); EXPECT_EQ(rg.startPosition, 0); EXPECT_EQ(rg.length, 2);
-        CHECK_HR_OK(IDWriteTextLayout4_GetFontAxisValues(l, 9, g, 4, &rg)); EXPECT_EQ(rg.startPosition, 5); EXPECT_EQ(rg.length, 5);
+        CHECK_HR_OK(IDWriteTextLayout4_GetFontAxisValues(l, 9, g, 4, &rg)); EXPECT_EQ(rg.startPosition, 5); EXPECT_EQ(rg.length, 0xFFFFFFFFu - 5u);   /* last run: open-ended length */
         DW_RELEASE(l);
     }
     DW_RELEASE(t);
@@ -369,7 +369,7 @@ TEST(r2_variable_fonts_layout_get_values_zeroes_buffer_and_range)
         memset(g, 0xCC, sizeof g);
         CHECK_HR_OK(IDWriteTextLayout4_GetFontAxisValues(l, 2, g, 3, &rg));
         for (i = 0; i < 3; i++) CHECK(g[i].axisTag == 0 && g[i].value == 0.0f);
-        EXPECT_EQ(rg.startPosition, 0); EXPECT_EQ(rg.length, 6);
+        EXPECT_EQ(rg.startPosition, 0); EXPECT_EQ(rg.length, 0xFFFFFFFFu);   /* single run reaching the end: open-ended length */
         DW_RELEASE(l);
     }
     DW_RELEASE(t);

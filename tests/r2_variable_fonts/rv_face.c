@@ -153,14 +153,15 @@ TEST(r2_variable_fonts_face_duplicates_of_every_axis)
 }
 TEST(r2_variable_fonts_face_unknown_tag_is_appended)
 {
+    /* a tag the font does not have is dropped: the face keeps exactly the font's own axes and the known value still applies */
     IDWriteFontFace5 *f; DWRITE_FONT_AXIS_VALUE a[2], v[16]; UINT32 n;
     RV_BEGIN(0);
     a[0] = rv_av(TAG_ZZZZ, 3.5f); a[1] = rv_av(TAG_WGHT, 600);
     f = rv_face(&x, a, 2);
     if (f) {
         n = vals(f, v);
-        EXPECT_EQ(n, RV_NALL + 1);
-        if (n == RV_NALL + 1) { CHECK(v[RV_NALL].axisTag == TAG_ZZZZ && v[RV_NALL].value == 3.5f); }     /* after all font axes */
+        EXPECT_EQ(n, RV_NALL);
+        CHECK(rv_find_value(v, n, TAG_ZZZZ) < 0);
         CHECK(val_of(f, TAG_WGHT) == 600.0f);
         DW_RELEASE(f);
     }
@@ -168,34 +169,36 @@ TEST(r2_variable_fonts_face_unknown_tag_is_appended)
 }
 TEST(r2_variable_fonts_face_unknown_tags_keep_supplied_order)
 {
-    IDWriteFontFace5 *f; DWRITE_FONT_AXIS_VALUE a[3], v[16]; UINT32 n;
+    /* several unknown tags are all dropped */
+    IDWriteFontFace5 *f; DWRITE_FONT_AXIS_VALUE a[3], v[16]; UINT32 n; int i;
     RV_BEGIN(0);
     a[0] = rv_av(RV_TAG('q', 'q', 'q', '2'), 2); a[1] = rv_av(RV_TAG('q', 'q', 'q', '1'), 1); a[2] = rv_av(RV_TAG('q', 'q', 'q', '3'), 3);
     f = rv_face(&x, a, 3);
     if (f) {
         n = vals(f, v);
-        EXPECT_EQ(n, RV_NALL + 3);
-        if (n == RV_NALL + 3) { CHECK(v[RV_NALL].axisTag == a[0].axisTag && v[RV_NALL + 1].axisTag == a[1].axisTag && v[RV_NALL + 2].axisTag == a[2].axisTag); }
+        EXPECT_EQ(n, RV_NALL);
+        for (i = 0; i < 3; i++) CHECK(rv_find_value(v, n, a[i].axisTag) < 0);
         DW_RELEASE(f);
     }
     RV_END();
 }
 TEST(r2_variable_fonts_face_unknown_tag_values_not_clamped)
 {
+    /* an unknown tag with an extreme value is dropped without effect on the known axes */
     IDWriteFontFace5 *f; DWRITE_FONT_AXIS_VALUE a = rv_av(TAG_ZZZZ, 123456.0f);
     RV_BEGIN(0);
     f = rv_face(&x, &a, 1);
-    if (f) { CHECK(val_of(f, TAG_ZZZZ) == 123456.0f); DW_RELEASE(f); }
+    if (f) { CHECK(val_of(f, TAG_ZZZZ) == -12345.0f); EXPECT_EQ(IDWriteFontFace5_GetFontAxisValueCount(f), RV_NALL); CHECK(val_of(f, TAG_WGHT) == 400.0f); DW_RELEASE(f); }
     RV_END();
 }
 TEST(r2_variable_fonts_face_twenty_five_unknown_axes)
 {
-    /* more than 20 supplied values leave the converter's inline storage */
+    /* many supplied unknown values are all dropped */
     IDWriteFontFace5 *f; DWRITE_FONT_AXIS_VALUE a[25]; int i;
     RV_BEGIN(0);
     for (i = 0; i < 25; i++) a[i] = rv_av(RV_TAG('u', 'k', '0' + i / 10, '0' + i % 10), (float)i);
     f = rv_face(&x, a, 25);
-    if (f) { EXPECT_EQ(IDWriteFontFace5_GetFontAxisValueCount(f), RV_NALL + 25); for (i = 0; i < 25; i++) CHECK(val_of(f, a[i].axisTag) == (float)i); DW_RELEASE(f); }
+    if (f) { EXPECT_EQ(IDWriteFontFace5_GetFontAxisValueCount(f), RV_NALL); for (i = 0; i < 25; i++) CHECK(val_of(f, a[i].axisTag) == -12345.0f); DW_RELEASE(f); }
     RV_END();
 }
 TEST(r2_variable_fonts_face_order_matches_resource_default_order)

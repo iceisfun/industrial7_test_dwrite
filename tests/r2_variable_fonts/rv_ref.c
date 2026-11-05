@@ -143,12 +143,16 @@ TEST(r2_variable_fonts_ref_factory_null_file)
 }
 TEST(r2_variable_fonts_ref_factory_invalid_arguments)
 {
-    DWRITE_FONT_AXIS_VALUE a = rv_av(TAG_WGHT, 500);
+    DWRITE_FONT_AXIS_VALUE a = rv_av(TAG_WGHT, 500), *big = (DWRITE_FONT_AXIS_VALUE *)calloc(0x10000, sizeof a);   /* the count is read before any validation: back it with real memory */
+    UINT32 k;
     RV_BEGIN(0);
-    if (t_is_wine()) { RV_END(); t_skip("emulator does not validate the arguments"); return; }
+    if (t_is_wine()) { RV_END(); free(big); t_skip("emulator does not validate the arguments"); return; }
+    if (!big) { RV_END(); t_skip("allocation failed"); return; }
+    for (k = 0; k < 0x10000; k++) big[k] = a;
     { IDWriteFontFaceReference1 *r = RV_SENT(IDWriteFontFaceReference1 *); HRESULT hr = IDWriteFactory6_CreateFontFaceReference(x.f6, x.file, 0, (DWRITE_FONT_SIMULATIONS)4, &a, 1, &r); CHECK_HR(hr, E_INVALIDARG); CHECK_OUT_NULL(r); }
-    { IDWriteFontFaceReference1 *r = RV_SENT(IDWriteFontFaceReference1 *); HRESULT hr = IDWriteFactory6_CreateFontFaceReference(x.f6, x.file, 0, DWRITE_FONT_SIMULATIONS_NONE, NULL, 2, &r); CHECK_HR(hr, E_INVALIDARG); CHECK_OUT_NULL(r); }
-    { IDWriteFontFaceReference1 *r = RV_SENT(IDWriteFontFaceReference1 *); HRESULT hr = IDWriteFactory6_CreateFontFaceReference(x.f6, x.file, 0, DWRITE_FONT_SIMULATIONS_NONE, &a, 0x10000, &r); CHECK_HR(hr, E_INVALIDARG); CHECK_OUT_NULL(r); }
+    /* NULL values with a non-zero count is not exercised: the factory overload dereferences the pointer (access violation) */
+    { IDWriteFontFaceReference1 *r = RV_SENT(IDWriteFontFaceReference1 *); HRESULT hr = IDWriteFactory6_CreateFontFaceReference(x.f6, x.file, 0, DWRITE_FONT_SIMULATIONS_NONE, big, 0x10000, &r); CHECK_HR(hr, E_INVALIDARG); CHECK_OUT_NULL(r); }
+    free(big);
     RV_END();
 }
 TEST(r2_variable_fonts_ref_resource_invalid_arguments)
