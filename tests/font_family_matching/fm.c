@@ -1,6 +1,8 @@
 #include "fm.h"
 
-static int g_notes;
+static int g_notes, g_quiet;
+void fm_set_quiet(int q) { g_quiet = q; }
+#define FAILF(...) do { if (g_quiet) t_note(__VA_ARGS__); else CHECKF(0, __VA_ARGS__); } while (0)
 static void fm_note(const char *fmt, const char *a, int b, int c) {
     if (g_notes++ < 24) t_note(fmt, a, b, c);
 }
@@ -52,31 +54,31 @@ int fm_open(fm *m, const char *family, const fm_face *faces, int n, fm_tweak tw)
     memset(m, 0, sizeof *m);
     snprintf(m->name, sizeof m->name, "%s", family);
     if (!dw_proc()) { t_skip("DWriteCreateFactory unavailable"); return 0; }
-    if (n < 1 || n > FM_MAXF) { CHECKF(0, "bad face count %d", n); return 0; }
+    if (n < 1 || n > DWX_MAX_BLOBS) { FAILF("bad face count %d", n); return 0; }
     m->n = n;
     memcpy(m->spec, faces, sizeof(fm_face) * n);
     m->f = dw_new_factory(DWRITE_FACTORY_TYPE_ISOLATED);
-    if (!m->f) { CHECKF(0, "isolated factory not created"); return 0; }
+    if (!m->f) { FAILF("isolated factory not created"); return 0; }
     m->fl = dwx_loader_new();
     hr = dwx_loader_register(m->fl, m->f);
-    if (FAILED(hr)) { CHECKF(0, "RegisterFontFileLoader %s", dw_hr_name(hr)); goto fail; }
+    if (FAILED(hr)) { FAILF("RegisterFontFileLoader %s", dw_hr_name(hr)); goto fail; }
     m->cl = dwx_coll_new(m->fl);
     for (i = 0; i < n; i++) {
         size_t sz; uint8_t *b = fm_blob(family, &faces[i], i, tw, &sz);
         UINT32 k = b ? dwx_loader_add(m->fl, b, sz) : 0xFFFFFFFFu;
         free(b);
-        if (k != (UINT32)i) { CHECKF(0, "blob %d key %u", i, k); goto fail; }
+        if (k != (UINT32)i) { FAILF("blob %d key %u", i, k); goto fail; }
         dwx_coll_add_key(m->cl, k);
     }
     hr = dwx_coll_register(m->cl, m->f);
-    if (FAILED(hr)) { CHECKF(0, "RegisterFontCollectionLoader %s", dw_hr_name(hr)); goto fail; }
+    if (FAILED(hr)) { FAILF("RegisterFontCollectionLoader %s", dw_hr_name(hr)); goto fail; }
     hr = dwx_coll_create(m->cl, m->f, &m->coll);
-    if (FAILED(hr) || !m->coll) { CHECKF(0, "CreateCustomFontCollection %s", dw_hr_name(hr)); goto fail; }
+    if (FAILED(hr) || !m->coll) { FAILF("CreateCustomFontCollection %s", dw_hr_name(hr)); goto fail; }
     dw_wide(family, wfam, 96);
     hr = IDWriteFontCollection_FindFamilyName(m->coll, wfam, &idx, &ex);
     if (FAILED(hr) || !ex) {
         UINT32 k, nf = IDWriteFontCollection_GetFontFamilyCount(m->coll);
-        CHECKF(0, "FindFamilyName(%s) %s exists=%d count=%u", family, dw_hr_name(hr), ex, nf);
+        FAILF("FindFamilyName(%s) %s exists=%d count=%u", family, dw_hr_name(hr), ex, nf);
         for (k = 0; k < nf && k < 4; k++) {
             IDWriteFontFamily *ff = NULL; IDWriteLocalizedStrings *ls = NULL; char nm[96] = "?";
             if (SUCCEEDED(IDWriteFontCollection_GetFontFamily(m->coll, k, &ff)) && ff && SUCCEEDED(IDWriteFontFamily_GetFamilyNames(ff, &ls)) && ls) dw_ls_en(ls, nm, sizeof nm);
@@ -86,13 +88,13 @@ int fm_open(fm *m, const char *family, const fm_face *faces, int n, fm_tweak tw)
         goto fail;
     }
     hr = IDWriteFontCollection_GetFontFamily(m->coll, idx, &m->fam);
-    if (FAILED(hr) || !m->fam) { CHECKF(0, "GetFontFamily %s", dw_hr_name(hr)); goto fail; }
+    if (FAILED(hr) || !m->fam) { FAILF("GetFontFamily %s", dw_hr_name(hr)); goto fail; }
     m->count = IDWriteFontFamily_GetFontCount(m->fam);
-    if (m->count > FM_MAXF) { CHECKF(0, "family font count %u", m->count); goto fail; }
+    if (m->count > FM_MAXF) { FAILF("family font count %u", m->count); goto fail; }
     for (i = 0; i < (int)m->count; i++) {
         IDWriteFont *font = NULL; int k;
         hr = IDWriteFontFamily_GetFont(m->fam, i, &font);
-        if (FAILED(hr) || !font) { CHECKF(0, "GetFont(%d) %s", i, dw_hr_name(hr)); goto fail; }
+        if (FAILED(hr) || !font) { FAILF("GetFont(%d) %s", i, dw_hr_name(hr)); goto fail; }
         fm_read_font(font, &m->obs[i], &m->obs_sims[i]);
         m->src[i] = -1;
         for (k = 0; k < n; k++) if (faces[k].w == m->obs[i].w && faces[k].wd == m->obs[i].wd && faces[k].st == m->obs[i].st) m->src[i] = k;
@@ -107,6 +109,7 @@ fail:
 void fm_close(fm *m) {
     DW_RELEASE(m->fam);
     DW_RELEASE(m->coll);
+    if (m->borrowed) return;
     if (m->cl) { dwx_coll_unregister(m->cl); dwx_release(m->cl); m->cl = NULL; }
     if (m->fl) { dwx_loader_unregister(m->fl); dwx_release(m->fl); m->fl = NULL; }
     if (m->f) { IDWriteFactory_Release(m->f); m->f = NULL; }
@@ -122,6 +125,30 @@ const char *fm_req_name(int w, int wd, int st) {
     char *o = b[k++ & 3];
     snprintf(o, 64, "(w=%d,wd=%d,st=%d)", w, wd, st);
     return o;
+}
+
+int fm_open_system(fm *m, const WCHAR *family) {
+    UINT32 idx = 0; BOOL ex = FALSE; HRESULT hr; int i;
+    memset(m, 0, sizeof *m);
+    if (!dw_proc()) { t_skip("DWriteCreateFactory unavailable"); return 0; }
+    m->f = dw_shared(); m->borrowed = 1;
+    dw_narrow(family, m->name, sizeof m->name);
+    hr = IDWriteFactory_GetSystemFontCollection(m->f, &m->coll, FALSE);
+    if (FAILED(hr) || !m->coll) { CHECKF(0, "GetSystemFontCollection %s", dw_hr_name(hr)); return 0; }
+    hr = IDWriteFontCollection_FindFamilyName(m->coll, family, &idx, &ex);
+    if (FAILED(hr) || !ex) { DW_RELEASE(m->coll); t_skip("font family %s not installed", m->name); return 0; }
+    hr = IDWriteFontCollection_GetFontFamily(m->coll, idx, &m->fam);
+    if (FAILED(hr) || !m->fam) { CHECKF(0, "GetFontFamily %s", dw_hr_name(hr)); DW_RELEASE(m->coll); return 0; }
+    m->count = IDWriteFontFamily_GetFontCount(m->fam);
+    if (m->count > FM_MAXF) { t_note("family %s has %u fonts, only the first %d are modelled", m->name, m->count, FM_MAXF); m->count = FM_MAXF; }
+    for (i = 0; i < (int)m->count; i++) {
+        IDWriteFont *font = NULL;
+        m->src[i] = -1;
+        if (FAILED(IDWriteFontFamily_GetFont(m->fam, i, &font)) || !font) { CHECKF(0, "GetFont(%d) failed", i); fm_close(m); return 0; }
+        fm_read_font(font, &m->obs[i], &m->obs_sims[i]);
+        IDWriteFont_Release(font);
+    }
+    return 1;
 }
 
 /* ---- checks ----------------------------------------------------------------------------------- */

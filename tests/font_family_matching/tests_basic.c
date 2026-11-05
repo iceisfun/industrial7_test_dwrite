@@ -69,7 +69,7 @@ TEST(fam_getfont_index_out_of_range) {
         HRESULT hr = IDWriteFontFamily_GetFont(m.fam, bad[i], &font);
         CHECKF(hr == E_FAIL, "GetFont(%u) -> %s", bad[i], dw_hr_name(hr));
         CHECKF(font == NULL, "GetFont(%u) left out parameter %p", bad[i], (void *)font);
-        DW_RELEASE(font);
+
     }
     fm_close(&m);
 }
@@ -128,7 +128,7 @@ TEST(fam_font_refcounts_balance) {
         EXPECT_EQ(r1, base + 1); EXPECT_EQ(r2, base + 2);
         r3 = IDWriteFont_Release(font); EXPECT_EQ(r3, base + 1);
         r3 = IDWriteFont_Release(font); EXPECT_EQ(r3, base);
-        CHECK(base >= 1);
+        EXPECT_EQ(base, 1);   /* DWriteFont::Create AddRefs the new object exactly once */
         IDWriteFont_Release(font);
     }
     fm_close(&m);
@@ -410,9 +410,10 @@ TEST(fam_first_matching_returns_new_object_each_call) {
 TEST(fam_first_matching_writes_out_param) {
     FM_OPEN(m, "FmFirstOut", F_RIBBI);
     IDWriteFont *font = (IDWriteFont *)(ULONG_PTR)&m;
-    CHECK_HR_OK(IDWriteFontFamily_GetFirstMatchingFont(m.fam, 400, 5, 0, &font));
+    HRESULT hr = IDWriteFontFamily_GetFirstMatchingFont(m.fam, 400, 5, 0, &font);
+    CHECK_HR(hr, S_OK);
     CHECK(font != NULL && font != (IDWriteFont *)(ULONG_PTR)&m);
-    DW_RELEASE(font);
+    if (hr == S_OK) DW_RELEASE(font);
     fm_close(&m);
 }
 
@@ -507,7 +508,7 @@ TEST(fam_list_get_font_out_of_range) {
             HRESULT hr = IDWriteFontList_GetFont(l, bad[i], &font);
             CHECKF(hr == E_FAIL, "list GetFont(%u) -> %s", bad[i], dw_hr_name(hr));
             CHECKF(font == NULL, "list GetFont(%u) left %p", bad[i], (void *)font);
-            DW_RELEASE(font);
+
         }
         IDWriteFontList_Release(l);
     }
@@ -635,5 +636,71 @@ TEST(fam_first_and_list_head_agree) {
         else CHECK(0);
         DW_RELEASE(a); DW_RELEASE(b); DW_RELEASE(l);
     }
+    fm_close(&m);
+}
+
+TEST(fam_font_holds_family_reference) {
+    FM_OPEN(m, "FmHold1", F_RIBBI);
+    ULONG before = dw_refcount((IUnknown *)m.fam);
+    IDWriteFont *a = NULL, *b = NULL;
+    CHECK_HR_OK(IDWriteFontFamily_GetFont(m.fam, 0, &a));
+    /* DWriteFont::Create stores the family and AddRefs it */
+    EXPECT_REFS(m.fam, before + 1);
+    CHECK_HR_OK(IDWriteFontFamily_GetFont(m.fam, 1, &b));
+    EXPECT_REFS(m.fam, before + 2);
+    DW_RELEASE(a);
+    EXPECT_REFS(m.fam, before + 1);
+    DW_RELEASE(b);
+    EXPECT_REFS(m.fam, before);
+    fm_close(&m);
+}
+TEST(fam_first_matching_font_holds_family_reference) {
+    FM_OPEN(m, "FmHold2", F_RIBBI);
+    ULONG before = dw_refcount((IUnknown *)m.fam);
+    IDWriteFont *a = NULL;
+    CHECK_HR_OK(IDWriteFontFamily_GetFirstMatchingFont(m.fam, 400, 5, 0, &a));
+    EXPECT_REFS(m.fam, before + 1);
+    DW_RELEASE(a);
+    EXPECT_REFS(m.fam, before);
+    fm_close(&m);
+}
+TEST(fam_list_font_holds_family_reference) {
+    FM_OPEN(m, "FmHold3", F_RIBBI);
+    IDWriteFontList *l = NULL; IDWriteFont *a = NULL;
+    CHECK_HR_OK(IDWriteFontFamily_GetMatchingFonts(m.fam, 400, 5, 0, &l));
+    if (l) {
+        ULONG before = dw_refcount((IUnknown *)m.fam);   /* includes the list's own reference */
+        CHECK_HR_OK(IDWriteFontList_GetFont(l, 0, &a));
+        EXPECT_REFS(m.fam, before + 1);
+        DW_RELEASE(a);
+        EXPECT_REFS(m.fam, before);
+        IDWriteFontList_Release(l);
+    }
+    fm_close(&m);
+}
+TEST(fam_failed_getfont_leaves_refcounts_alone) {
+    FM_OPEN(m, "FmHold4", F_RIBBI);
+    ULONG before = dw_refcount((IUnknown *)m.fam);
+    IDWriteFont *a = NULL;
+    CHECK_HR(IDWriteFontFamily_GetFont(m.fam, 99, &a), E_FAIL);
+    EXPECT_REFS(m.fam, before);
+    fm_close(&m);
+}
+TEST(fam_getfamilynames_does_not_retain_family) {
+    FM_OPEN(m, "FmHold5", F_RIBBI);
+    ULONG before = dw_refcount((IUnknown *)m.fam);
+    IDWriteLocalizedStrings *s = NULL;
+    CHECK_HR_OK(IDWriteFontFamily_GetFamilyNames(m.fam, &s));
+    DW_RELEASE(s);
+    EXPECT_REFS(m.fam, before);
+    fm_close(&m);
+}
+TEST(fam_addref_release_return_values) {
+    FM_OPEN(m, "FmHold6", F_RIBBI);
+    ULONG base = dw_refcount((IUnknown *)m.fam), a, b, c;
+    a = IDWriteFontFamily_AddRef(m.fam); b = IDWriteFontFamily_AddRef(m.fam);
+    EXPECT_EQ(a, base + 1); EXPECT_EQ(b, base + 2);
+    c = IDWriteFontFamily_Release(m.fam); EXPECT_EQ(c, base + 1);
+    c = IDWriteFontFamily_Release(m.fam); EXPECT_EQ(c, base);
     fm_close(&m);
 }

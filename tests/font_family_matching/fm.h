@@ -22,12 +22,17 @@ typedef struct fm {
     int obs_sims[FM_MAXF];
     int src[FM_MAXF];               /* family index -> spec index (== loader key), -1 when unknown */
     char name[64];
+    int borrowed;                   /* system collection: factory is shared and owned elsewhere */
 } fm;
 
 /* Builds the collection and fetches the family. Returns 1 on success. On failure reports a failed CHECK (or a skip when
  * DWriteCreateFactory is unavailable), cleans up and returns 0. Always call fm_close() when 1 was returned. */
 int  fm_open(fm *m, const char *family, const fm_face *faces, int n, fm_tweak tw);
 void fm_close(fm *m);
+/* failures of fm_open become t_note lines instead of failed checks (for fixtures whose acceptance by the OS is itself in question) */
+void fm_set_quiet(int quiet);
+/* family of the system font collection by name; returns 1 on success, otherwise t_skip("family not installed") and 0 */
+int  fm_open_system(fm *m, const WCHAR *family);
 #define FM_OPEN(m, fam, arr) fm m; if (!fm_open(&m, fam, arr, (int)(sizeof(arr) / sizeof((arr)[0])), NULL)) return
 #define FM_OPEN_TW(m, fam, arr, tw) fm m; if (!fm_open(&m, fam, arr, (int)(sizeof(arr) / sizeof((arr)[0])), tw)) return
 #define FM_N(a) ((int)(sizeof(a) / sizeof((a)[0])))

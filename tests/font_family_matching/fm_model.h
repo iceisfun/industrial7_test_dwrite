@@ -1,7 +1,7 @@
 /* Pure-C model of the Windows 10 DirectWrite family matcher (no Windows dependencies; also used by the host-side table generator). */
 #ifndef FM_MODEL_H
 #define FM_MODEL_H
-#define FM_MAXF 32
+#define FM_MAXF 128
 /* st: DWRITE_FONT_STYLE_NORMAL 0, OBLIQUE 1, ITALIC 2 */
 typedef struct { int w, wd, st; } fm_face;
 typedef struct { int idx; int sims; } fm_pick;
