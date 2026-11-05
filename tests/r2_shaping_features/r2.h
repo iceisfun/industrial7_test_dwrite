@@ -35,6 +35,10 @@
 #define TG(a, b, c, d) ((UINT32)(a) | ((UINT32)(b) << 8) | ((UINT32)(c) << 16) | ((UINT32)(d) << 24))
 
 enum { G_FI = 69, G_FF, G_FFI, G_SCA, G_SCB, G_P1, G_T1, G_SS01A, G_CALTB, G_ACUTE, G_CIRC, G_EACUTE, G_DOTLESSI, G_XY, G_CK, G_ALT1, G_ALT2, G_ZERO, G_ZWSP };
+enum { A_ALEF = 69, A_ALEF_FINA, A_BEH, A_BEH_INIT, A_BEH_MEDI, A_BEH_FINA, A_LAM, A_LAM_INIT, A_LAM_MEDI, A_LAM_FINA, A_LAMALEF, A_LAMALEF_FINA,
+       A_HAMZA, A_FATHA, A_ALEF_ISOL, A_BEH_ISOL, A_LAM_ISOL, A_ZWNJ, A_ZWJ };
+enum { D_KA = 69, D_SSA, D_VIRAMA, D_I, D_AA, D_HALF_KA, D_RA, D_REPH, D_NUKTA, D_KA_NUKTA };
+enum { TH_KO = 69, TH_MAIEK, TH_SARAA, TH_NIKHAHIT, TH_SARAAM, TH_SARAI, TH_SARAU, TH_SARAE, TH_MAITHO };
 #define LG(c) ((UINT16)ttf_default_gid(c))     /* default-font glyph of an ASCII char */
 
 enum { FX_LATN, FX_LATN_IGNM, FX_ARAB, FX_DEVA, FX_THAI, FX_THAI_NOAM, FX_PLAIN };
@@ -111,4 +115,19 @@ const char *sh_dump(const shaped *s);
     for (i_ = 0; i_ < sizeof a_ / sizeof a_[0] && i_ < SH_MAX; i_++) CHECKF((s)->adv[i_] == a_[i_], "advance[%u] = %g want %g", i_, (s)->adv[i_], a_[i_]); } while (0)
 #define CHECK_OFF(s, i, dx, dy) do { CHECKF((s)->off[i].advanceOffset == (float)(dx) && (s)->off[i].ascenderOffset == (float)(dy), \
     "offset[%u] = (%g,%g) want (%g,%g)", (unsigned)(i), (s)->off[i].advanceOffset, (s)->off[i].ascenderOffset, (float)(dx), (float)(dy)); } while (0)
+
+/* Direction-independent checks for right-to-left runs: the glyph of text unit i is gid[cmap[i]].  The glyph array of an RTL run is
+ * either in logical or in visual (reversed) order; these helpers assert the per-character result and that the clusterMap is
+ * monotonic in one direction or the other. */
+int sh_order(const shaped *s);           /* 0 clusterMap ascending, 1 descending, -1 neither (equal runs allowed) */
+int sh_has(const shaped *s, UINT16 gid);
+int sh_index_of(const shaped *s, UINT16 gid);   /* -1 when absent */
+#define CHECK_FORMS(s, nglyph, ...) do { static const UINT16 f_[] = { __VA_ARGS__ }; UINT32 i_; \
+    CHECKF(SUCCEEDED((s)->hr) && (s)->actual == (UINT32)(nglyph), "glyph count %u want %u: %s", (s)->actual, (unsigned)(nglyph), sh_dump(s)); \
+    CHECKF(sh_order(s) >= 0, "clusterMap not monotonic: %s", sh_dump(s)); \
+    for (i_ = 0; i_ < sizeof f_ / sizeof f_[0] && i_ < (s)->len; i_++) CHECKF((s)->cmap[i_] < (s)->actual && (s)->gid[(s)->cmap[i_]] == f_[i_], \
+        "text unit %u -> cluster glyph %u (gid %u) want gid %u: %s", i_, (s)->cmap[i_], (s)->cmap[i_] < (s)->actual ? (s)->gid[(s)->cmap[i_]] : 0, f_[i_], sh_dump(s)); } while (0)
+#define CHECK_ADVC(s, ...) do { static const float a_[] = { __VA_ARGS__ }; UINT32 i_; \
+    for (i_ = 0; i_ < sizeof a_ / sizeof a_[0] && i_ < (s)->len; i_++) CHECKF((s)->cmap[i_] < (s)->actual && (s)->adv[(s)->cmap[i_]] == a_[i_], \
+        "text unit %u advance %g want %g", i_, (s)->cmap[i_] < (s)->actual ? (s)->adv[(s)->cmap[i_]] : -1.0f, a_[i_]); } while (0)
 #endif

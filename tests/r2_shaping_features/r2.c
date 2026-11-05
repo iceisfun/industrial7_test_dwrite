@@ -120,8 +120,6 @@ static uint8_t *build_latn(int ignm, size_t *n) {
 }
 
 /* ---- ARAB ---------------------------------------------------------------------------------------------------------------------- */
-enum { A_ALEF = 69, A_ALEF_FINA, A_BEH, A_BEH_INIT, A_BEH_MEDI, A_BEH_FINA, A_LAM, A_LAM_INIT, A_LAM_MEDI, A_LAM_FINA, A_LAMALEF, A_LAMALEF_FINA,
-       A_HAMZA, A_FATHA, A_ALEF_ISOL, A_BEH_ISOL, A_LAM_ISOL, A_ZWNJ, A_ZWJ };
 static uint8_t *build_arab(size_t *n) {
     ttf_spec s; start(&s, "R2Arab"); int i;
     unsigned adv[] = { 700, 650, 1200, 800, 600, 900, 800, 500, 400, 700, 1100, 1000, 500, 0, 710, 1210, 810, 0, 0 };
@@ -162,7 +160,6 @@ static uint8_t *build_arab(size_t *n) {
 }
 
 /* ---- DEVA ---------------------------------------------------------------------------------------------------------------------- */
-enum { D_KA = 69, D_SSA, D_VIRAMA, D_I, D_AA, D_HALF_KA, D_RA, D_REPH, D_NUKTA, D_KA_NUKTA };
 static uint8_t *build_deva(size_t *n) {
     ttf_spec s; start(&s, "R2Deva"); int i;
     gbox(D_KA, 900); gbox(D_SSA, 900); gmark(D_VIRAMA); g_gl[D_VIRAMA].adv = 300; gbox(D_I, 400); gbox(D_AA, 500); gbox(D_HALF_KA, 600);
@@ -191,7 +188,6 @@ static uint8_t *build_deva(size_t *n) {
 }
 
 /* ---- THAI ---------------------------------------------------------------------------------------------------------------------- */
-enum { TH_KO = 69, TH_MAIEK, TH_SARAA, TH_NIKHAHIT, TH_SARAAM, TH_SARAI, TH_SARAU, TH_SARAE, TH_MAITHO };
 static uint8_t *build_thai(int with_am, size_t *n) {
     ttf_spec s; start(&s, "R2Thai"); int i;
     gbox(TH_KO, 900); gmark(TH_MAIEK); gbox(TH_SARAA, 500); gmark(TH_NIKHAHIT); gbox(TH_SARAAM, 600); gmark(TH_SARAI); gmark(TH_SARAU); gbox(TH_SARAE, 500); gmark(TH_MAITHO);
@@ -293,3 +289,12 @@ const char *sh_dump(const shaped *s) {
     for (i = 0; i < s->actual && i < 40 && k < 480; i++) k += snprintf(b + k, sizeof b - k, " %u", s->gid[i]);
     snprintf(b + k, sizeof b - k, "]"); return b;
 }
+
+int sh_order(const shaped *s) {
+    UINT32 i; int up = 1, down = 1;
+    for (i = 1; i < s->len; i++) { if (s->cmap[i] < s->cmap[i - 1]) up = 0; if (s->cmap[i] > s->cmap[i - 1]) down = 0; }
+    if (up) return 0;
+    return down ? 1 : -1;
+}
+int sh_index_of(const shaped *s, UINT16 gid) { UINT32 i; for (i = 0; i < s->actual; i++) if (s->gid[i] == gid) return (int)i; return -1; }
+int sh_has(const shaped *s, UINT16 gid) { return sh_index_of(s, gid) >= 0; }
