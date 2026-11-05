@@ -1,9 +1,8 @@
 /* The system font set: IDWriteFactory3::GetSystemFontSet and the IDWriteFontSet methods that read it.
  *
- * Win10 decompilation: DWriteFactory::GetSystemFontSet caches one DWriteFontSet per (includeDownloadable) flag under the
- * factory lock and hands out that same object with an AddRef; DWriteFontSet::GetFontFaceReference throws ArgumentException
- * ("listIndex", E_INVALIDARG) for index >= count; FindFontFaceReference/FindFontFace write index = 0xFFFFFFFF and exists = FALSE
- * first, reject NULL with E_INVALIDARG and otherwise search by FontFaceKey.
+ * Win10 behaviour: GetSystemFontSet hands out one cached set per includeDownloadable flag; GetFontFaceReference returns
+ * E_INVALIDARG for index >= count; FindFontFaceReference/FindFontFace write index = 0xFFFFFFFF and exists = FALSE first and
+ * reject NULL with E_INVALIDARG.
  */
 #include "fs.h"
 
@@ -173,7 +172,7 @@ TEST(fset_sys_ref_out_of_range)
     for (i = 0; i < sizeof bad / sizeof bad[0]; i++) {
         IDWriteFontFaceReference *ref = (IDWriteFontFaceReference *)(ULONG_PTR)1;
         HRESULT hr = IDWriteFontSet_GetFontFaceReference(set, bad[i], &ref);
-        /* ArgumentException("listIndex") carries E_INVALIDARG; the out parameter is zeroed first. */
+        /* an out-of-range index gives E_INVALIDARG; the out parameter is zeroed first. */
         CHECKF(hr == E_INVALIDARG, "index %u -> %s", bad[i], dw_hr_name(hr));
         CHECK_OUT_NULL(ref);
         FS_DROP(ref, hr);

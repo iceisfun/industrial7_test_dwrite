@@ -2,13 +2,13 @@
  *
  * Fixture (fs_std): SynthA {Regular, Bold, Italic, Bold Italic} and SynthB Regular, all with Windows (3,1,0x409) names only.
  *
- * Win10 decompilation:
- *  - FontSet::GetPropertyValues throws ArgumentOutOfRangeException("propertyId", E_INVALIDARG) for ids > 14; ids 0..14 are valid.
+ * Win10 behaviour:
+ *  - GetPropertyValues gives E_INVALIDARG for ids > 14; ids 0..14 are valid.
  *  - GetPropertyValues(id, NULL locales, ..) is E_INVALIDARG; the list out parameter is zeroed first.
  *  - GetPropertyValues(index, id, &exists, &strings): both outputs zeroed first, exists only when the font has a value.
  *  - String list methods: size 0 -> HRESULT_FROM_WIN32(ERROR_INSUFFICIENT_BUFFER) (checked before the index), StringCchCopy
  *    truncation -> same code with a terminated truncated string; length queries store 0xFFFFFFFF before an out-of-range
- *    index throws.
+ *    index fails.
  */
 #include "fs.h"
 
@@ -289,10 +289,10 @@ TEST(fset_str_list_bad_index_lengths)
         unsigned i;
         for (i = 0; i < 4; i++) {
             len = 0x55; hr = IDWriteStringList_GetStringLength(l, bad[i], &len);
-            CHECKF(hr == E_FAIL, "GetStringLength(%u) -> %s", bad[i], dw_hr_name(hr));   /* IndexOutOfRangeException carries E_FAIL */
+            CHECKF(hr == E_FAIL, "GetStringLength(%u) -> %s", bad[i], dw_hr_name(hr));   /* an out-of-range index gives E_FAIL */
             CHECKF(len == 0xFFFFFFFFu, "length %u", len);
             len = 0x55; hr = IDWriteStringList_GetLocaleNameLength(l, bad[i], &len);
-            CHECKF(hr == E_FAIL, "GetLocaleNameLength(%u) -> %s", bad[i], dw_hr_name(hr));   /* IndexOutOfRangeException carries E_FAIL */
+            CHECKF(hr == E_FAIL, "GetLocaleNameLength(%u) -> %s", bad[i], dw_hr_name(hr));   /* an out-of-range index gives E_FAIL */
             CHECKF(len == 0xFFFFFFFFu, "length %u", len);
         }
         DW_RELEASE(l);
@@ -312,11 +312,11 @@ TEST(fset_str_list_bad_index_strings)
         for (i = 0; i < 3; i++) {
             wmemset(buf, 0x2222, 16);
             hr = IDWriteStringList_GetString(l, bad[i], buf, 16);
-            CHECKF(hr == E_FAIL, "GetString(%u) -> %s", bad[i], dw_hr_name(hr));   /* IndexOutOfRangeException carries E_FAIL */
+            CHECKF(hr == E_FAIL, "GetString(%u) -> %s", bad[i], dw_hr_name(hr));   /* an out-of-range index gives E_FAIL */
             CHECKF(buf[0] == 0, "buffer cleared before the throw: 0x%x", buf[0]);
             wmemset(buf, 0x2222, 16);
             hr = IDWriteStringList_GetLocaleName(l, bad[i], buf, 16);
-            CHECKF(hr == E_FAIL, "GetLocaleName(%u) -> %s", bad[i], dw_hr_name(hr));   /* IndexOutOfRangeException carries E_FAIL */
+            CHECKF(hr == E_FAIL, "GetLocaleName(%u) -> %s", bad[i], dw_hr_name(hr));   /* an out-of-range index gives E_FAIL */
             CHECKF(buf[0] == 0, "buffer cleared before the throw: 0x%x", buf[0]);
             /* size 0 wins over the index check */
             wmemset(buf, 0x2222, 16);

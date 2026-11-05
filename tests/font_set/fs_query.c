@@ -2,14 +2,16 @@
  * IDWriteFontSet1::GetMatchingFonts(property, axis values), GetFilteredFonts / GetFilteredFontIndices (properties, indices,
  * axis ranges), GetFirstFontResources and GetFontAxisRanges.
  *
- * Win10 decompilation (DWriteFontSet / FontSet):
- *  - property values are compared with CompareStringW(LOCALE_INVARIANT, NORM_IGNORECASE); the locale of the DWRITE_FONT_PROPERTY is
- *    ignored; an id above 14 matches nothing (no error); GetPropertyOccurrenceCount(NULL) throws E_INVALIDARG after zeroing *count.
+ * Win10 behaviour:
+ *  - property values are compared case-insensitively and invariantly; the locale of the DWRITE_FONT_PROPERTY is ignored; an id
+ *    above 14 matches nothing (no error); GetPropertyOccurrenceCount(NULL) gives E_INVALIDARG after zeroing *count.
+ *  - the numeric properties WEIGHT, STRETCH and STYLE are readable per font but never searchable: GetPropertyOccurrenceCount,
+ *    GetMatchingFonts and GetFilteredFonts treat them as matching nothing. Use the name properties for queries.
  *  - GetMatchingFonts(props, n) = GetFilteredFonts(props, n, FALSE): a font is kept when it matches every property; results keep the
  *    order of the source set. With n == 0 the result is a copy of the whole set. NULL props with n > 0 -> E_INVALIDARG.
  *  - GetFilteredFontIndices zero-fills the buffer, reports the full match count in *actual and returns
  *    HRESULT_FROM_WIN32(ERROR_INSUFFICIENT_BUFFER) when the buffer is smaller than that.
- *  - GetFilteredFonts(indices): any index >= count -> ArgumentException("indices") = E_INVALIDARG; results follow the order of the
+ *  - GetFilteredFonts(indices): any index >= count -> E_INVALIDARG; results follow the order of the
  *    index array.
  *  - GetMatchingFonts(family, weight, stretch, style) validates 1 <= weight <= 999, 1 <= stretch <= 9, style <= 2 (E_INVALIDARG),
  *    selects by WWS family name and orders the family by closeness to the request.
@@ -100,14 +102,23 @@ TEST(fset_q_occ_locale_ignored)
 TEST(fset_q_occ_numeric_properties)
 {
     FS_STD(s);
-    CHECK(occ(s.set, DWRITE_FONT_PROPERTY_ID_WEIGHT, "400", NULL) == 3);
-    CHECK(occ(s.set, DWRITE_FONT_PROPERTY_ID_WEIGHT, "700", NULL) == 2);
+    /* Win10: the numeric properties (weight, stretch, style) are readable per font but never searchable: every
+     * occurrence count is 0, whatever the value or locale. */
+    CHECK(occ(s.set, DWRITE_FONT_PROPERTY_ID_WEIGHT, "400", NULL) == 0);
+    CHECK(occ(s.set, DWRITE_FONT_PROPERTY_ID_WEIGHT, "700", NULL) == 0);
     CHECK(occ(s.set, DWRITE_FONT_PROPERTY_ID_WEIGHT, "300", NULL) == 0);
-    CHECK(occ(s.set, DWRITE_FONT_PROPERTY_ID_STRETCH, "5", NULL) == 5);
+    CHECK(occ(s.set, DWRITE_FONT_PROPERTY_ID_WEIGHT, "400", "en-us") == 0);
+    CHECK(occ(s.set, DWRITE_FONT_PROPERTY_ID_STRETCH, "5", NULL) == 0);
     CHECK(occ(s.set, DWRITE_FONT_PROPERTY_ID_STRETCH, "3", NULL) == 0);
-    CHECK(occ(s.set, DWRITE_FONT_PROPERTY_ID_STYLE, "0", NULL) == 3);
-    CHECK(occ(s.set, DWRITE_FONT_PROPERTY_ID_STYLE, "2", NULL) == 2);
+    CHECK(occ(s.set, DWRITE_FONT_PROPERTY_ID_STYLE, "0", NULL) == 0);
+    CHECK(occ(s.set, DWRITE_FONT_PROPERTY_ID_STYLE, "2", NULL) == 0);
     CHECK(occ(s.set, DWRITE_FONT_PROPERTY_ID_STYLE, "1", NULL) == 0);
+    /* the per-font values are there and are what the fixture was built with */
+    CHECK(fs_indices_of(s.set, DWRITE_FONT_PROPERTY_ID_WEIGHT, "400", NULL, 0) == 3);
+    CHECK(fs_indices_of(s.set, DWRITE_FONT_PROPERTY_ID_WEIGHT, "700", NULL, 0) == 2);
+    CHECK(fs_indices_of(s.set, DWRITE_FONT_PROPERTY_ID_STRETCH, "5", NULL, 0) == 5);
+    CHECK(fs_indices_of(s.set, DWRITE_FONT_PROPERTY_ID_STYLE, "0", NULL, 0) == 3);
+    CHECK(fs_indices_of(s.set, DWRITE_FONT_PROPERTY_ID_STYLE, "2", NULL, 0) == 2);
     /* values are strings: a different spelling of the same number does not match */
     FS_SOFT(occ(s.set, DWRITE_FONT_PROPERTY_ID_WEIGHT, "0400", NULL) == 0);
     FS_SOFT(occ(s.set, DWRITE_FONT_PROPERTY_ID_WEIGHT, " 400", NULL) == 0);
@@ -169,7 +180,8 @@ TEST(fset_q_occ_on_subset)
         CHECK(occ(sub, DWRITE_FONT_PROPERTY_ID_WEIGHT_STRETCH_STYLE_FAMILY_NAME, "SynthB", NULL) == 1);
         CHECKF(occ(sub, DWRITE_FONT_PROPERTY_ID_WEIGHT_STRETCH_STYLE_FAMILY_NAME, "SynthA", NULL) == 0, "subset must not count fonts outside it");
         CHECKF(occ(sub, DWRITE_FONT_PROPERTY_ID_WEIGHT, "700", NULL) == 0, "bold fonts are not in the subset");
-        CHECK(occ(sub, DWRITE_FONT_PROPERTY_ID_WEIGHT, "400", NULL) == 1);
+        CHECK(occ(sub, DWRITE_FONT_PROPERTY_ID_WEIGHT, "400", NULL) == 0);   /* numeric properties are not searchable */
+        CHECK(fs_indices_of(sub, DWRITE_FONT_PROPERTY_ID_WEIGHT, "400", NULL, 0) == 1);
         DW_RELEASE(sub);
     }
     fs_std_close(&s);
@@ -184,8 +196,10 @@ TEST(fset_q_occ_system_arial)
     t_note("Arial WWS family occurrences: %u", c);
     CHECK(occ(set, DWRITE_FONT_PROPERTY_ID_FULL_NAME, "Arial", NULL) >= 1);
     CHECK(occ(set, DWRITE_FONT_PROPERTY_ID_FULL_NAME, "Arial Bold", NULL) >= 1);
-    CHECK(occ(set, DWRITE_FONT_PROPERTY_ID_WEIGHT, "400", NULL) > 20);
-    CHECK(occ(set, DWRITE_FONT_PROPERTY_ID_WEIGHT, "700", NULL) > 5);
+    CHECK(occ(set, DWRITE_FONT_PROPERTY_ID_WEIGHT, "400", NULL) == 0);   /* numeric properties are not searchable */
+    CHECK(occ(set, DWRITE_FONT_PROPERTY_ID_WEIGHT, "700", NULL) == 0);
+    CHECK(fs_indices_of(set, DWRITE_FONT_PROPERTY_ID_WEIGHT, "400", NULL, 0) > 20);
+    CHECK(fs_indices_of(set, DWRITE_FONT_PROPERTY_ID_WEIGHT, "700", NULL, 0) > 5);
     DW_RELEASE(set);
 }
 
@@ -247,8 +261,8 @@ TEST(fset_q_mf_single_weight)
     fs_prop_set(&p, DWRITE_FONT_PROPERTY_ID_WEIGHT, "700", NULL);
     CHECK_HR_OK(IDWriteFontSet_GetMatchingFonts(s.set, &p.p, 1, &out));
     if (out) {
-        CHECKF(cnt(out) == 2, "count %u: %s", cnt(out), names(out));
-        CHECK(has_full(out, "SynthA Bold") && has_full(out, "SynthA Bold Italic"));
+        /* Win10: a numeric property never matches */
+        CHECKF(cnt(out) == 0, "count %u: %s", cnt(out), names(out));
         DW_RELEASE(out);
     }
     fs_std_close(&s);
@@ -263,10 +277,10 @@ TEST(fset_q_mf_two_properties_are_anded)
     fs_prop_set(&p[2], DWRITE_FONT_PROPERTY_ID_STYLE, "2", NULL);
     arr[0] = p[0].p; arr[1] = p[1].p; arr[2] = p[2].p;
     CHECK_HR_OK(IDWriteFontSet_GetMatchingFonts(s.set, arr, 2, &out));
-    if (out) { CHECKF(cnt(out) == 2, "family+weight: %s", names(out)); DW_RELEASE(out); }
+    if (out) { CHECKF(cnt(out) == 0, "family+weight: %s", names(out)); DW_RELEASE(out); }   /* numeric properties never match */
     out = NULL;
     CHECK_HR_OK(IDWriteFontSet_GetMatchingFonts(s.set, arr, 3, &out));
-    if (out) { CHECKF(cnt(out) == 1 && has_full(out, "SynthA Bold Italic"), "family+weight+style: %s", names(out)); DW_RELEASE(out); }
+    if (out) { CHECKF(cnt(out) == 0, "family+weight+style: %s", names(out)); DW_RELEASE(out); }
     fs_std_close(&s);
 }
 
@@ -359,7 +373,8 @@ TEST(fset_q_mf_subset_properties_are_subset_only)
 {
     FS_STD(s);
     fs_prop p; IDWriteFontSet *out = NULL;
-    fs_prop_set(&p, DWRITE_FONT_PROPERTY_ID_WEIGHT, "700", NULL);
+    /* the face-name property is searchable (a numeric weight property never matches) */
+    fs_prop_set(&p, DWRITE_FONT_PROPERTY_ID_WEIGHT_STRETCH_STYLE_FACE_NAME, "Bold", NULL);
     CHECK_HR_OK(IDWriteFontSet_GetMatchingFonts(s.set, &p.p, 1, &out));
     if (out) {
         IDWriteStringList *l = fs_props(out, DWRITE_FONT_PROPERTY_ID_WEIGHT);
@@ -367,7 +382,7 @@ TEST(fset_q_mf_subset_properties_are_subset_only)
         l = fs_props(out, DWRITE_FONT_PROPERTY_ID_WEIGHT_STRETCH_STYLE_FAMILY_NAME);
         if (l) { CHECKF(IDWriteStringList_GetCount(l) == 1 && fs_sl_has(l, "SynthA"), "families: %u", IDWriteStringList_GetCount(l)); DW_RELEASE(l); }
         l = fs_props(out, DWRITE_FONT_PROPERTY_ID_FULL_NAME);
-        if (l) { CHECKF(IDWriteStringList_GetCount(l) == 2, "full names: %u", IDWriteStringList_GetCount(l)); DW_RELEASE(l); }
+        if (l) { CHECKF(IDWriteStringList_GetCount(l) == 1, "full names: %u", IDWriteStringList_GetCount(l)); DW_RELEASE(l); }
         DW_RELEASE(out);
     }
     fs_std_close(&s);
@@ -407,11 +422,11 @@ TEST(fset_q_mf_nested_filter)
     FS_STD(s);
     fs_prop p1, p2; IDWriteFontSet *a = NULL, *b = NULL;
     fs_prop_set(&p1, DWRITE_FONT_PROPERTY_ID_WEIGHT_STRETCH_STYLE_FAMILY_NAME, "SynthA", NULL);
-    fs_prop_set(&p2, DWRITE_FONT_PROPERTY_ID_STYLE, "2", NULL);
+    fs_prop_set(&p2, DWRITE_FONT_PROPERTY_ID_WEIGHT_STRETCH_STYLE_FACE_NAME, "Italic", NULL);
     CHECK_HR_OK(IDWriteFontSet_GetMatchingFonts(s.set, &p1.p, 1, &a));
     if (a) {
         CHECK_HR_OK(IDWriteFontSet_GetMatchingFonts(a, &p2.p, 1, &b));
-        if (b) { CHECKF(cnt(b) == 2, "%s", names(b)); CHECK(has_full(b, "SynthA Italic") && has_full(b, "SynthA Bold Italic")); DW_RELEASE(b); }
+        if (b) { CHECKF(cnt(b) == 1, "%s", names(b)); CHECK(has_full(b, "SynthA Italic")); DW_RELEASE(b); }
         DW_RELEASE(a);
     }
     fs_std_close(&s);
@@ -423,9 +438,13 @@ TEST(fset_q_mf_result_items_equal_source_items)
     fs_prop p; IDWriteFontSet *out = NULL;
     fs_prop_set(&p, DWRITE_FONT_PROPERTY_ID_STRETCH, "5", NULL);
     CHECK_HR_OK(IDWriteFontSet_GetMatchingFonts(s.set, &p.p, 1, &out));
+    if (out) CHECK(cnt(out) == 0);   /* numeric properties never match */
+    DW_RELEASE(out); out = NULL;
+    fs_prop_set(&p, DWRITE_FONT_PROPERTY_ID_FULL_NAME, "SynthA Bold", NULL);
+    CHECK_HR_OK(IDWriteFontSet_GetMatchingFonts(s.set, &p.p, 1, &out));
     if (out) {
         UINT32 i;
-        CHECK(cnt(out) == 5);
+        CHECK(cnt(out) == 1);
         for (i = 0; i < cnt(out); i++) {
             IDWriteFontFaceReference *a = NULL, *b = NULL; UINT32 pi = parent_index(s.set, out, i);
             CHECKF(pi < 5, "item %u maps into the parent", i);
@@ -734,7 +753,8 @@ TEST(fset_q_s1mf_is_a_subset)
     IDWriteFontSet1 *s1 = fs_set1(s.set);
     if (s1) {
         fs_prop p; IDWriteFontSet1 *out = NULL;
-        DWRITE_FONT_AXIS_VALUE v[1] = { { DWRITE_FONT_AXIS_TAG_WEIGHT, 700.0f } };
+        DWRITE_FONT_AXIS_VALUE v[1] = { { DWRITE_FONT_AXIS_TAG_WEIGHT, 400.0f } };
+        /* wght 400 selects the unsimulated face, so the result item equals the parent item (700 would pick a bold simulation) */
         fs_prop_set(&p, DWRITE_FONT_PROPERTY_ID_WEIGHT_STRETCH_STYLE_FAMILY_NAME, "SynthB", NULL);
         CHECK_HR_OK(IDWriteFontSet1_GetMatchingFonts(s1, &p.p, v, 1, &out));
         if (out) {
@@ -746,6 +766,8 @@ TEST(fset_q_s1mf_is_a_subset)
         }
         fs_prop_set(&p, DWRITE_FONT_PROPERTY_ID_WEIGHT_STRETCH_STYLE_FAMILY_NAME, "Nobody", NULL);
         CHECK_HR_OK(IDWriteFontSet1_GetMatchingFonts(s1, &p.p, v, 1, &out));
+        if (out) CHECK(IDWriteFontSet1_GetFontCount(out) == 0);
+        DW_RELEASE(out);
         DW_RELEASE(s1);
     }
     fs_std_close(&s);
@@ -759,13 +781,13 @@ TEST(fset_q_gff_any_vs_all)
     if (s1) {
         fs_prop p[2]; DWRITE_FONT_PROPERTY arr[2]; IDWriteFontSet1 *out = NULL;
         fs_prop_set(&p[0], DWRITE_FONT_PROPERTY_ID_WEIGHT_STRETCH_STYLE_FAMILY_NAME, "SynthB", NULL);
-        fs_prop_set(&p[1], DWRITE_FONT_PROPERTY_ID_WEIGHT, "700", NULL);
+        fs_prop_set(&p[1], DWRITE_FONT_PROPERTY_ID_WEIGHT_STRETCH_STYLE_FACE_NAME, "Bold", NULL);
         arr[0] = p[0].p; arr[1] = p[1].p;
         CHECK_HR_OK(IDWriteFontSet1_GetFilteredFonts(s1, arr, 2, FALSE, &out));
         if (out) { CHECKF(IDWriteFontSet1_GetFontCount(out) == 0, "all: %u", IDWriteFontSet1_GetFontCount(out)); DW_RELEASE(out); }
         out = NULL;
         CHECK_HR_OK(IDWriteFontSet1_GetFilteredFonts(s1, arr, 2, TRUE, &out));
-        if (out) { CHECKF(IDWriteFontSet1_GetFontCount(out) == 3, "any: %u (%s)", IDWriteFontSet1_GetFontCount(out), names(FS_AS_SET(out))); DW_RELEASE(out); }
+        if (out) { CHECKF(IDWriteFontSet1_GetFontCount(out) == 2, "any: %u (%s)", IDWriteFontSet1_GetFontCount(out), names(FS_AS_SET(out))); DW_RELEASE(out); }
         DW_RELEASE(s1);
     }
     fs_std_close(&s);
@@ -779,12 +801,12 @@ TEST(fset_q_gff_selectany_nonzero_is_true)
         fs_prop p[2]; DWRITE_FONT_PROPERTY arr[2]; BOOL flags[] = { 1, 2, -1, 0x100 };
         unsigned i;
         fs_prop_set(&p[0], DWRITE_FONT_PROPERTY_ID_WEIGHT_STRETCH_STYLE_FAMILY_NAME, "SynthB", NULL);
-        fs_prop_set(&p[1], DWRITE_FONT_PROPERTY_ID_WEIGHT, "700", NULL);
+        fs_prop_set(&p[1], DWRITE_FONT_PROPERTY_ID_WEIGHT_STRETCH_STYLE_FACE_NAME, "Bold", NULL);
         arr[0] = p[0].p; arr[1] = p[1].p;
         for (i = 0; i < 4; i++) {
             IDWriteFontSet1 *out = NULL;
             CHECK_HR_OK(IDWriteFontSet1_GetFilteredFonts(s1, arr, 2, flags[i], &out));
-            if (out) { CHECKF(IDWriteFontSet1_GetFontCount(out) == 3, "flag %d: %u", flags[i], IDWriteFontSet1_GetFontCount(out)); DW_RELEASE(out); }
+            if (out) { CHECKF(IDWriteFontSet1_GetFontCount(out) == 2, "flag %d: %u", flags[i], IDWriteFontSet1_GetFontCount(out)); DW_RELEASE(out); }
         }
         DW_RELEASE(s1);
     }
@@ -828,11 +850,11 @@ TEST(fset_q_gff_single_property_flag_irrelevant)
     IDWriteFontSet1 *s1 = fs_set1(s.set);
     if (s1) {
         fs_prop p; BOOL any;
-        fs_prop_set(&p, DWRITE_FONT_PROPERTY_ID_STYLE, "2", NULL);
+        fs_prop_set(&p, DWRITE_FONT_PROPERTY_ID_WEIGHT_STRETCH_STYLE_FACE_NAME, "Italic", NULL);
         for (any = 0; any <= 1; any++) {
             IDWriteFontSet1 *out = NULL;
             CHECK_HR_OK(IDWriteFontSet1_GetFilteredFonts(s1, &p.p, 1, any, &out));
-            if (out) { CHECKF(IDWriteFontSet1_GetFontCount(out) == 2, "any=%d count %u", any, IDWriteFontSet1_GetFontCount(out)); DW_RELEASE(out); }
+            if (out) { CHECKF(IDWriteFontSet1_GetFontCount(out) == 1, "any=%d count %u", any, IDWriteFontSet1_GetFontCount(out)); DW_RELEASE(out); }
         }
         DW_RELEASE(s1);
     }
@@ -845,8 +867,8 @@ TEST(fset_q_gff_order_and_distinct)
     IDWriteFontSet1 *s1 = fs_set1(s.set);
     if (s1) {
         fs_prop p[2]; DWRITE_FONT_PROPERTY arr[2]; IDWriteFontSet1 *a = NULL, *b = NULL;
-        fs_prop_set(&p[0], DWRITE_FONT_PROPERTY_ID_WEIGHT, "400", NULL);
-        fs_prop_set(&p[1], DWRITE_FONT_PROPERTY_ID_WEIGHT, "700", NULL);
+        fs_prop_set(&p[0], DWRITE_FONT_PROPERTY_ID_WEIGHT_STRETCH_STYLE_FAMILY_NAME, "SynthA", NULL);
+        fs_prop_set(&p[1], DWRITE_FONT_PROPERTY_ID_WEIGHT_STRETCH_STYLE_FAMILY_NAME, "SynthB", NULL);
         arr[0] = p[0].p; arr[1] = p[1].p;
         CHECK_HR_OK(IDWriteFontSet1_GetFilteredFonts(s1, arr, 2, TRUE, &a));
         CHECK_HR_OK(IDWriteFontSet1_GetFilteredFonts(s1, arr, 2, TRUE, &b));
@@ -963,10 +985,11 @@ TEST(fset_q_gfi_matches_filtered_set)
     IDWriteFontSet1 *s1 = fs_set1(s.set);
     if (s1) {
         fs_prop p[2]; DWRITE_FONT_PROPERTY arr[2]; UINT32 buf[8], actual = 0, i; IDWriteFontSet1 *sub = NULL;
-        fs_prop_set(&p[0], DWRITE_FONT_PROPERTY_ID_STYLE, "2", NULL);
-        fs_prop_set(&p[1], DWRITE_FONT_PROPERTY_ID_WEIGHT, "700", NULL);
+        fs_prop_set(&p[0], DWRITE_FONT_PROPERTY_ID_WEIGHT_STRETCH_STYLE_FAMILY_NAME, "SynthB", NULL);
+        fs_prop_set(&p[1], DWRITE_FONT_PROPERTY_ID_WEIGHT_STRETCH_STYLE_FACE_NAME, "Italic", NULL);
         arr[0] = p[0].p; arr[1] = p[1].p;
         CHECK_HR_OK(IDWriteFontSet1_GetFilteredFontIndices(s1, arr, 2, TRUE, buf, 8, &actual));
+        CHECKF(actual == 2, "indices %u", actual);
         CHECK_HR_OK(IDWriteFontSet1_GetFilteredFonts(s1, arr, 2, TRUE, &sub));
         if (sub) {
             CHECKF(actual == IDWriteFontSet1_GetFontCount(sub), "indices %u vs set %u", actual, IDWriteFontSet1_GetFontCount(sub));
@@ -1291,26 +1314,36 @@ TEST(fset_q_first_resources_system_set)
 TEST(fset_q_system_matching_by_weight_partitions)
 {
     NEED_SYSSET(set);
-    UINT32 total = cnt(set), sum = 0; int w;
-    /* every font has exactly one weight value, so the per-weight counts partition the set */
-    for (w = 1; w <= 999; w++) {
-        char v[8]; snprintf(v, sizeof v, "%d", w);
-        UINT32 c = occ(set, DWRITE_FONT_PROPERTY_ID_WEIGHT, v, NULL);
-        if (c != 0xDEAD0000u) sum += c;
+    UINT32 total = cnt(set), have = 0, i, bad = 0; int w;
+    /* every font has exactly one weight value in 1..999 (read per font), yet Win10 never matches a numeric property */
+    for (i = 0; i < total; i++) {
+        char b[32];
+        if (fs_font_prop(set, i, DWRITE_FONT_PROPERTY_ID_WEIGHT, b, sizeof b)) { have++; if (atoi(b) < 1 || atoi(b) > 999) bad++; }
     }
-    CHECKF(sum == total, "sum of per-weight counts %u vs %u fonts", sum, total);
+    CHECKF(have == total && bad == 0, "weights present for %u of %u fonts, %u out of range", have, total, bad);
+    for (w = 1; w <= 999; w += 50) {
+        char v[8]; snprintf(v, sizeof v, "%d", w);
+        CHECKF(occ(set, DWRITE_FONT_PROPERTY_ID_WEIGHT, v, NULL) == 0, "weight %d is not searchable", w);
+    }
     DW_RELEASE(set);
 }
 
 TEST(fset_q_system_style_stretch_partition)
 {
     NEED_SYSSET(set);
-    UINT32 total = cnt(set), sum = 0; int i;
-    for (i = 0; i <= 2; i++) { char v[4]; snprintf(v, sizeof v, "%d", i); sum += occ(set, DWRITE_FONT_PROPERTY_ID_STYLE, v, NULL); }
-    CHECKF(sum == total, "style counts %u vs %u", sum, total);
-    sum = 0;
-    for (i = 1; i <= 9; i++) { char v[4]; snprintf(v, sizeof v, "%d", i); sum += occ(set, DWRITE_FONT_PROPERTY_ID_STRETCH, v, NULL); }
-    CHECKF(sum == total, "stretch counts %u vs %u", sum, total);
+    UINT32 total = cnt(set), i, st = 0, sr = 0;
+    for (i = 0; i < total; i++) {
+        char b[32];
+        if (fs_font_prop(set, i, DWRITE_FONT_PROPERTY_ID_STYLE, b, sizeof b) && atoi(b) >= 0 && atoi(b) <= 2) st++;
+        if (fs_font_prop(set, i, DWRITE_FONT_PROPERTY_ID_STRETCH, b, sizeof b) && atoi(b) >= 1 && atoi(b) <= 9) sr++;
+    }
+    CHECKF(st == total, "style values %u vs %u", st, total);
+    CHECKF(sr == total, "stretch values %u vs %u", sr, total);
+    for (i = 0; i <= 9; i++) {
+        char v[4]; snprintf(v, sizeof v, "%u", i);
+        CHECK(occ(set, DWRITE_FONT_PROPERTY_ID_STYLE, v, NULL) == 0);
+        CHECK(occ(set, DWRITE_FONT_PROPERTY_ID_STRETCH, v, NULL) == 0);
+    }
     DW_RELEASE(set);
 }
 
@@ -1320,10 +1353,10 @@ TEST(fset_q_system_indices_match_count)
     IDWriteFontSet1 *s1 = fs_set1(set);
     if (s1) {
         fs_prop p; UINT32 actual = 0;
-        fs_prop_set(&p, DWRITE_FONT_PROPERTY_ID_WEIGHT, "400", NULL);
+        fs_prop_set(&p, DWRITE_FONT_PROPERTY_ID_WEIGHT_STRETCH_STYLE_FACE_NAME, "Regular", NULL);
         HRESULT hr = IDWriteFontSet1_GetFilteredFontIndices(s1, &p.p, 1, FALSE, NULL, 0, &actual);
         CHECK(hr == FS_E_NOTSUFF || (hr == S_OK && actual == 0));
-        CHECKF(actual == occ(set, DWRITE_FONT_PROPERTY_ID_WEIGHT, "400", NULL), "actual %u vs occurrence count", actual);
+        CHECKF(actual == occ(set, DWRITE_FONT_PROPERTY_ID_WEIGHT_STRETCH_STYLE_FACE_NAME, "Regular", NULL), "actual %u vs occurrence count", actual);
         UINT32 *buf = (UINT32 *)calloc(actual + 1, sizeof *buf);
         if (buf) {
             UINT32 a2 = 0, i;
@@ -1331,8 +1364,8 @@ TEST(fset_q_system_indices_match_count)
             CHECK(a2 == actual);
             for (i = 1; i < actual; i++) CHECK(buf[i - 1] < buf[i]);
             for (i = 0; i < actual && i < 8; i++) {
-                char w[16]; fs_font_prop(set, buf[i], DWRITE_FONT_PROPERTY_ID_WEIGHT, w, sizeof w);
-                CHECKF(!strcmp(w, "400"), "index %u weight %s", buf[i], w);
+                char w[16]; fs_font_prop(set, buf[i], DWRITE_FONT_PROPERTY_ID_WEIGHT_STRETCH_STYLE_FACE_NAME, w, sizeof w);
+                CHECKF(!_stricmp(w, "Regular"), "index %u face name %s", buf[i], w);
             }
             free(buf);
         }

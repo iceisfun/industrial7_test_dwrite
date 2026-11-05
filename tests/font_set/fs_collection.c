@@ -1,14 +1,13 @@
 /* Font sets and font collections: IDWriteFactory3::CreateFontCollectionFromFontSet, IDWriteFactory6 model variant,
  * IDWriteFontCollection1::GetFontSet round trips, family grouping, and the faces / resources reachable from a set.
  *
- * Win10 decompilation:
- *  - DWriteFactory::CreateFontCollectionFromFontSet(set, model, out): out zeroed, NULL set -> E_INVALIDARG, otherwise a new
- *    DWriteFontCollection over a copy of the set's FontSet; the Factory3 flavour passes model 1 (WEIGHT_STRETCH_STYLE).
- *  - DWriteFontCollection::GetFontSet builds a DWriteFontSet over the collection's own FontSet (same items as the source set).
- *  - GetFontFamily(index >= count) throws IndexOutOfRangeException (HRESULT 0x80004005); out zeroed first.
+ * Win10 behaviour:
+ *  - CreateFontCollectionFromFontSet(set, model, out): out zeroed, NULL set -> E_INVALIDARG, otherwise a new collection over
+ *    the set's items; the Factory3 flavour uses the WEIGHT_STRETCH_STYLE model.
+ *  - GetFontSet returns a set with the same items as the source set.
+ *  - GetFontFamily(index >= count) fails with E_FAIL (0x80004005); out zeroed first.
  *  - FindFamilyName writes index = 0xFFFFFFFF / exists = FALSE first and always returns S_OK.
- *  - In the WWS model every family font list gets simulated faces added for completeness (AddSimulationsForWwsCompleteness);
- *    in the typographic model it does not.
+ *  - In the WWS model family font lists get simulated faces added for completeness; in the typographic model they do not.
  */
 #include "fs.h"
 
@@ -156,7 +155,7 @@ TEST(fset_c_family_index_out_of_range)
         for (i = 0; i < 5; i++) {
             IDWriteFontFamily *f = (IDWriteFontFamily *)FS_SENT;
             hr = IDWriteFontCollection_GetFontFamily(base, bad[i], &f);
-            CHECKF(hr == E_FAIL, "index %u -> %s", bad[i], dw_hr_name(hr));   /* IndexOutOfRangeException */
+            CHECKF(hr == E_FAIL, "index %u -> %s", bad[i], dw_hr_name(hr));   /* out-of-range index */
             CHECK_OUT_NULL(f);
             FS_DROP(f, hr);
         }
@@ -667,7 +666,7 @@ TEST(fset_c_set_font_resource)
             CHECK(file != NULL);
             DW_RELEASE(file);
             CHECK(IDWriteFontResource_GetFontFaceIndex(res) == 0);
-            CHECK(IDWriteFontResource_GetFontAxisCount(res) == 0);
+            CHECK(IDWriteFontResource_GetFontAxisCount(res) == 4);   /* Win10 reports wght, wdth, ital and slnt for a static face, each with a fixed range */
             CHECK(IDWriteFontResource_HasVariations(res) == FALSE);
             DW_RELEASE(res);
         }

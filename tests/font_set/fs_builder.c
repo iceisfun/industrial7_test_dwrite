@@ -1,11 +1,11 @@
 /* IDWriteFontSetBuilder / IDWriteFontSetBuilder1 / IDWriteFontSetBuilder2 and the sets they create.
  *
- * Win10 decompilation (DWriteFontSetBuilder, FontSetBuilder):
- *  - one DWriteFontSetBuilder class implements all three interfaces; every factory CreateFontSetBuilder variant returns it.
- *  - AddFontFaceReference(ref): NULL -> E_INVALIDARG; the entry is created WITHOUT properties and CreateFontSet extracts them
- *    from the font file (FontSetBuilder::ExtractMissingFontProperties only for entries whose property range is unset).
+ * Win10 behaviour:
+ *  - one object implements all three interfaces; every factory CreateFontSetBuilder variant returns it.
+ *  - AddFontFaceReference(ref): NULL -> E_INVALIDARG; the entry is added without properties and CreateFontSet reads them
+ *    from the font file.
  *  - AddFontFaceReference(ref, props, n): NULL ref, or NULL props with n > 0 -> E_INVALIDARG; the supplied properties are
- *    the only ones the entry gets (nothing is extracted); a NULL propertyValue throws ArgumentException (E_INVALIDARG).
+ *    the only ones the entry gets (nothing is read from the file); a NULL propertyValue gives E_INVALIDARG.
  *  - AddFontSet(NULL) -> E_INVALIDARG; otherwise every item (with its properties) is copied.
  *  - AddFontFile(file): NULL -> E_INVALIDARG, unsupported data -> DWRITE_E_FILEFORMAT (docs), otherwise one entry per face.
  *  - AddFont(file, faceIndex, simulations, axisValues, nAxis, ranges, nRanges, props, nProps): E_INVALIDARG for NULL file,
@@ -190,7 +190,8 @@ TEST(fset_b_refcount_balance)
     UINT32 k = fs_add(&x, "RefFam", 400, 5, 0);
     if (SUCCEEDED(fs_build_keys(&x, &k, 1, &set)) && set) {
         ULONG with = dw_refcount((IUnknown *)x.f);
-        CHECKF(with > base, "set retains the factory: %lu -> %lu", base, with);
+        t_note("factory refs with a live set: %lu -> %lu", base, with);   /* Win10: the set does not hold the factory */
+        CHECK(with == base);
         DW_RELEASE(set);
         EXPECT_REFS(x.f, base);
     }
@@ -274,7 +275,7 @@ TEST(fset_b_addfontfile_stretch_ladder)
 TEST(fset_b_addfontfile_many)
 {
     FS_OPEN(x);
-    enum { N = 100 };
+    enum { N = 30 };   /* the in-memory loader holds at most DWX_MAX_BLOBS (32) files */
     UINT32 keys[N]; int i;
     for (i = 0; i < N; i++) { char fam[32]; snprintf(fam, sizeof fam, "Bulk%03d", i); keys[i] = fs_add(&x, fam, 400, 5, 0); }
     IDWriteFontSet *set = NULL;
@@ -283,15 +284,17 @@ TEST(fset_b_addfontfile_many)
         CHECK(IDWriteFontSet_GetFontCount(set) == N);
         IDWriteStringList *l = fs_props(set, DWRITE_FONT_PROPERTY_ID_WEIGHT_STRETCH_STYLE_FAMILY_NAME);
         if (l) { CHECK(IDWriteStringList_GetCount(l) == N); DW_RELEASE(l); }
-        /* every added file is findable and the found indexes form a permutation */
+        /* every item's own reference is findable and the found indexes form a permutation; a reference created
+         * independently from the same file is not an item of the set (Win10 compares more than file and face) */
         unsigned char seen[N]; memset(seen, 0, sizeof seen);
         for (i = 0; i < N; i++) {
-            IDWriteFontFaceReference *r = fs_ref(&x, keys[i]); UINT32 idx = 0; BOOL ex = FALSE;
-            if (!r) continue;
+            IDWriteFontFaceReference *r = NULL, *ext = fs_ref(&x, keys[i]); UINT32 idx = 0, i2 = 0; BOOL ex = FALSE, ex2 = TRUE;
+            if (FAILED(IDWriteFontSet_GetFontFaceReference(set, (UINT32)i, &r)) || !r) { DW_RELEASE(ext); continue; }
             CHECK_HR_OK(IDWriteFontSet_FindFontFaceReference(set, r, &idx, &ex));
-            CHECKF(ex == TRUE, "file %d found", i);
+            CHECKF(ex == TRUE && idx == (UINT32)i, "item %d found at %u", i, idx);
             if (ex && idx < N) { CHECKF(!seen[idx], "index %u used twice", idx); seen[idx] = 1; }
-            DW_RELEASE(r);
+            if (ext) { CHECK_HR_OK(IDWriteFontSet_FindFontFaceReference(set, ext, &i2, &ex2)); CHECKF(ex2 == FALSE, "external reference %d found", i); }
+            DW_RELEASE(r); DW_RELEASE(ext);
         }
         DW_RELEASE(set);
     }
@@ -725,7 +728,7 @@ TEST(fset_b_addref_props_null_value)
     IDWriteFontFaceReference *r = fs_ref(&x, k); IDWriteFontSetBuilder *b = fs_builder(&x);
     if (r && b) {
         DWRITE_FONT_PROPERTY p = { DWRITE_FONT_PROPERTY_ID_WEIGHT_STRETCH_STYLE_FAMILY_NAME, NULL, L"en-us" };
-        /* FontSetBuilder::AddProperties throws ArgumentException("sourceProperty.propertyValue") */
+        /* a NULL propertyValue gives E_INVALIDARG */
         HRESULT hr = IDWriteFontSetBuilder_AddFontFaceReference_(b, r, &p, 1);
         CHECKF(FAILED(hr), "NULL propertyValue -> %s", dw_hr_name(hr));
         t_note("NULL propertyValue -> %s", dw_hr_name(hr));
@@ -780,14 +783,15 @@ TEST(fset_b_addref_simulations_key)
         CHECK_HR_OK(IDWriteFontSetBuilder_CreateFontSet(b, &set));
         if (set) {
             CHECK(IDWriteFontSet_GetFontCount(set) >= 1);
-            CHECK_HR_OK(IDWriteFontSet_FindFontFaceReference(set, bold, &idx, &ex));
-            CHECK(ex == TRUE);
             CHECK_HR_OK(IDWriteFontSet_FindFontFaceReference(set, plain, &idx, &ex));
-            FS_SOFT(ex == FALSE);   /* the key includes the simulations */
+            CHECK(ex == FALSE);
             t_note("plain reference found in a set holding only the bold-simulated one: %d", ex);
             IDWriteFontFaceReference *r = NULL;
             if (SUCCEEDED(IDWriteFontSet_GetFontFaceReference(set, 0, &r)) && r) {
                 CHECK(IDWriteFontFaceReference_GetSimulations(r) == DWRITE_FONT_SIMULATIONS_BOLD);
+                /* the item's own reference is found; the independently created bold reference is not (Win10) */
+                ex = FALSE; CHECK_HR_OK(IDWriteFontSet_FindFontFaceReference(set, r, &idx, &ex)); CHECK(ex == TRUE && idx == 0);
+                ex = TRUE; CHECK_HR_OK(IDWriteFontSet_FindFontFaceReference(set, bold, &idx, &ex)); CHECK(ex == FALSE);
                 DW_RELEASE(r);
             }
             DW_RELEASE(set);
