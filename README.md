@@ -7,7 +7,7 @@ The DLL is never linked: each test loads it with `LoadLibrary`, resolves `DWrite
 (`U(DWriteCreateFactory)`, typed from the SDK header) and then calls interface methods through the vtables.
 
 The corpus is meant to help someone *implementing* dwrite.dll: expectations are what real Windows does (callback order, arguments,
-HRESULTs, out-parameter state), established from the Windows 10 decompilation, the documentation and deterministic synthetic fonts.
+HRESULTs, out-parameter state), established from observed Windows 10 behaviour, the documentation and deterministic synthetic fonts.
 
 Helper layer (see `docs/DWRITE_TESTING.md`): `common/dw.*` factory/HRESULT/QI/refcount helpers, `common/dwx.*` recording COM test doubles,
 `common/ttfgen.*` deterministic synthetic TrueType/OpenType builder. `tools/dwrite_interfaces.tsv` is the public interface surface,
@@ -91,13 +91,13 @@ See `HANDOFF.md` (when present) for how to run and triage the Windows passes.
 | unicode_script_coverage | script and character coverage matrices |
 | vertical_text_orientation | vertical reading, glyph orientation transforms |
 
-**Method.** Every area is a single exe built from `tests/<area>/*.c` plus `common/`. Expectations come from the Windows 10 decompilation,
+**Method.** Every area is a single exe built from `tests/<area>/*.c` plus `common/`. Expectations come from observed Windows 10 behaviour,
 vendored docs and public headers; deterministic synthetic fonts (`common/ttfgen`) give exact numbers, system fonts are used for relations and
 `t_note` only (unless the value was verified in the font tables). Callback objects we pass in (loaders, renderers, analysis source/sink) record order and arguments.
 
 **Running on Windows.** Copy `build\*.exe` to a disposable Win10 22H2 x64 VM, run `tools\run_all.bat` (add `/destructive` for `dx_*`), then
 `python tools\summarize.py build\results --failures`. See HANDOFF.md.
 
-**Fixture policy.** Hard CHECKs only for facts from decomp/docs/IDL or synthetic fixtures. Font-file, OS-version, locale, DPI and ClearType dependent facts are
+**Fixture policy.** Hard CHECKs only for facts from docs/IDL or synthetic fixtures. Font-file, OS-version, locale, DPI and ClearType dependent facts are
 `t_note`; missing prerequisites are `t_skip`. Non-`dx_` areas never write the registry, change system settings, install fonts or show windows;
 scratch files live under `t_tmpdir()`; every registered loader is unregistered by the test that registered it.

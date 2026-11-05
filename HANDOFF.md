@@ -21,8 +21,17 @@ make thousands of checks differ. Expect some wrong expectations on the first rea
 Single area/test: `build\<area>.exe <name-substring>`. Collect `build\results\*.txt`, then `python tools\summarize.py build\results --failures`.
 Exit code is 1 when any test failed. Per-exe hard limit is 600 s in run_all.bat; the slowest exes under Wine take about 90 s.
 
+## Windows 10 baseline method
+Run the whole corpus twice from a fresh snapshot each time: once as a standard user and once from an elevated administrator session (the `/destructive`
+pass is a third, elevated-only run). Use a hard per-exe time limit (600 s) so a hang is recorded rather than blocking the run. Exes are independent
+(each uses its own scratch directory), so several can run in parallel; keep parallelism modest (for example 4 to 8) so timing-sensitive tests
+(com_lifetime_threads, r2_factory_platform_dll) are not starved, and re-run any exe that fails only under load on its own before judging it.
+Save one result file per exe and compare the two runs with `tools\summarize.py`. Known standard-vs-admin difference: tests that probe
+elevation-dependent behaviour (dx_* steps and a few registry/system-font visibility checks) skip or differ for the standard user; every other area should
+produce identical results in both runs, and a difference elsewhere is a flaky test or an environment issue to investigate.
+
 ## Triage
-1. Wrong expectation: Windows differs from the test. Check the decomp (http://docker1.dev.moonlightcompanies.com:8765/api/function/dwrite/<Name>/decomp), fix the test.
+1. Wrong expectation: Windows differs from the test. Re-check against the documentation and observed behaviour, fix the test.
 2. Environment/SKU/locale/font revision: turn the hard CHECK into `t_note` or `t_skip`.
 3. Real divergence: this is what the corpus is for; record it.
 Re-run only the test (`build\<area>.exe <name>`), commit with a short message.

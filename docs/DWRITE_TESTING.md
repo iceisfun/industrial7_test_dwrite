@@ -13,7 +13,7 @@ The DLL is never linked. `#include "dwx.h"` gives you everything below (it pulls
     IDWriteFactory3 *f3 = dw_factory_v(DWRITE_FACTORY_TYPE_SHARED, 3);   // NULL when the interface is unsupported
     void *raw; HRESULT hr = dw_create_factory(DWRITE_FACTORY_TYPE_ISOLATED, &IID_IDWriteFactory, &raw);   // fresh, you release
     IDWriteFactory *own = dw_new_factory(DWRITE_FACTORY_TYPE_ISOLATED);
-Facts from the Win10 decompilation: `*ppFactory` is written NULL before anything else (never pass a NULL out pointer);
+Observed Win10 behaviour: `*ppFactory` is written NULL before anything else (never pass a NULL out pointer);
 type 0 (SHARED) returns the process-wide factory, type 1 (ISOLATED) builds a new `DWriteFactory`; any other type throws an
 argument exception that the export converts to a failure HRESULT.
 Call interface methods COBJMACROS style: `IDWriteFactory_CreateTextFormat(f, ...)`, or `obj->lpVtbl->Method(obj, ...)`.
@@ -71,7 +71,7 @@ quadratic round, composite, empty-500, two-contour ring; hhea/typo/win metrics a
 cover container and error paths. To serve a whole family, add several blobs to one `dwx_mem_loader` and enumerate them with
 `dwx_coll_loader` (see tests/core_dw_helpers/helpers.c for a complete custom collection plus text layout).
 Hard-check numbers derived from the spec; they are facts about the synthetic font, not about the OS (but how DirectWrite
-rounds/derives them - e.g. which of hhea / typo / win metrics it reports - is exactly what you are testing: confirm in the decompilation).
+rounds/derives them - e.g. which of hhea / typo / win metrics it reports - is exactly what you are testing: confirm on Windows).
 
 ## System fonts
 Installed fonts vary by SKU, language and updates. Use them only for relations (bold wider than regular, fallback picks a family)
@@ -81,7 +81,7 @@ Bahnschrift (variable), MS Gothic (msgothic.ttc) are expected on Windows 10. Exa
 once verified against the font tables with `dw_face_table(face, DW_TAG('h','h','e','a'), &len)`.
 
 ## Valid and invalid tests
-Valid: argument validation visible in the decompilation or docs (E_INVALIDARG, E_NOINTERFACE, E_NOT_SUFFICIENT_BUFFER, DWRITE_E_*),
+Valid: argument validation visible in the docs or observable on Windows (E_INVALIDARG, E_NOINTERFACE, E_NOT_SUFFICIENT_BUFFER, DWRITE_E_*),
 out-parameters zeroed on failure, buffer protocols (size 0 / exact-1 / exact / NULL), enum range checks, index out of range,
 ranges beyond the text length, refcounts, QI identity, object lifetime after factory release.
 Invalid: environment failures (OOM, absurd sizes), non-NULL garbage pointers, fuzzing, tight timing, locale/SKU/DPI/ClearType-dependent

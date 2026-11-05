@@ -8,7 +8,9 @@ generation (dwrite.h = Win7, dwrite_1.h = Win7 platform update/Win8, dwrite_2.h 
 with a per-interface refinement where known).
 usage: gen_interfaces.py [idl_dir] [out.tsv]"""
 import re, sys, os
-idl_dir = sys.argv[1] if len(sys.argv) > 1 else "/home/iceisfun/work/wine/wine/include"
+idl_dir = sys.argv[1] if len(sys.argv) > 1 else os.environ.get("IDL_DIR")
+if not idl_dir:
+    sys.exit("usage: gen_interfaces.py <idl_dir> [out.tsv]  (or set IDL_DIR)")
 out = sys.argv[2] if len(sys.argv) > 2 else os.path.join(os.path.dirname(os.path.abspath(__file__)), "dwrite_interfaces.tsv")
 FILES = [("dwrite.idl", "dwrite.h", "Win7"), ("dwrite_1.idl", "dwrite_1.h", "Win7 PU / Win8"),
          ("dwrite_2.idl", "dwrite_2.h", "Win8.1"), ("dwrite_3.idl", "dwrite_3.h", "Win10")]
