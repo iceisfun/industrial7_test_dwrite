@@ -262,8 +262,8 @@ TEST(flow_btt_stacks_lines_upward)
             dwx_release(r); IDWriteTextLayout_Release(l);
         }
         for (k = 0; k < 3; k++) {
-            CHECK_NEAR(y_ttb[k], (float)k * h + b, 1.0);        /* baselines snap to whole pixels */
-            CHECK_NEAR(y_btt[k], 500.0f - (float)(k + 1) * h + b, 1.0);            /* line 0 occupies the bottom row of the box */
+            CHECK_NEAR(y_ttb[k], floorf((float)k * h + b + 0.5f), 0.001);        /* baseline origin is rounded to the nearest whole pixel */
+            CHECK_NEAR(y_btt[k], floorf(500.0f - (float)(k + 1) * h + b + 0.5f), 0.001);            /* line 0 occupies the bottom row of the box */
         }
     }
     WT_END();

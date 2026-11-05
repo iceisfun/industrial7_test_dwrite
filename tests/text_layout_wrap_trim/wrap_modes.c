@@ -668,13 +668,12 @@ TEST(wrap_draw_runs_per_line)
 {
     /* every line is drawn from its own baseline origin; lines are WT_LH apart */
     WT_BEGIN(); WT_LAYOUT(l, L"aaa bbb ccc", WT_FIT(3)); dwx_renderer *r = wt_draw(l, 10.0f, 20.0f);
-    int cur = 0; const dwx_draw *d; float prev_y = -1; int runs = 0; wt_lines lo; float lh = 0;
-    if (SUCCEEDED(wt_get_lines(l, &lo)) && lo.n) lh = lo.lm[0].height;
+    int cur = 0; const dwx_draw *d; int runs = 0; wt_lines lo; float lh = 0, b0 = 0;
+    if (SUCCEEDED(wt_get_lines(l, &lo)) && lo.n) lh = lo.lm[0].height, b0 = lo.lm[0].baseline;
     while ((d = wt_next_run(r, &cur)) != NULL) {
         runs++;
         CHECK_NEAR(d->x, 10.0, 0.01);
-        if (prev_y >= 0) CHECK_NEAR(d->y - prev_y, lh, 1.0);      /* baselines are snapped to whole pixels */
-        prev_y = d->y;
+        CHECK_NEAR(d->y, floorf(20.0f + (float)(runs - 1) * lh + b0 + 0.5f), 0.001);      /* baseline origin is rounded to the nearest whole pixel */
     }
     CHECKF(runs >= 3, "glyph runs %d", runs);
     dwx_release(r); DW_RELEASE(l); WT_END();

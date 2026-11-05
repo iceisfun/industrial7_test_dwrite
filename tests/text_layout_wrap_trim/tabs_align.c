@@ -544,8 +544,8 @@ TEST(para_draw_baseline_moves_with_alignment)
         wt_lines o; IDWriteTextLayout *l = wt_layout_(&X, L"abc", WT_CH(10), 400.0f, WT_SIZE);
         if (l && SUCCEEDED(wt_get_lines(l, &o))) {
             float h = o.lm[0].height;
-            CHECK_NEAR(y[1] - y[0], 400.0f - h, 1.0); CHECK_NEAR(y[2] - y[0], (400.0f - h) * 0.5f, 1.0);     /* baselines snap to whole pixels */
-            CHECK_NEAR(y[0] - 13.0f, o.lm[0].baseline, 1.0);
+            { float bl = o.lm[0].baseline;   /* baseline origin is rounded to the nearest whole pixel */
+                CHECK_NEAR(y[0], floorf(13.0f + bl + 0.5f), 0.001); CHECK_NEAR(y[1], floorf(13.0f + (400.0f - h) + bl + 0.5f), 0.001); CHECK_NEAR(y[2], floorf(13.0f + (400.0f - h) * 0.5f + bl + 0.5f), 0.001); }
         }
         DW_RELEASE(l);
     }
