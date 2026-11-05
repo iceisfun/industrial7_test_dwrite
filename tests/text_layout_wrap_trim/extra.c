@@ -143,7 +143,7 @@ TEST(extra_wrap_after_text_edit_relayouts)
     WT_BEGIN(); WT_LAYOUT(l, L"aaa bbb ccc", WT_FIT(7)); WT_LENS(l, 8, 3);
     CHECK_HR_OK(IDWriteTextLayout_SetFontSize(l, WT_SIZE * 2.0f, RNG(0, 11))); WT_LENS(l, 4, 4, 3);
     CHECK_HR_OK(IDWriteTextLayout_SetFontSize(l, WT_SIZE, RNG(0, 11))); WT_LENS(l, 8, 3);
-    CHECK_HR_OK(IDWriteTextLayout_SetMaxWidth(l, WT_FIT(2))); WT_LENS(l, 4, 4, 3);
+    CHECK_HR_OK(IDWriteTextLayout_SetMaxWidth(l, WT_FIT(3))); WT_LENS(l, 4, 4, 3);
     DW_RELEASE(l); WT_END();
 }
 

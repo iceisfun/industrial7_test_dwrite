@@ -227,3 +227,14 @@ void *wt_qi(IUnknown *u, const IID *iid, const char *name)
 }
 
 dwx_inline *wt_sign(float w, float h, float base) { return dwx_inline_new(w, h, base, FALSE); }
+
+const dwx_draw *wt_next_run(dwx_renderer *r, int *cur)
+{
+    const dwx_draw *d;
+    while ((d = dwx_renderer_next(r, DWX_DRAW_GLYPHRUN, cur)) != NULL) {
+        UINT32 i; int vis = !(d->has_desc && d->text && d->text_len);
+        for (i = 0; !vis && i < d->text_len; i++) { WCHAR c = d->text[i]; if (c != L' ' && c != L'\t' && c != L'\r' && c != L'\n') vis = 1; }
+        if (vis) return d;
+    }
+    return NULL;
+}

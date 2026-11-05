@@ -86,6 +86,8 @@ UINT32 wt_clusters(IDWriteTextLayout *l, DWRITE_CLUSTER_METRICS *cm, UINT32 cap)
 float wt_x(IDWriteTextLayout *l, UINT32 pos);
 float wt_x_trailing(IDWriteTextLayout *l, UINT32 pos);               /* trailing edge of the character at pos */
 float wt_y(IDWriteTextLayout *l, UINT32 pos);
+/* Next glyph run that is not made only of white space / line break characters (Win10 emits separate runs for blanks and newlines). */
+const dwx_draw *wt_next_run(dwx_renderer *r, int *cur);
 /* Draw into a fresh recording renderer (caller releases with dwx_release). */
 dwx_renderer *wt_draw(IDWriteTextLayout *l, float ox, float oy);
 /* Legal line break between text positions p-1 and p according to IDWriteTextAnalyzer (1 yes, 0 no, -1 analyzer unavailable). */

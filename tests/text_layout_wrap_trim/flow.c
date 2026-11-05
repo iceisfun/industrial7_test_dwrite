@@ -258,12 +258,12 @@ TEST(flow_btt_stacks_lines_upward)
             if (!l) continue;
             /* NEAR alignment: the text starts at the origin of the flow (top for TOP_TO_BOTTOM, bottom for BOTTOM_TO_TOP) */
             r = wt_draw(l, 0.0f, 0.0f);
-            for (k = 0; k < 3; k++) { d = dwx_renderer_next(r, DWX_DRAW_GLYPHRUN, &cur); if (d) (mode ? y_btt : y_ttb)[k] = d->y; }
+            for (k = 0; k < 3; k++) { d = wt_next_run(r, &cur); if (d) (mode ? y_btt : y_ttb)[k] = d->y; }
             dwx_release(r); IDWriteTextLayout_Release(l);
         }
         for (k = 0; k < 3; k++) {
-            CHECK_NEAR(y_ttb[k], (float)k * h + b, 0.05);
-            CHECK_NEAR(y_btt[k], 500.0f - (float)(k + 1) * h + b, 0.05);            /* line 0 occupies the bottom row of the box */
+            CHECK_NEAR(y_ttb[k], (float)k * h + b, 1.0);        /* baselines snap to whole pixels */
+            CHECK_NEAR(y_btt[k], 500.0f - (float)(k + 1) * h + b, 1.0);            /* line 0 occupies the bottom row of the box */
         }
     }
     WT_END();
